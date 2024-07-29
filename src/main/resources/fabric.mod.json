@@ -1,0 +1,44 @@
+{
+	"schemaVersion": 1,
+	"id": "zombifiedplayer",
+	"version": "${version}",
+	"name": "ZombifiedPlayer",
+	"description": "A Zombified Player gets spawned after the player dies.",
+	"authors": [
+		"Pete MC Mods, mcmods.pete@gmail.com"
+	],
+	"contact": {
+		"homepage": "https://modrinth.com/mod/",
+		"sources": "https://github.com/MC-Mods-Pete/ZombifiedPlayer",
+		"issues": "https://github.com/MC-Mods-Pete/ZombifiedPlayer/issues"
+	},
+	"license": "MIT",
+	"icon": " ",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"net.petemc.zombifiedplayer.ZombifiedPlayer"
+		],
+		"client": [
+			"net.petemc.zombifiedplayer.ZombifiedPlayerClient"
+		],
+		"fabric-datagen": [
+			"net.petemc.zombifiedplayer.ZombifiedPlayerDataGenerator"
+		],
+		"modmenu": [
+			"net.petemc.zombifiedplayer.util.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		"zombifiedplayer.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.11",
+		"minecraft": "~1.21",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
