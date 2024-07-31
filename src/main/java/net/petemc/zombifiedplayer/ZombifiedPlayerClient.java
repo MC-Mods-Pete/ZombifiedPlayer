@@ -1,17 +1,32 @@
 package net.petemc.zombifiedplayer;
 
 import net.fabricmc.api.ClientModInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.minecraft.util.Identifier;
+import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
+import net.petemc.zombifiedplayer.entity.ModEntities;
+import net.petemc.zombifiedplayer.event.ClientZombifiedPlayerLoadEvent;
+import net.petemc.zombifiedplayer.network.NetworkHandlerClient;
+import net.petemc.zombifiedplayer.network.NetworkPayloads;
+
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ZombifiedPlayerClient implements ClientModInitializer {
-	// This logger is used to write text to the console and the log file.
-	// It is considered best practice to use your mod id as the logger's name.
-	// That way, it's clear which mod wrote info, warnings, and errors.
-    public static final Logger LOGGER = LoggerFactory.getLogger("template-mod");
+
+	public static ConcurrentHashMap<UUID, Identifier> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
 
 	@Override
 	public void onInitializeClient() {
-		LOGGER.info("Hello Fabric Client world!");
+		EntityRendererRegistry.register(ModEntities.ZOMBIFIED_PLAYER, ZombifiedPlayerRenderer::new);
+
+		ClientZombifiedPlayerLoadEvent.registerEvent();
+
+		ClientPlayNetworking.registerGlobalReceiver(NetworkPayloads.GameProfilePayload.ID, (payload, context) -> {
+			context.client().execute(() -> {
+				NetworkHandlerClient.processGameProfile(context.player(), payload.entityUUID(), payload.entityID(), payload.playerUUID(), payload.name());
+			});
+		});
 	}
 }
