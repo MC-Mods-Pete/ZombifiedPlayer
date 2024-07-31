@@ -20,6 +20,10 @@ public class ZombifiedPlayerConfig implements ConfigData
     }
 
     @ConfigEntry.Gui.Tooltip()
-    @Comment("If true, a zombified player will spawn after death (with the players inventory) | default: true")
+    @Comment("If true, a zombified player will spawn after death | default: true")
     public boolean spawnZombifiedPlayerAfterDeath = true;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, the inventory of the dead player will be transfered to the zombified player | default: true")
+    public boolean transferInventoryToZombifiedPlayer = true;
 }

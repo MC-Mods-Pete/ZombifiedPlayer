@@ -24,6 +24,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
+import net.petemc.zombifiedplayer.config.ZombifiedPlayerConfig;
 import net.petemc.zombifiedplayer.util.GameProfileData;
 import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
@@ -121,7 +122,9 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             zombifiedPlayer.setCustomName(name);
             zombifiedPlayer.setPosition(player.getX(), player.getY(), player.getZ());
             zombifiedPlayer.setPersistent();
-            zombifiedPlayer.transferInventory(player);
+            if (ZombifiedPlayerConfig.INSTANCE.transferInventoryToZombifiedPlayer) {
+                zombifiedPlayer.transferInventory(player);
+            }
             serverWorld.spawnEntity(zombifiedPlayer);
         }
         return zombifiedPlayer;
