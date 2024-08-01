@@ -1,7 +1,9 @@
 {
   "text.autoconfig.zombifiedplayer.title": "Zombified Player",
   "text.autoconfig.zombifiedplayer.option.spawnZombifiedPlayerAfterDeath": "Spawn a zombified player after death",
-  "text.autoconfig.zombifiedplayer.option.spawnZombifiedPlayerAfterDeath.@Tooltip": "If enabled, a zombified player will spawn after death | default: true",
+  "text.autoconfig.zombifiedplayer.option.spawnZombifiedPlayerAfterDeath.@Tooltip": "If enabled, a zombified player will spawn after death | default: enabled",
   "text.autoconfig.zombifiedplayer.option.transferInventoryToZombifiedPlayer": "Transfer the players inventory to the zombified player",
-  "text.autoconfig.zombifiedplayer.option.transferInventoryToZombifiedPlayer.@Tooltip": "If enabled, the inventory of the dead player will be transfered to the zombified player | default: true"
+  "text.autoconfig.zombifiedplayer.option.transferInventoryToZombifiedPlayer.@Tooltip": "If enabled, the inventory of the dead player will be transferred to the zombified player | default: enabled",
+  "text.autoconfig.zombifiedplayer.option.onlyOnKilledByUndead": "Spawn zombified player only if player was kill by other Zombies",
+  "text.autoconfig.zombifiedplayer.option.onlyOnKilledByUndead.@Tooltip": "If enabled, zombified player will only spawn if the player was killed by an undead mob | default: enabled"
 }

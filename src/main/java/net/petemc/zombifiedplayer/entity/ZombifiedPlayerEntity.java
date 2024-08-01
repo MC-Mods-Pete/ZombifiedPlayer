@@ -28,6 +28,7 @@ import net.petemc.zombifiedplayer.config.ZombifiedPlayerConfig;
 import net.petemc.zombifiedplayer.util.GameProfileData;
 import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
+import org.spongepowered.asm.mixin.Overwrite;
 
 import java.util.List;
 
@@ -64,6 +65,12 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     @Override
     protected boolean burnsInDaylight() {
         return false;
+    }
+
+    @Override
+    public boolean canBreakDoors()
+    {
+        return true;
     }
 
     public GameProfile getGameProfile() {
