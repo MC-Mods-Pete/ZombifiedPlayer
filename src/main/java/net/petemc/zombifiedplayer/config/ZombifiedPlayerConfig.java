@@ -30,4 +30,12 @@ public class ZombifiedPlayerConfig implements ConfigData
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, a zombified player will only spawn if the player was killed by an undead mob | default: true")
     public boolean onlyOnKilledByUndead = true;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, zombified players can break through doors | default: true")
+    public boolean zombifiedPlayersCanBreakDoors = true;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, zombified players are stronger faster and have more health | default: false")
+    public boolean makeTheZombifiedPlayersStronger = false;
 }

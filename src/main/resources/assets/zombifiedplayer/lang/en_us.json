@@ -4,6 +4,10 @@
   "text.autoconfig.zombifiedplayer.option.spawnZombifiedPlayerAfterDeath.@Tooltip": "If enabled, a zombified player will spawn after death | default: enabled",
   "text.autoconfig.zombifiedplayer.option.transferInventoryToZombifiedPlayer": "Transfer the players inventory to the zombified player",
   "text.autoconfig.zombifiedplayer.option.transferInventoryToZombifiedPlayer.@Tooltip": "If enabled, the inventory of the dead player will be transferred to the zombified player | default: enabled",
-  "text.autoconfig.zombifiedplayer.option.onlyOnKilledByUndead": "Spawn zombified player only if player was kill by other Zombies",
-  "text.autoconfig.zombifiedplayer.option.onlyOnKilledByUndead.@Tooltip": "If enabled, zombified player will only spawn if the player was killed by an undead mob | default: enabled"
+  "text.autoconfig.zombifiedplayer.option.onlyOnKilledByUndead": "Spawn zombified player only if player was killed by other Zombies",
+  "text.autoconfig.zombifiedplayer.option.onlyOnKilledByUndead.@Tooltip": "If enabled, zombified player will only spawn if the player was killed by an undead mob | default: enabled",
+  "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors": "Zombified Players can break doors",
+  "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors.@Tooltip": "If enabled, zombified players can break through doors | default: enabled",
+  "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger": "Make Zombified Players stronger",
+  "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger.@Tooltip": "If enabled, zombified players are stronger faster and have more health | default: disabled"
 }

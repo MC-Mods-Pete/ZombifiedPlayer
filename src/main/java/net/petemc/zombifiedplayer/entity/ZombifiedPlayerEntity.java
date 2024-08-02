@@ -28,7 +28,6 @@ import net.petemc.zombifiedplayer.config.ZombifiedPlayerConfig;
 import net.petemc.zombifiedplayer.util.GameProfileData;
 import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
-import org.spongepowered.asm.mixin.Overwrite;
 
 import java.util.List;
 
@@ -45,9 +44,10 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
 
     public static DefaultAttributeContainer.Builder createZombifiedPlayerAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 35.0)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.23f)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 40.0 : 20.0)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 50.0 : 40.0)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 0.29f : 0.23f)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 4.0 : 2.0)
                 .add(EntityAttributes.GENERIC_ARMOR, 2.0)
                 .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
     }
@@ -70,7 +70,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     @Override
     public boolean canBreakDoors()
     {
-        return true;
+        return ZombifiedPlayerConfig.INSTANCE.zombifiedPlayersCanBreakDoors;
     }
 
     public GameProfile getGameProfile() {
