@@ -32,6 +32,10 @@ public class ZombifiedPlayerConfig implements ConfigData
     public boolean transferArmorToZombifiedPlayer = true;
 
     @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, the inventory of the dead player will be transferred to the zombified player | default: true")
+    public boolean transferInventoryToZombifiedPlayer = true;
+
+    @ConfigEntry.Gui.Tooltip()
     @Comment("If true, a zombified player will only spawn if the player was killed by an undead mob | default: true")
     public boolean onlyOnKilledByUndead = true;
 

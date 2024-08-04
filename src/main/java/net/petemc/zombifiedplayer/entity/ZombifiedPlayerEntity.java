@@ -166,7 +166,9 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                     playerEntity.getInventory().main.set(i, ItemStack.EMPTY);
                     this.main.set(i, ItemStack.EMPTY);
                 }
-                this.main.set(i, playerEntity.getInventory().main.get(i).copyAndEmpty());
+                if (ZombifiedPlayerConfig.INSTANCE.transferInventoryToZombifiedPlayer) {
+                    this.main.set(i, playerEntity.getInventory().main.get(i).copyAndEmpty());
+                }
             }
         }
     }

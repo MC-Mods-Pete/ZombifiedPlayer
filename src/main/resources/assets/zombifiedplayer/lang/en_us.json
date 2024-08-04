@@ -6,6 +6,8 @@
   "text.autoconfig.zombifiedplayer.option.transferMainandOffHandToZombifiedPlayer.@Tooltip": "If enabled, the Main and the Off Hand of the dead player will be transferred to the zombified player | default: enabled",
   "text.autoconfig.zombifiedplayer.option.transferArmorToZombifiedPlayer": "Transfer the players Armor to the zombified player",
   "text.autoconfig.zombifiedplayer.option.transferArmorToZombifiedPlayer.@Tooltip": "If enabled, the Armor of the dead player will be transferred to the zombified player | default: enabled",
+  "text.autoconfig.zombifiedplayer.option.transferInventoryToZombifiedPlayer": "Transfer the players Inventory to the zombified player",
+  "text.autoconfig.zombifiedplayer.option.transferInventoryToZombifiedPlayer.@Tooltip": "If enabled, the Inventory of the dead player will be transferred to the zombified player | default: enabled",
   "text.autoconfig.zombifiedplayer.option.onlyOnKilledByUndead": "Spawn zombified player only if player was killed by other Zombies",
   "text.autoconfig.zombifiedplayer.option.onlyOnKilledByUndead.@Tooltip": "If enabled, zombified player will only spawn if the player was killed by an undead mob | default: enabled",
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors": "Zombified Players can break doors",
