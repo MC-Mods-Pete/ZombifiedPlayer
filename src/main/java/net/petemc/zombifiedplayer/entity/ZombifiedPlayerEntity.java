@@ -15,9 +15,13 @@ import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.server.network.EntityTrackerEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -29,14 +33,10 @@ import net.petemc.zombifiedplayer.util.GameProfileData;
 import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
-import java.util.List;
 
 public class ZombifiedPlayerEntity extends ZombieEntity {
     public GameProfile gameProfile;
     public final DefaultedList<ItemStack> main = DefaultedList.ofSize(36, ItemStack.EMPTY);
-    public final DefaultedList<ItemStack> armor = DefaultedList.ofSize(4, ItemStack.EMPTY);
-    public final DefaultedList<ItemStack> offHand = DefaultedList.ofSize(1, ItemStack.EMPTY);
-    private final List<DefaultedList<ItemStack>> combinedInventory = ImmutableList.of(this.main, this.armor, this.offHand);
 
     public ZombifiedPlayerEntity(EntityType<? extends ZombieEntity> entityType, World world) {
         super(entityType, world);
@@ -54,7 +54,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
 
     @Override
     public Packet<ClientPlayPacketListener> createSpawnPacket(EntityTrackerEntry entityTrackerEntry) {
-        return new EntitySpawnS2CPacket((Entity)this, entityTrackerEntry);
+        return new EntitySpawnS2CPacket((Entity) this, entityTrackerEntry);
     }
 
     @Override
@@ -109,12 +109,10 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
 
     public void dropInventory() {
         super.dropInventory();
-        for (List list : this.combinedInventory) {
-            for (int i = 0; i < list.size(); ++i) {
-                ItemStack itemStack = (ItemStack) list.get(i);
-                if (itemStack.isEmpty()) continue;
-                this.dropStack(itemStack);
-                list.set(i, ItemStack.EMPTY);
+        for (int i = 0; i < this.main.size(); i++) {
+            if (!this.main.get(i).isEmpty()) {
+                this.dropStack(this.main.get(i));
+                this.main.set(i, ItemStack.EMPTY);
             }
         }
     }
@@ -162,7 +160,6 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             }
         }
 
-        /*
         for (int i = 0; i < playerEntity.getInventory().main.size(); i++) {
             if (!playerEntity.getInventory().main.get(i).isEmpty()) {
                 if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getInventory().main.get(i), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
@@ -171,6 +168,43 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                 }
                 this.main.set(i, playerEntity.getInventory().main.get(i).copyAndEmpty());
             }
-        } */
+        }
+    }
+
+    @Override
+    public void writeCustomDataToNbt(NbtCompound nbt) {
+        super.writeCustomDataToNbt(nbt);
+        nbt.put("Inventory", this.writeNbt(new NbtList()));
+    }
+
+    @Override
+    public void readCustomDataFromNbt(NbtCompound nbt) {
+        super.readCustomDataFromNbt(nbt);
+        NbtList nbtList = nbt.getList("Inventory", NbtElement.COMPOUND_TYPE);
+        this.readNbt(nbtList);
+    }
+
+    public NbtList writeNbt(NbtList nbtList) {
+        for (int i = 0; i < this.main.size(); i++) {
+            if (!this.main.get(i).isEmpty()) {
+                NbtCompound nbtCompound = new NbtCompound();
+                nbtCompound.putByte("Slot", (byte)i);
+                nbtList.add(this.main.get(i).encode(this.getRegistryManager(), nbtCompound));
+            }
+        }
+        return nbtList;
+    }
+
+    public void readNbt(NbtList nbtList) {
+        this.main.clear();
+
+        for (int i = 0; i < nbtList.size(); i++) {
+            NbtCompound nbtCompound = nbtList.getCompound(i);
+            int j = nbtCompound.getByte("Slot") & 255;
+            ItemStack itemStack = (ItemStack) ItemStack.fromNbt(super.getRegistryManager(), nbtCompound).orElse(ItemStack.EMPTY);
+            if (j < this.main.size()) {
+                this.main.set(j, itemStack);
+            }
+        }
     }
 }
