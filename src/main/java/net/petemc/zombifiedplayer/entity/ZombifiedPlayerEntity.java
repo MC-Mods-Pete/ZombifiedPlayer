@@ -129,9 +129,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             zombifiedPlayer.setCustomName(name);
             zombifiedPlayer.setPosition(player.getX(), player.getY(), player.getZ());
             zombifiedPlayer.setPersistent();
-            if (ZombifiedPlayerConfig.INSTANCE.transferInventoryToZombifiedPlayer) {
-                zombifiedPlayer.transferInventory(player);
-            }
+            zombifiedPlayer.transferInventory(player);
             serverWorld.spawnEntity(zombifiedPlayer);
         }
         return zombifiedPlayer;
@@ -141,23 +139,30 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getMainHandStack(), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
         } else {
-            this.setStackInHand(Hand.MAIN_HAND, playerEntity.getMainHandStack().copyAndEmpty());
+            if (ZombifiedPlayerConfig.INSTANCE.transferMainandOffHandToZombifiedPlayer) {
+                this.setStackInHand(Hand.MAIN_HAND, playerEntity.getMainHandStack().copyAndEmpty());
+            }
         }
 
         if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getOffHandStack(), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
         } else {
-            this.setStackInHand(Hand.OFF_HAND, playerEntity.getOffHandStack().copyAndEmpty());
+            if (ZombifiedPlayerConfig.INSTANCE.transferMainandOffHandToZombifiedPlayer) {
+                this.setStackInHand(Hand.OFF_HAND, playerEntity.getOffHandStack().copyAndEmpty());
+            }
         }
 
         for (int i = 0; i < 4; i++) {
             if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getInventory().armor.get(i), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
-                this.tryEquip(playerEntity.getInventory().armor.get(i).copyAndEmpty());
+                if (ZombifiedPlayerConfig.INSTANCE.transferArmorToZombifiedPlayer) {
+                    this.tryEquip(playerEntity.getInventory().armor.get(i).copyAndEmpty());
+                }
             }
         }
 
+        /*
         for (int i = 0; i < playerEntity.getInventory().main.size(); i++) {
             if (!playerEntity.getInventory().main.get(i).isEmpty()) {
                 if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getInventory().main.get(i), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
@@ -166,6 +171,6 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                 }
                 this.main.set(i, playerEntity.getInventory().main.get(i).copyAndEmpty());
             }
-        }
+        } */
     }
 }
