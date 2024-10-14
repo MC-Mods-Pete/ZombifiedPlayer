@@ -44,6 +44,6 @@ public class ZombifiedPlayerConfig implements ConfigData
     public boolean zombifiedPlayersCanBreakDoors = true;
 
     @ConfigEntry.Gui.Tooltip()
-    @Comment("If true, zombified players are stronger faster and have more health | default: false")
+    @Comment("If true, zombified players are stronger, faster and have more health | default: false")
     public boolean makeTheZombifiedPlayersStronger = false;
 }

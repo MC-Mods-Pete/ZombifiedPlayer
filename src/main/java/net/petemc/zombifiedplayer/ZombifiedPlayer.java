@@ -2,7 +2,6 @@ package net.petemc.zombifiedplayer;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.petemc.zombifiedplayer.config.ZombifiedPlayerConfig;
@@ -14,6 +13,8 @@ import net.petemc.zombifiedplayer.network.NetworkHandlerServer;
 import net.petemc.zombifiedplayer.network.NetworkPayloads;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.UUID;
 
 public class ZombifiedPlayer implements ModInitializer {
 	public static final String MOD_ID = "zombifiedplayer";
@@ -28,13 +29,14 @@ public class ZombifiedPlayer implements ModInitializer {
 
 		FabricDefaultAttributeRegistry.register(ModEntities.ZOMBIFIED_PLAYER, ZombifiedPlayerEntity.createZombifiedPlayerAttributes());
 
-		PayloadTypeRegistry.playS2C().register(NetworkPayloads.GameProfilePayload.ID, NetworkPayloads.GameProfilePayload.CODEC);
-		PayloadTypeRegistry.playC2S().register(NetworkPayloads.RequestGameProfilePayload.ID, NetworkPayloads.RequestGameProfilePayload.CODEC);
+		ServerPlayNetworking.registerGlobalReceiver(NetworkPayloads.REQEST_GAMEPROFILE_PACKET_ID, (server, player, handler, buf, responseSender) -> {
+			UUID zombPlayerUuid = buf.readUuid();
+			Integer zombPlayerId = buf.readInt();
 
-		ServerPlayNetworking.registerGlobalReceiver(NetworkPayloads.RequestGameProfilePayload.ID, (payload, context) -> {
-			context.player().server.execute(() -> {
-				NetworkHandlerServer.processGameProfileRequest(context.player(), payload.entityUUID(), payload.entityID());
+			server.execute(() -> {
+				NetworkHandlerServer.processGameProfileRequest(player, zombPlayerUuid, zombPlayerId);
 			});
 		});
+
 	}
 }

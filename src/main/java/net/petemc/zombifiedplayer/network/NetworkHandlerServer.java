@@ -1,7 +1,9 @@
 package net.petemc.zombifiedplayer.network;
 
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 
@@ -12,7 +14,13 @@ public class NetworkHandlerServer {
         Entity zombifiedPlayer = serverPlayer.getWorld().getEntityById(zombifiedPlayerId);
 
         if (zombifiedPlayer instanceof ZombifiedPlayerEntity zombifiedPlayerEntity) {
-            ServerPlayNetworking.send(serverPlayer, new NetworkPayloads.GameProfilePayload(zombifiedPlayerEntity.getUuid(), zombifiedPlayerEntity.getId(), zombifiedPlayerEntity.getGameProfile().getId(), zombifiedPlayerEntity.getGameProfile().getName()));
+            PacketByteBuf buf = PacketByteBufs.create();
+
+            buf.writeUuid(zombifiedPlayerEntity.getUuid());
+            buf.writeInt(zombifiedPlayerEntity.getId());
+            buf.writeUuid(zombifiedPlayerEntity.getGameProfile().getId());
+            buf.writeString(zombifiedPlayerEntity.getGameProfile().getName());
+            ServerPlayNetworking.send((ServerPlayerEntity) serverPlayer, NetworkPayloads.GAMEPROFILE_PACKET_ID, buf);
         }
     }
 }

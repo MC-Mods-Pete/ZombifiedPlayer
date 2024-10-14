@@ -2,9 +2,11 @@ package net.petemc.zombifiedplayer.event;
 
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
@@ -41,7 +43,13 @@ public class ServerZombifiedPlayerLoadEvent {
                 if ((gameProfileState.gameProfileUUID != null) && (gameProfileState.gameProfileName != null)) {
                     zombifiedPlayerEntity.gameProfile = new GameProfile(gameProfileState.gameProfileUUID, gameProfileState.gameProfileName);
                     for (ServerPlayerEntity player : PlayerLookup.world((ServerWorld) pWorld)) {
-                        ServerPlayNetworking.send(player, new NetworkPayloads.GameProfilePayload(zombifiedPlayerEntity.getUuid(), zombifiedPlayerEntity.getId(), zombifiedPlayerEntity.gameProfile.getId(), zombifiedPlayerEntity.gameProfile.getName()));
+                        PacketByteBuf buf = PacketByteBufs.create();
+
+                        buf.writeUuid(zombifiedPlayerEntity.getUuid());
+                        buf.writeInt(zombifiedPlayerEntity.getId());
+                        buf.writeUuid(zombifiedPlayerEntity.getGameProfile().getId());
+                        buf.writeString(zombifiedPlayerEntity.getGameProfile().getName());
+                        ServerPlayNetworking.send((ServerPlayerEntity) player, NetworkPayloads.GAMEPROFILE_PACKET_ID, buf);
                     }
                 }
             }

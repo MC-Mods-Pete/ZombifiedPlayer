@@ -1,7 +1,6 @@
 package net.petemc.zombifiedplayer.util;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
@@ -16,7 +15,7 @@ public class StateSaverAndLoader extends PersistentState {
     public HashMap<UUID, GameProfileData> gameProfiles = new HashMap<>();
 
     @Override
-    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
+    public NbtCompound writeNbt(NbtCompound nbt) {
         NbtCompound gameProfilesNbt = new NbtCompound();
         gameProfiles.forEach((uuid, gameProfileData) -> {
             NbtCompound gameProfileNbt = new NbtCompound();
@@ -31,7 +30,7 @@ public class StateSaverAndLoader extends PersistentState {
         return nbt;
     }
 
-    public static StateSaverAndLoader createFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
+    public static StateSaverAndLoader createFromNbt(NbtCompound tag) {
         StateSaverAndLoader state = new StateSaverAndLoader();
 
         NbtCompound gameProfilesNbt = tag.getCompound("gameProfiles");
@@ -48,20 +47,18 @@ public class StateSaverAndLoader extends PersistentState {
         return state;
     }
 
-    private static Type<StateSaverAndLoader> type = new Type<>(
-            StateSaverAndLoader::new, // If there's no 'StateSaverAndLoader' yet create one
-            StateSaverAndLoader::createFromNbt, // If there is a 'StateSaverAndLoader' NBT, parse it with 'createFromNbt'
-            null // Supposed to be an 'DataFixTypes' enum, but we can just pass null
-    );
-
+    /**
+     * This function gets the 'PersistentStateManager' and creates or returns the filled in 'StateSaveAndLoader'.
+     * It does this by calling 'StateSaveAndLoader::createFromNbt' passing it the previously saved 'NbtCompound' we wrote in 'writeNbt'.
+     */
     public static StateSaverAndLoader getServerState(MinecraftServer server) {
-        // (Note: arbitrary choice to use 'World.OVERWORLD' instead of 'World.END' or 'World.NETHER'.  Any work)
         PersistentStateManager persistentStateManager = server.getWorld(World.OVERWORLD).getPersistentStateManager();
 
-        // The first time the following 'getOrCreate' function is called, it creates a brand new 'StateSaverAndLoader' and
-        // stores it inside the 'PersistentStateManager'. The subsequent calls to 'getOrCreate' pass in the saved
-        // 'StateSaverAndLoader' NBT on disk to our function 'StateSaverAndLoader::createFromNbt'.
-        StateSaverAndLoader state = persistentStateManager.getOrCreate(type, ZombifiedPlayer.MOD_ID);
+        StateSaverAndLoader state = persistentStateManager.getOrCreate(
+                StateSaverAndLoader::createFromNbt,
+                StateSaverAndLoader::new,
+                ZombifiedPlayer.MOD_ID
+        );
 
         // If state is not marked dirty, when Minecraft closes, 'writeNbt' won't be called and therefore nothing will be saved.
         // Technically it's 'cleaner' if you only mark state as dirty when there was actually a change, but the vast majority

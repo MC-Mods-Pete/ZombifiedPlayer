@@ -9,31 +9,22 @@ import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.ZombieBaseEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.client.render.entity.model.ZombieEntityModel;
-import net.minecraft.client.util.SkinTextures;
 import net.minecraft.util.Identifier;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.ZombifiedPlayerClient;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 @Environment(EnvType.CLIENT)
 public class ZombifiedPlayerRenderer
         extends ZombieBaseEntityRenderer<ZombifiedPlayerEntity, ZombieEntityModel<ZombifiedPlayerEntity>> {
-    private static Identifier TEXTURE_FALLBACK = Identifier.of("minecraft", "textures/entity/player/wide/steve.png");
 
-    private static GameProfile receivedGameProfile;
+    private static Identifier TEXTURE_FALLBACK = Identifier.of("minecraft", "textures/entity/player/wide/steve.png");
+    private static GameProfile receivedGameProfile = null;
 
     public ZombifiedPlayerRenderer(EntityRendererFactory.Context ctx) {
         super(ctx, new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE)), new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_INNER_ARMOR)), new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_OUTER_ARMOR)));
         this.addFeature(new ZombificationFeatureRenderer(this));
-    }
-
-
-    public void setTexture(Identifier id) {
-        TEXTURE_FALLBACK = id;
     }
 
 
@@ -50,22 +41,19 @@ public class ZombifiedPlayerRenderer
     }
 
 
+    public void setTexture(Identifier id) {
+        TEXTURE_FALLBACK = id;
+    }
+
+
     public void getPlayerSkinFromGameProfile(GameProfile profile) {
         try {
-            receivedGameProfile = null;
-            ZombifiedPlayer.LOGGER.info("Trying to get GameProfile for {} UUID: {}", profile.getName(), profile.getId());
+            if (receivedGameProfile == null) {
+                ZombifiedPlayer.LOGGER.info("Trying to get GameProfile for {} UUID: {}", profile.getName(), profile.getId());
 
-            int tries = 25;
-            while (tries > 0) {
-                try {
-                    Optional<GameProfile> optGameProfile = SkullBlockEntity.fetchProfileByName(profile.getName()).get(300, TimeUnit.MILLISECONDS);
-                    if (SkullBlockEntity.fetchProfileByName(profile.getName()).isDone()) {
-                        optGameProfile.ifPresent(gameProfile -> ZombifiedPlayerRenderer.receivedGameProfile = gameProfile);
-                        tries = 0;
-                    }
-                } catch (TimeoutException timeoutException) {
-                    tries--;
-                }
+                SkullBlockEntity.loadProperties(profile, owner -> {
+                    ZombifiedPlayerRenderer.receivedGameProfile = owner;
+                });
             }
 
             if (receivedGameProfile != null) {
@@ -73,22 +61,15 @@ public class ZombifiedPlayerRenderer
 
                 MinecraftClient minecraft = MinecraftClient.getInstance();
 
-                SkinTextures skinTexture = null;
-                skinTexture = minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).get(300, TimeUnit.MILLISECONDS);
-                tries = 25;
-                while (!minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).isDone() && (tries > 0)) {
-                    try {
-                        skinTexture = minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).get(300, TimeUnit.MILLISECONDS);
-                    } catch (TimeoutException timeoutException) {
-                        tries--;
-                    }
-                }
+                Identifier skinTexture = null;
+
+                skinTexture = minecraft.getSkinProvider().loadSkin(receivedGameProfile);
 
                 if (skinTexture != null) {
-                    ZombifiedPlayerClient.cachedPlayerSkinsByUUID.put(receivedGameProfile.getId(), skinTexture.texture());
+                    ZombifiedPlayerClient.cachedPlayerSkinsByUUID.put(receivedGameProfile.getId(), skinTexture);
                     ZombifiedPlayer.LOGGER.info("Successfully received Skin for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
-                    ZombifiedPlayer.LOGGER.info("Skin Texture: {}", skinTexture.texture());
-                    ZombifiedPlayer.LOGGER.info("Skin Texture URL: {}", skinTexture.textureUrl());
+                    ZombifiedPlayer.LOGGER.info("Skin Texture: {}", skinTexture);
+                    receivedGameProfile = null;
                 } else {
                     ZombifiedPlayer.LOGGER.warn("No valid Skin was received for {}", receivedGameProfile.getName());
                     receivedGameProfile = null;

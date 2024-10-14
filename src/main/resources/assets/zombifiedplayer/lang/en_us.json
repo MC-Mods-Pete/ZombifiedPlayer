@@ -13,5 +13,5 @@
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors": "Zombified Players can break doors",
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors.@Tooltip": "If enabled, zombified players can break through doors | default: enabled",
   "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger": "Make Zombified Players stronger",
-  "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger.@Tooltip": "If enabled, zombified players are stronger faster and have more health | default: disabled"
+  "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger.@Tooltip": "If enabled, zombified players are stronger, faster and have more health | default: disabled"
 }

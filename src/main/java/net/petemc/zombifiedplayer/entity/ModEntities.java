@@ -11,5 +11,5 @@ public class ModEntities {
     public static final EntityType<ZombifiedPlayerEntity> ZOMBIFIED_PLAYER = Registry.register(Registries.ENTITY_TYPE,
             Identifier.of(ZombifiedPlayer.MOD_ID, "zombified_player"),
             EntityType.Builder.create(ZombifiedPlayerEntity::new, SpawnGroup.MONSTER)
-                    .dimensions(0.6f, 1.95f).eyeHeight(1.74f).build());
+                    .setDimensions(0.6f, 1.95f).build(Identifier.of(ZombifiedPlayer.MOD_ID, "zombified_player").toString()));
 }

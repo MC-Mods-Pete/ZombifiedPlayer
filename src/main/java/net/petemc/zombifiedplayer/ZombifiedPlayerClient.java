@@ -23,9 +23,14 @@ public class ZombifiedPlayerClient implements ClientModInitializer {
 
 		ClientZombifiedPlayerLoadEvent.registerEvent();
 
-		ClientPlayNetworking.registerGlobalReceiver(NetworkPayloads.GameProfilePayload.ID, (payload, context) -> {
-			context.client().execute(() -> {
-				NetworkHandlerClient.processGameProfile(context.player(), payload.entityUUID(), payload.entityID(), payload.playerUUID(), payload.name());
+		ClientPlayNetworking.registerGlobalReceiver(NetworkPayloads.GAMEPROFILE_PACKET_ID, (client, handler, buf, responseSender) -> {
+			UUID zombPlayerUuid = buf.readUuid();
+			Integer zombPlayerId = buf.readInt();
+			UUID gameProfileUuid = buf.readUuid();
+			String gameProfileName = buf.readString();
+
+			client.execute(() -> {
+				NetworkHandlerClient.processGameProfile(client.player, zombPlayerUuid, zombPlayerId, gameProfileUuid, gameProfileName);
 			});
 		});
 	}
