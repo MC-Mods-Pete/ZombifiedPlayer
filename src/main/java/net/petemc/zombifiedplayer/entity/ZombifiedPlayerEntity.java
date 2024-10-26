@@ -1,6 +1,5 @@
 package net.petemc.zombifiedplayer.entity;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.component.EnchantmentEffectComponentTypes;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -21,7 +20,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.server.network.EntityTrackerEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -33,7 +31,6 @@ import net.petemc.zombifiedplayer.util.GameProfileData;
 import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
-
 public class ZombifiedPlayerEntity extends ZombieEntity {
     public GameProfile gameProfile;
     public final DefaultedList<ItemStack> main = DefaultedList.ofSize(36, ItemStack.EMPTY);
@@ -44,12 +41,12 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
 
     public static DefaultAttributeContainer.Builder createZombifiedPlayerAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 40.0 : 20.0)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 50.0 : 40.0)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 0.29f : 0.23f)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 4.0 : 2.0)
-                .add(EntityAttributes.GENERIC_ARMOR, 2.0)
-                .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
+                .add(EntityAttributes.MAX_HEALTH, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 40.0 : 20.0)
+                .add(EntityAttributes.FOLLOW_RANGE, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 50.0 : 40.0)
+                .add(EntityAttributes.MOVEMENT_SPEED, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 0.29f : 0.23f)
+                .add(EntityAttributes.ATTACK_DAMAGE, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 4.0 : 2.0)
+                .add(EntityAttributes.ARMOR, 2.0)
+                .add(EntityAttributes.SPAWN_REINFORCEMENTS);
     }
 
     @Override
@@ -101,17 +98,17 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                     EnchantmentHelper.getEquipmentDropChance(serverWorld, livingEntity, source, 1.0f);
                 }
             }
-            this.dropStack(itemStack);
+            this.dropStack(world, itemStack);
             this.equipStack(equipmentSlot, ItemStack.EMPTY);
         }
-        dropInventory();
+        dropInventory(world);
     }
 
-    public void dropInventory() {
-        super.dropInventory();
+    public void dropInventory(ServerWorld world) {
+        super.dropInventory(world);
         for (int i = 0; i < this.main.size(); i++) {
             if (!this.main.get(i).isEmpty()) {
-                this.dropStack(this.main.get(i));
+                this.dropStack(world, this.main.get(i));
                 this.main.set(i, ItemStack.EMPTY);
             }
         }
@@ -127,13 +124,13 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             zombifiedPlayer.setCustomName(name);
             zombifiedPlayer.setPosition(player.getX(), player.getY(), player.getZ());
             zombifiedPlayer.setPersistent();
-            zombifiedPlayer.transferInventory(player);
+            zombifiedPlayer.transferInventory(serverWorld, player);
             serverWorld.spawnEntity(zombifiedPlayer);
         }
         return zombifiedPlayer;
     }
 
-    public void transferInventory(PlayerEntity playerEntity) {
+    public void transferInventory(ServerWorld world, PlayerEntity playerEntity) {
         if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getMainHandStack(), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
         } else {
@@ -155,7 +152,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
                 if (ZombifiedPlayerConfig.INSTANCE.transferArmorToZombifiedPlayer) {
-                    this.tryEquip(playerEntity.getInventory().armor.get(i).copyAndEmpty());
+                    this.tryEquip(world, playerEntity.getInventory().armor.get(i).copyAndEmpty());
                 }
             }
         }
@@ -191,7 +188,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             if (!this.main.get(i).isEmpty()) {
                 NbtCompound nbtCompound = new NbtCompound();
                 nbtCompound.putByte("Slot", (byte)i);
-                nbtList.add(this.main.get(i).encode(this.getRegistryManager(), nbtCompound));
+                nbtList.add(this.main.get(i).toNbt(this.getRegistryManager(), nbtCompound));
             }
         }
         return nbtList;

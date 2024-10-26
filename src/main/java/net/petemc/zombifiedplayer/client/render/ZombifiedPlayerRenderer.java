@@ -13,6 +13,8 @@ import net.minecraft.client.util.SkinTextures;
 import net.minecraft.util.Identifier;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.ZombifiedPlayerClient;
+import net.petemc.zombifiedplayer.client.render.entity.feature.ZombificationFeatureRenderer;
+import net.petemc.zombifiedplayer.client.render.entity.state.ZombifiedPlayerEntityRenderState;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 
 import java.util.Optional;
@@ -21,14 +23,33 @@ import java.util.concurrent.TimeoutException;
 
 @Environment(EnvType.CLIENT)
 public class ZombifiedPlayerRenderer
-        extends ZombieBaseEntityRenderer<ZombifiedPlayerEntity, ZombieEntityModel<ZombifiedPlayerEntity>> {
+        extends ZombieBaseEntityRenderer<ZombifiedPlayerEntity, ZombifiedPlayerEntityRenderState, ZombieEntityModel<ZombifiedPlayerEntityRenderState>> {
     private static Identifier TEXTURE_FALLBACK = Identifier.of("minecraft", "textures/entity/player/wide/steve.png");
 
     private static GameProfile receivedGameProfile;
 
     public ZombifiedPlayerRenderer(EntityRendererFactory.Context ctx) {
-        super(ctx, new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE)), new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_INNER_ARMOR)), new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_OUTER_ARMOR)));
+        super(
+                ctx,
+                new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE)),
+                new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_BABY)),
+                new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_INNER_ARMOR)),
+                new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_OUTER_ARMOR)),
+                new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_BABY_INNER_ARMOR)),
+                new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_BABY_OUTER_ARMOR))
+        );
         this.addFeature(new ZombificationFeatureRenderer(this));
+    }
+
+    @Override
+    public ZombifiedPlayerEntityRenderState createRenderState() {
+        return new ZombifiedPlayerEntityRenderState();
+    }
+
+    @Override
+    public void updateRenderState(ZombifiedPlayerEntity zombifiedPlayerEntity, ZombifiedPlayerEntityRenderState zombifiedPlayerEntityRenderState, float f) {
+        super.updateRenderState(zombifiedPlayerEntity, zombifiedPlayerEntityRenderState, f);
+        zombifiedPlayerEntityRenderState.gameProfile = zombifiedPlayerEntity.getGameProfile();
     }
 
 
@@ -38,12 +59,12 @@ public class ZombifiedPlayerRenderer
 
 
     @Override
-    public Identifier getTexture(ZombifiedPlayerEntity entity) {
-        if (entity.getGameProfile() != null) {
-            if (!ZombifiedPlayerClient.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
-                getPlayerSkinFromGameProfile(entity.getGameProfile());
-            } else if (ZombifiedPlayerClient.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
-                return ZombifiedPlayerClient.cachedPlayerSkinsByUUID.get(entity.getGameProfile().getId());
+    public Identifier getTexture(ZombifiedPlayerEntityRenderState zombieEntityRenderState) {
+        if (zombieEntityRenderState.gameProfile != null) {
+            if (!ZombifiedPlayerClient.cachedPlayerSkinsByUUID.containsKey(zombieEntityRenderState.gameProfile.getId())) {
+                getPlayerSkinFromGameProfile(zombieEntityRenderState.gameProfile);
+            } else if (ZombifiedPlayerClient.cachedPlayerSkinsByUUID.containsKey(zombieEntityRenderState.gameProfile.getId())) {
+                return ZombifiedPlayerClient.cachedPlayerSkinsByUUID.get(zombieEntityRenderState.gameProfile.getId());
             }
         }
         return TEXTURE_FALLBACK;
