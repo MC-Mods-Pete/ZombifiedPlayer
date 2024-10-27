@@ -15,7 +15,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -46,10 +45,10 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                 .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
     }
 
-    @Override
-    public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        return new EntitySpawnS2CPacket(this);
-    }
+    //@Override
+    //public Packet<ClientPlayPacketListener> createSpawnPacket() {
+    //    return new EntitySpawnS2CPacket(this);
+    //}
 
     @Override
     public void onSpawnPacket(EntitySpawnS2CPacket packet) {
@@ -126,7 +125,8 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             playerEntity.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
         } else {
             if (ZombifiedPlayerConfig.INSTANCE.transferMainandOffHandToZombifiedPlayer) {
-                this.setStackInHand(Hand.MAIN_HAND, playerEntity.getMainHandStack().copyAndEmpty());
+                this.setStackInHand(Hand.MAIN_HAND, playerEntity.getMainHandStack().copy());
+                playerEntity.getMainHandStack().setCount(0);
             }
         }
 
@@ -134,7 +134,8 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             playerEntity.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
         } else {
             if (ZombifiedPlayerConfig.INSTANCE.transferMainandOffHandToZombifiedPlayer) {
-                this.setStackInHand(Hand.OFF_HAND, playerEntity.getOffHandStack().copyAndEmpty());
+                this.setStackInHand(Hand.OFF_HAND, playerEntity.getOffHandStack().copy());
+                playerEntity.getOffHandStack().setCount(0);
             }
         }
 
@@ -143,7 +144,8 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
                 if (ZombifiedPlayerConfig.INSTANCE.transferArmorToZombifiedPlayer) {
-                    this.tryEquip(playerEntity.getInventory().armor.get(i).copyAndEmpty());
+                    this.tryEquip(playerEntity.getInventory().armor.get(i).copy());
+                    playerEntity.getInventory().armor.get(i).setCount(0);
                 }
             }
         }
@@ -155,7 +157,8 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                     this.main.set(i, ItemStack.EMPTY);
                 }
                 if (ZombifiedPlayerConfig.INSTANCE.transferInventoryToZombifiedPlayer) {
-                    this.main.set(i, playerEntity.getInventory().main.get(i).copyAndEmpty());
+                    this.main.set(i, playerEntity.getInventory().main.get(i).copy());
+                    playerEntity.getInventory().main.get(i).setCount(0);
                 }
             }
         }

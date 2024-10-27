@@ -19,7 +19,7 @@ import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 public class ZombifiedPlayerRenderer
         extends ZombieBaseEntityRenderer<ZombifiedPlayerEntity, ZombieEntityModel<ZombifiedPlayerEntity>> {
 
-    private static Identifier TEXTURE_FALLBACK = Identifier.of("minecraft", "textures/entity/player/wide/steve.png");
+    private static Identifier TEXTURE_FALLBACK = Identifier.of("minecraft", "textures/entity/steve.png");
     private static GameProfile receivedGameProfile = null;
 
     public ZombifiedPlayerRenderer(EntityRendererFactory.Context ctx) {
