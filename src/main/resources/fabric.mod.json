@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "zombifiedplayer",
+	"id": "${mod_id}",
 	"version": "${version}",
-	"name": "ZombifiedPlayer",
+	"name": "${mod_name}",
 	"description": "A Zombified Player gets spawned after the player dies.",
 	"authors": [
 		"Pete MC Mods, mcmods.pete@gmail.com"
@@ -33,12 +33,14 @@
 		"zombifiedplayer.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.16.7",
-		"minecraft": "~1.21.3",
-		"java": ">=21",
-		"fabric-api": "*"
+		"fabricloader": "${fabric_version_range}",
+		"minecraft": "${mc_version_range}",
+		"java": "${java_version_range}",
+		"fabric-api": "*",
+		"cloth-config": ">=16.0.141"
 	},
 	"suggests": {
+		"modmenu": ">=12.0.0-beta.1",
 		"another-mod": "*"
 	}
 }
