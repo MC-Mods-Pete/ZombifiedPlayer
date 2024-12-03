@@ -94,16 +94,22 @@ public class ZombifiedPlayerRenderer
 
                 MinecraftClient minecraft = MinecraftClient.getInstance();
 
+                Optional<SkinTextures> optionalSkinTextures;
                 SkinTextures skinTexture = null;
-                skinTexture = minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).get(300, TimeUnit.MILLISECONDS);
+                optionalSkinTextures = minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).get(300, TimeUnit.MILLISECONDS);
                 tries = 25;
                 while (!minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).isDone() && (tries > 0)) {
                     try {
-                        skinTexture = minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).get(300, TimeUnit.MILLISECONDS);
+                        optionalSkinTextures = minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).get(300, TimeUnit.MILLISECONDS);
                     } catch (TimeoutException timeoutException) {
                         tries--;
                     }
                 }
+
+                if (optionalSkinTextures.isPresent()) {
+                    skinTexture = optionalSkinTextures.get();
+                }
+
 
                 if (skinTexture != null) {
                     ZombifiedPlayerClient.cachedPlayerSkinsByUUID.put(receivedGameProfile.getId(), skinTexture.texture());
