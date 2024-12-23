@@ -13,5 +13,7 @@
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors": "Zombified Players can break doors",
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors.@Tooltip": "If enabled, zombified players can break through doors | default: enabled",
   "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger": "Make Zombified Players stronger",
-  "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger.@Tooltip": "If enabled, zombified players are stronger, faster and have more health | default: disabled"
+  "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger.@Tooltip": "If enabled, zombified players are stronger, faster and have more health | default: disabled",
+  "text.autoconfig.zombifiedplayer.option.limitSkinFetchTries": "If unsuccessful, stop trying to fetch the player skin",
+  "text.autoconfig.zombifiedplayer.option.limitSkinFetchTries.@Tooltip": "If enabled, the mod will stop trying to fetch the player skin after several unsuccessful tries | default: enabled"
 }
