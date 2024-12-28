@@ -1,6 +1,3 @@
-/*
- * Decompiled with CFR 0.2.2 (FabricMC 7c48b8c4).
- */
 package net.petemc.zombifiedplayer.client.render;
 
 import net.fabricmc.api.EnvType;
@@ -25,6 +22,7 @@ extends FeatureRenderer<ZombifiedPlayerEntity, ZombieEntityModel<ZombifiedPlayer
 
     @Override
     public void render(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, ZombifiedPlayerEntity zombifiedPlayerEntity, float f, float g, float h, float j, float k, float l) {
+        ZombificationFeatureRenderer.renderModel(this.getContextModel(), this.getTexture(zombifiedPlayerEntity), matrixStack, vertexConsumerProvider, i, zombifiedPlayerEntity, 0xFF99FF99);
         ZombificationFeatureRenderer.renderModel(this.getContextModel(), TEXTURE, matrixStack, vertexConsumerProvider, i, zombifiedPlayerEntity, -1);
     }
 }
