@@ -12,7 +12,7 @@ mc_version_range = project.mc_version_range
 java_version_range = project.java_version_range
 
 base {
-	archivesName = project.mod_id
+	archivesName = project.mod_name
 }
 
 repositories {
