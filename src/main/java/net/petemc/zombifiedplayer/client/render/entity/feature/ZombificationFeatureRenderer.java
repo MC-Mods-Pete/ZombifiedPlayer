@@ -25,6 +25,7 @@ extends FeatureRenderer<ZombifiedPlayerEntityRenderState, ZombieEntityModel<Zomb
 
     @Override
     public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, ZombifiedPlayerEntityRenderState state, float limbAngle, float limbDistance) {
+        ZombificationFeatureRenderer.renderModel(this.getContextModel(), state.skinTexture, matrices, vertexConsumers, light, state, 0xFF99FF99);
         ZombificationFeatureRenderer.renderModel(this.getContextModel(), TEXTURE, matrices, vertexConsumers, light, state, -1);
     }
 }

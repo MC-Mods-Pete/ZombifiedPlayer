@@ -46,4 +46,8 @@ public class ZombifiedPlayerConfig implements ConfigData
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, zombified players are stronger faster and have more health | default: false")
     public boolean makeTheZombifiedPlayersStronger = false;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, the mod will stop trying to fetch the player skin after several unsuccessful tries | default: true")
+    public boolean limitSkinFetchTries = true;
 }
