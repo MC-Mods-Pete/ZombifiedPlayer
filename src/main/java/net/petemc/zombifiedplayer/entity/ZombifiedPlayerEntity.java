@@ -67,6 +67,11 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         return ZombifiedPlayerConfig.INSTANCE.zombifiedPlayersCanBreakDoors;
     }
 
+    @Override
+    protected boolean canConvertInWater() {
+        return false;
+    }
+
     public GameProfile getGameProfile() {
         return gameProfile;
     }

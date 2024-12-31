@@ -15,13 +15,12 @@ import net.petemc.zombifiedplayer.ZombifiedPlayerClient;
 import net.petemc.zombifiedplayer.config.ZombifiedPlayerConfig;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 
-
 @Environment(EnvType.CLIENT)
 public class ZombifiedPlayerRenderer
         extends ZombieBaseEntityRenderer<ZombifiedPlayerEntity, ZombieEntityModel<ZombifiedPlayerEntity>> {
 
     private static Identifier TEXTURE_FALLBACK = Identifier.of("minecraft", "textures/entity/player/wide/steve.png");
-    private static GameProfile receivedGameProfile = null;
+    private GameProfile receivedGameProfile = null;
 
     private final int counterSteps = 30;
     private final int maxSubTries = 3;
@@ -60,7 +59,7 @@ public class ZombifiedPlayerRenderer
                     ZombifiedPlayer.LOGGER.info("Trying to get GameProfile for {} UUID: {}", profile.getName(), profile.getId());
 
                     SkullBlockEntity.loadProperties(profile, owner -> {
-                        ZombifiedPlayerRenderer.receivedGameProfile = owner;
+                        receivedGameProfile = owner;
                     });
                 }
 
@@ -92,8 +91,12 @@ public class ZombifiedPlayerRenderer
             } else {
                 counter = counterMax;
                 totalTries++;
-                if ((totalTries == maxTotalTries - 1) && (ZombifiedPlayerConfig.INSTANCE.limitSkinFetchTries)) {
-                    ZombifiedPlayer.LOGGER.warn("Could not fetch a valid Skin for {}, will stop trying.", profile.getName());
+                if (totalTries == maxTotalTries - 1) {
+                    if (ZombifiedPlayerConfig.INSTANCE.limitSkinFetchTries) {
+                        ZombifiedPlayer.LOGGER.warn("Could not fetch a valid Skin for {}, will stop trying.", profile.getName());
+                    } else {
+                        totalTries = 0;
+                    }
                 }
             }
         } catch (Exception ignored) {
