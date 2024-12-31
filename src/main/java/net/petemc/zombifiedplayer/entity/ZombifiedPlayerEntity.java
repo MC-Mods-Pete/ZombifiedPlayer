@@ -4,11 +4,16 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.ai.goal.*;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.ZombieEntity;
+import net.minecraft.entity.mob.ZombifiedPiglinEntity;
+import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.passive.MerchantEntity;
+import net.minecraft.entity.passive.TurtleEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -44,6 +49,16 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                 .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 4.0 : 2.0)
                 .add(EntityAttributes.GENERIC_ARMOR, 2.0)
                 .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
+    }
+
+    @Override
+    protected void initCustomGoals() {
+        this.goalSelector.add(1, new SwimGoal(this));
+        this.goalSelector.add(2, new ZombieAttackGoal(this, (double)1.0F, false));
+        this.goalSelector.add(6, new MoveThroughVillageGoal(this, (double)1.0F, true, 4, this::canBreakDoors));
+        this.goalSelector.add(7, new WanderAroundFarGoal(this, (double)1.0F));
+        this.targetSelector.add(2, new ActiveTargetGoal(this, PlayerEntity.class, true));
+        this.targetSelector.add(3, new ActiveTargetGoal(this, IronGolemEntity.class, true));
     }
 
     @Override
