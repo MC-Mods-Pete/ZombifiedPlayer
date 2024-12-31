@@ -45,11 +45,6 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                 .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
     }
 
-    //@Override
-    //public Packet<ClientPlayPacketListener> createSpawnPacket() {
-    //    return new EntitySpawnS2CPacket(this);
-    //}
-
     @Override
     public void onSpawnPacket(EntitySpawnS2CPacket packet) {
         super.onSpawnPacket(packet);
@@ -64,6 +59,11 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     public boolean canBreakDoors()
     {
         return ZombifiedPlayerConfig.INSTANCE.zombifiedPlayersCanBreakDoors;
+    }
+
+    @Override
+    protected boolean canConvertInWater() {
+        return false;
     }
 
     public GameProfile getGameProfile() {
