@@ -21,7 +21,6 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.server.network.EntityTrackerEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
@@ -71,6 +70,11 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     public boolean canBreakDoors()
     {
         return ZombifiedPlayerConfig.INSTANCE.zombifiedPlayersCanBreakDoors;
+    }
+
+    @Override
+    protected boolean canConvertInWater() {
+        return false;
     }
 
     public GameProfile getGameProfile() {
