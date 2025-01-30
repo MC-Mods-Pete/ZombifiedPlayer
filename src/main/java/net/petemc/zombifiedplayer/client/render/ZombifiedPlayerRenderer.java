@@ -12,7 +12,7 @@ import net.minecraft.client.render.entity.model.ZombieEntityModel;
 import net.minecraft.util.Identifier;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.ZombifiedPlayerClient;
-import net.petemc.zombifiedplayer.config.ZombifiedPlayerConfig;
+import net.petemc.zombifiedplayer.config.Config;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 
 @Environment(EnvType.CLIENT)
@@ -22,8 +22,8 @@ public class ZombifiedPlayerRenderer
     private static Identifier TEXTURE_FALLBACK = Identifier.of("minecraft", "textures/entity/player/wide/steve.png");
     private GameProfile receivedGameProfile = null;
 
-    private final int counterSteps = 30;
-    private final int maxSubTries = 3;
+    private final int counterSteps = 40;
+    private final int maxSubTries = 5;
     private final int maxTotalTries = 3;
     private final int counterMax = 2000 + (counterSteps * maxSubTries);
 
@@ -34,7 +34,6 @@ public class ZombifiedPlayerRenderer
         super(ctx, new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE)), new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_INNER_ARMOR)), new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_OUTER_ARMOR)));
         this.addFeature(new ZombificationFeatureRenderer(this));
     }
-
 
     @Override
     public Identifier getTexture(ZombifiedPlayerEntity entity) {
@@ -56,7 +55,9 @@ public class ZombifiedPlayerRenderer
         try {
             if (((counter % counterSteps) == 0) && (counter > (counterMax - (counterSteps * maxSubTries))) && (totalTries < maxTotalTries)) {
                 if (receivedGameProfile == null) {
-                    ZombifiedPlayer.LOGGER.info("Trying to get GameProfile for {} UUID: {}", profile.getName(), profile.getId());
+                    if (counter == counterMax) {
+                        ZombifiedPlayer.LOGGER.info("Trying to get GameProfile for {} UUID: {}", profile.getName(), profile.getId());
+                    }
 
                     SkullBlockEntity.loadProperties(profile, owner -> {
                         receivedGameProfile = owner;
@@ -82,8 +83,6 @@ public class ZombifiedPlayerRenderer
                         ZombifiedPlayer.LOGGER.warn("No valid Skin was received for {} yet", receivedGameProfile.getName());
                         receivedGameProfile = null;
                     }
-                } else {
-                    ZombifiedPlayer.LOGGER.warn("No valid GameProfile was received for {} yet", profile.getName());
                 }
             }
             if (counter > 0) {
@@ -92,7 +91,7 @@ public class ZombifiedPlayerRenderer
                 counter = counterMax;
                 totalTries++;
                 if (totalTries == maxTotalTries - 1) {
-                    if (ZombifiedPlayerConfig.INSTANCE.limitSkinFetchTries) {
+                    if (Config.getLimitSkinFetchTries()) {
                         ZombifiedPlayer.LOGGER.warn("Could not fetch a valid Skin for {}, will stop trying.", profile.getName());
                     } else {
                         totalTries = 0;

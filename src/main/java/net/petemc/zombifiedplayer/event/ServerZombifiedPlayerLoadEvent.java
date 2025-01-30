@@ -10,7 +10,6 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
-import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import net.petemc.zombifiedplayer.network.NetworkPayloads;
 import net.petemc.zombifiedplayer.util.GameProfileData;
@@ -30,30 +29,25 @@ public class ServerZombifiedPlayerLoadEvent {
     }
 
     public static void execute() {
-        if (pEntity == null) {
-            ZombifiedPlayer.LOGGER.warn("Failed to load entity!");
-        } else if (pWorld.isClient()) {
-            ZombifiedPlayer.LOGGER.warn("World is Client world!");
-        } else if (pEntity.getWorld() == null) {
-            ZombifiedPlayer.LOGGER.warn("Failed to load World!");
-        } else {
-            if (pEntity instanceof ZombifiedPlayerEntity zombifiedPlayerEntity) {
+        if (pEntity != null) {
+            if (!pWorld.isClient()) {
+                if (pEntity instanceof ZombifiedPlayerEntity zombifiedPlayerEntity) {
+                    GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(zombifiedPlayerEntity.getUuid(), pWorld);
+                    if ((gameProfileState.gameProfileUUID != null) && (gameProfileState.gameProfileName != null)) {
+                        zombifiedPlayerEntity.gameProfile = new GameProfile(gameProfileState.gameProfileUUID, gameProfileState.gameProfileName);
+                        for (ServerPlayerEntity serverPlayer : PlayerLookup.world((ServerWorld) pWorld)) {
+                            PacketByteBuf buf = PacketByteBufs.create();
 
-                GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(zombifiedPlayerEntity.getUuid(), pWorld);
-                if ((gameProfileState.gameProfileUUID != null) && (gameProfileState.gameProfileName != null)) {
-                    zombifiedPlayerEntity.gameProfile = new GameProfile(gameProfileState.gameProfileUUID, gameProfileState.gameProfileName);
-                    for (ServerPlayerEntity player : PlayerLookup.world((ServerWorld) pWorld)) {
-                        PacketByteBuf buf = PacketByteBufs.create();
-
-                        buf.writeUuid(zombifiedPlayerEntity.getUuid());
-                        buf.writeInt(zombifiedPlayerEntity.getId());
-                        buf.writeUuid(zombifiedPlayerEntity.getGameProfile().getId());
-                        buf.writeString(zombifiedPlayerEntity.getGameProfile().getName());
-                        ServerPlayNetworking.send((ServerPlayerEntity) player, NetworkPayloads.GAMEPROFILE_PACKET_ID, buf);
+                            buf.writeUuid(zombifiedPlayerEntity.getUuid());
+                            buf.writeInt(zombifiedPlayerEntity.getId());
+                            buf.writeUuid(zombifiedPlayerEntity.getGameProfile().getId());
+                            buf.writeString(zombifiedPlayerEntity.getGameProfile().getName());
+                            assert NetworkPayloads.GAMEPROFILE_PACKET_ID != null;
+                            ServerPlayNetworking.send(serverPlayer, NetworkPayloads.GAMEPROFILE_PACKET_ID, buf);
+                        }
                     }
                 }
             }
-
         }
     }
 
