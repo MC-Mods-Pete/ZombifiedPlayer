@@ -22,11 +22,7 @@ public class ClientZombifiedPlayerLoadEvent {
     }
 
     public static void execute() {
-        if (pEntity == null) {
-            ZombifiedPlayer.LOGGER.warn("Failed to load entity!");
-        } else if (pEntity.getWorld() == null) {
-            ZombifiedPlayer.LOGGER.warn("Failed to load World!");
-        } else {
+        if (pEntity != null) {
             if (pEntity instanceof ZombifiedPlayerEntity zombifiedPlayerEntity) {
                 ClientPlayNetworking.send(new NetworkPayloads.RequestGameProfilePayload(zombifiedPlayerEntity.getUuid(), zombifiedPlayerEntity.getId()));
             }

@@ -15,7 +15,7 @@ import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.ZombifiedPlayerClient;
 import net.petemc.zombifiedplayer.client.render.entity.feature.ZombificationFeatureRenderer;
 import net.petemc.zombifiedplayer.client.render.entity.state.ZombifiedPlayerEntityRenderState;
-import net.petemc.zombifiedplayer.config.ZombifiedPlayerConfig;
+import net.petemc.zombifiedplayer.config.Config;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 
 import java.util.Optional;
@@ -88,7 +88,9 @@ public class ZombifiedPlayerRenderer
         try {
             if ((counter > (counterMax - maxSubTries)) && (totalTries < maxTotalTries)) {
                 if (receivedGameProfile == null) {
-                    ZombifiedPlayer.LOGGER.info("Trying to get GameProfile for {} UUID: {}", profile.getName(), profile.getId());
+                    if (counter == counterMax) {
+                        ZombifiedPlayer.LOGGER.info("Trying to get GameProfile for {} UUID: {}", profile.getName(), profile.getId());
+                    }
 
                     receivedGameProfile = getGameProfile(profile);
 
@@ -104,11 +106,11 @@ public class ZombifiedPlayerRenderer
                     MinecraftClient minecraft = MinecraftClient.getInstance();
 
                     SkinTextures skinTexture = null;
-                    skinTexture = minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).get(300, TimeUnit.MILLISECONDS);
+                    skinTexture = minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).get(100, TimeUnit.MILLISECONDS);
                     int tries = 5;
                     while (!minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).isDone() && (tries > 0)) {
                         try {
-                            skinTexture = minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).get(300, TimeUnit.MILLISECONDS);
+                            skinTexture = minecraft.getSkinProvider().fetchSkinTextures(receivedGameProfile).get(50, TimeUnit.MILLISECONDS);
                         } catch (TimeoutException timeoutException) {
                             tries--;
                         }
@@ -119,12 +121,11 @@ public class ZombifiedPlayerRenderer
                         ZombifiedPlayer.LOGGER.info("Successfully received Skin for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
                         ZombifiedPlayer.LOGGER.info("Skin Texture: {}", skinTexture.texture());
                         ZombifiedPlayer.LOGGER.info("Skin Texture URL: {}", skinTexture.textureUrl());
+                        totalTries = 0;
                     } else {
                         ZombifiedPlayer.LOGGER.warn("No valid Skin was received for {}", receivedGameProfile.getName());
                         receivedGameProfile = null;
                     }
-                } else {
-                    ZombifiedPlayer.LOGGER.warn("No valid GameProfile was received for {}", profile.getName());
                 }
             }
             if (counter > 0) {
@@ -133,7 +134,7 @@ public class ZombifiedPlayerRenderer
                 counter = counterMax;
                 totalTries++;
                 if (totalTries == (maxTotalTries - 1)) {
-                    if (ZombifiedPlayerConfig.INSTANCE.limitSkinFetchTries) {
+                    if (Config.getLimitSkinFetchTries()) {
                         ZombifiedPlayer.LOGGER.warn("Could not fetch a valid Skin for {}, will stop trying.", profile.getName());
                     } else {
                         totalTries = 0;
@@ -148,11 +149,11 @@ public class ZombifiedPlayerRenderer
     private GameProfile getGameProfile(GameProfile profile) {
         try {
             CompletableFuture<Optional<GameProfile>> futureOptionalGameProfile = SkullBlockEntity.fetchProfileByName(profile.getName());
-            Optional<GameProfile> optionalGameProfile = futureOptionalGameProfile.get(300, TimeUnit.MILLISECONDS);
+            Optional<GameProfile> optionalGameProfile = futureOptionalGameProfile.get(100, TimeUnit.MILLISECONDS);
             int tries = 5;
             while (!futureOptionalGameProfile.isDone() && (tries > 0)) {
                 try {
-                    futureOptionalGameProfile.get(300, TimeUnit.MILLISECONDS);
+                    futureOptionalGameProfile.get(50, TimeUnit.MILLISECONDS);
                 } catch (TimeoutException timeoutException) {
                     tries--;
                 }
