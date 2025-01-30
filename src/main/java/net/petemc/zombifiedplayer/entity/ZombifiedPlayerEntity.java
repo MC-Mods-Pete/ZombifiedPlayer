@@ -16,17 +16,18 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
-import net.petemc.zombifiedplayer.config.ZombifiedPlayerConfig;
+import net.petemc.zombifiedplayer.ZombifiedPlayer;
+import net.petemc.zombifiedplayer.config.Config;
 import net.petemc.zombifiedplayer.util.GameProfileData;
 import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
-import net.petemc.zombifiedplayer.ZombifiedPlayer;
+
+import java.util.Objects;
 
 
 public class ZombifiedPlayerEntity extends ZombieEntity {
@@ -39,11 +40,11 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
 
     public static DefaultAttributeContainer.Builder createZombifiedPlayerAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 40.0 : 20.0)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 50.0 : 40.0)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 0.29f : 0.23f)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, ZombifiedPlayerConfig.INSTANCE.makeTheZombifiedPlayersStronger ? 4.0 : 2.0)
-                .add(EntityAttributes.GENERIC_ARMOR, 2.0)
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, Config.getMakeTheZombifiedPlayersStronger() ? 40.0 : 20.0)
+                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, Config.getMakeTheZombifiedPlayersStronger() ? 50.0 : 40.0)
+                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, Config.getMakeTheZombifiedPlayersStronger() ? 0.29f : 0.23f)
+                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, Config.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
+                .add(EntityAttributes.GENERIC_ARMOR, Config.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
                 .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
     }
 
@@ -70,12 +71,17 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     @Override
     public boolean canBreakDoors()
     {
-        return ZombifiedPlayerConfig.INSTANCE.zombifiedPlayersCanBreakDoors;
+        return Config.getZombifiedPlayersCanBreakDoors();
     }
 
     @Override
     protected boolean canConvertInWater() {
         return false;
+    }
+
+    @Override
+    protected void initAttributes() {
+        Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS)).setBaseValue(0.0F);
     }
 
     public GameProfile getGameProfile() {
@@ -136,7 +142,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         if (EnchantmentHelper.hasVanishingCurse(playerEntity.getMainHandStack())) {
             playerEntity.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
         } else {
-            if (ZombifiedPlayerConfig.INSTANCE.transferMainandOffHandToZombifiedPlayer) {
+            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
                 this.setStackInHand(Hand.MAIN_HAND, playerEntity.getMainHandStack().copy());
                 playerEntity.getMainHandStack().setCount(0);
             }
@@ -145,7 +151,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         if (EnchantmentHelper.hasVanishingCurse(playerEntity.getOffHandStack())) {
             playerEntity.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
         } else {
-            if (ZombifiedPlayerConfig.INSTANCE.transferMainandOffHandToZombifiedPlayer) {
+            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
                 this.setStackInHand(Hand.OFF_HAND, playerEntity.getOffHandStack().copy());
                 playerEntity.getOffHandStack().setCount(0);
             }
@@ -155,7 +161,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             if (EnchantmentHelper.hasVanishingCurse(playerEntity.getInventory().armor.get(i))) {
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
-                if (ZombifiedPlayerConfig.INSTANCE.transferArmorToZombifiedPlayer) {
+                if (Config.getTransferArmorToZombifiedPlayer()) {
                     this.tryEquip(playerEntity.getInventory().armor.get(i).copy());
                     playerEntity.getInventory().armor.get(i).setCount(0);
                 }
@@ -168,7 +174,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                     playerEntity.getInventory().main.set(i, ItemStack.EMPTY);
                     this.main.set(i, ItemStack.EMPTY);
                 }
-                if (ZombifiedPlayerConfig.INSTANCE.transferInventoryToZombifiedPlayer) {
+                if (Config.getTransferInventoryToZombifiedPlayer()) {
                     this.main.set(i, playerEntity.getInventory().main.get(i).copy());
                     playerEntity.getInventory().main.get(i).setCount(0);
                 }

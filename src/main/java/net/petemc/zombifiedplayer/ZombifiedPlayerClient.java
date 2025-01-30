@@ -20,17 +20,18 @@ public class ZombifiedPlayerClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
 		EntityRendererRegistry.register(ModEntities.ZOMBIFIED_PLAYER, ZombifiedPlayerRenderer::new);
-
 		ClientZombifiedPlayerLoadEvent.registerEvent();
 
-		ClientPlayNetworking.registerGlobalReceiver(NetworkPayloads.GAMEPROFILE_PACKET_ID, (client, handler, buf, responseSender) -> {
-			UUID zombPlayerUuid = buf.readUuid();
-			Integer zombPlayerId = buf.readInt();
+        assert NetworkPayloads.GAMEPROFILE_PACKET_ID != null;
+        ClientPlayNetworking.registerGlobalReceiver(NetworkPayloads.GAMEPROFILE_PACKET_ID, (client, handler, buf, responseSender) -> {
+			UUID zombifiedPlayerUuid = buf.readUuid();
+			Integer zombifiedPlayerId = buf.readInt();
 			UUID gameProfileUuid = buf.readUuid();
 			String gameProfileName = buf.readString();
 
 			client.execute(() -> {
-				NetworkHandlerClient.processGameProfile(client.player, zombPlayerUuid, zombPlayerId, gameProfileUuid, gameProfileName);
+                assert client.player != null;
+                NetworkHandlerClient.processGameProfile(client.player, zombifiedPlayerUuid, zombifiedPlayerId, gameProfileUuid, gameProfileName);
 			});
 		});
 	}
