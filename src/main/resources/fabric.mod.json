@@ -33,14 +33,14 @@
 		"zombifiedplayer.mixins.json"
 	],
 	"depends": {
-		"fabricloader": "${fabric_version_range}",
-		"minecraft": "${mc_version_range}",
+		"fabricloader": ">=${loader_version}",
+		"minecraft": "${minecraft_version_range}",
 		"java": "${java_version_range}",
 		"fabric-api": "*",
-		"cloth-config": ">=16.0.141"
+		"cloth-config": ">=${cloth_config_version}"
 	},
 	"suggests": {
-		"modmenu": ">=12.0.0-beta.1",
+		"modmenu": ">=${modmenu_version}",
 		"another-mod": "*"
 	}
 }
