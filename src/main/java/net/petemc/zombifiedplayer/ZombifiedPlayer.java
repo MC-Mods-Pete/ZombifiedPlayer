@@ -1,42 +1,73 @@
 package net.petemc.zombifiedplayer;
 
-import net.fabricmc.api.ModInitializer;
-
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.petemc.zombifiedplayer.config.ZombifiedPlayerConfig;
+import com.mojang.logging.LogUtils;
+import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.entity.ModEntities;
-import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
-import net.petemc.zombifiedplayer.event.PlayerDeathEvent;
-import net.petemc.zombifiedplayer.event.ServerZombifiedPlayerLoadEvent;
-import net.petemc.zombifiedplayer.network.NetworkHandlerServer;
-import net.petemc.zombifiedplayer.network.NetworkPayloads;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class ZombifiedPlayer implements ModInitializer {
-	public static final String MOD_ID = "zombifiedplayer";
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+// The value here should match an entry in the META-INF/mods.toml file
+@Mod(ZombifiedPlayer.MOD_ID)
+public class ZombifiedPlayer
+{
+    public static final String MOD_ID = "zombifiedplayer";
+    public static final Logger LOGGER = LogUtils.getLogger();
 
-	@Override
-	public void onInitialize() {
-		LOGGER.info("Initializing Zombified Player Mod");
-		ZombifiedPlayerConfig.init();
-		PlayerDeathEvent.registerEvent();
-		ServerZombifiedPlayerLoadEvent.registerEvent();
+    public static ConcurrentHashMap<UUID, ResourceLocation> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
 
-		FabricDefaultAttributeRegistry.register(ModEntities.ZOMBIFIED_PLAYER, ZombifiedPlayerEntity.createZombifiedPlayerAttributes());
+    public ZombifiedPlayer() {
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        ModEntities.register(modEventBus);
 
-		ServerPlayNetworking.registerGlobalReceiver(NetworkPayloads.REQEST_GAMEPROFILE_PACKET_ID, (server, player, handler, buf, responseSender) -> {
-			UUID zombPlayerUuid = buf.readUuid();
-			Integer zombPlayerId = buf.readInt();
+        modEventBus.addListener(this::commonSetup);
 
-			server.execute(() -> {
-				NetworkHandlerServer.processGameProfileRequest(player, zombPlayerUuid, zombPlayerId);
-			});
-		});
+        MinecraftForge.EVENT_BUS.register(this);
+        //modEventBus.addListener(this::addCreative);
 
-	}
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SPEC_SERVER);
+    }
+
+    private void commonSetup(final FMLCommonSetupEvent event)
+    {
+
+    }
+
+    private void addCreative(BuildCreativeModeTabContentsEvent event)
+    {
+
+    }
+
+    // You can use SubscribeEvent and let the Event Bus discover methods to call
+    @SubscribeEvent
+    public void onServerStarting(ServerStartingEvent event)
+    {
+        LOGGER.info("Initializing Zombified Player Mod");
+    }
+
+    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
+    @Mod.EventBusSubscriber(modid = MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    public static class ClientModEvents
+    {
+        @SubscribeEvent
+        public static void onClientSetup(FMLClientSetupEvent event)
+        {
+            EntityRenderers.register(ModEntities.ZOMBIFIED_PLAYER.get(), ZombifiedPlayerRenderer::new);
+        }
+    }
 }
