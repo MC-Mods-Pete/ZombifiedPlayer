@@ -5,10 +5,12 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -26,10 +28,11 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.entity.IEntityAdditionalSpawnData;
-import net.minecraftforge.network.NetworkHooks;
+import net.neoforged.neoforge.common.extensions.IEntityExtension;
+import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import net.petemc.zombifiedplayer.Config;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.util.GameProfileData;
@@ -39,7 +42,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 import java.util.UUID;
 
-public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSpawnData {
+public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, IEntityWithComplexSpawn {
     public GameProfile gameProfile;
     public final NonNullList<ItemStack> main = NonNullList.withSize(36, ItemStack.EMPTY);
 
@@ -119,8 +122,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     }
 
     @Override
-    protected void dropCustomDeathLoot(@NotNull DamageSource pDamageSource, int pLooting, boolean pHitByPlayer) {
-        super.dropCustomDeathLoot(pDamageSource, pLooting, pHitByPlayer);
+    protected void dropCustomDeathLoot(@NotNull ServerLevel serverLevel, @NotNull DamageSource pDamageSource, boolean recentlyHit) {
+        super.dropCustomDeathLoot(serverLevel, pDamageSource, recentlyHit);
         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
             ItemStack itemStack = this.getItemBySlot(equipmentSlot);
             this.spawnAtLocation(itemStack);
@@ -156,7 +159,9 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     }
 
     public void transferInventory(Player playerEntity) {
-        if (EnchantmentHelper.hasVanishingCurse(playerEntity.getMainHandItem())) {
+        //!EnchantmentHelper.has(itemstack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)
+        //EnchantmentEffectComponents.EQUIPMENT_DROPS
+        if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else {
             if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
@@ -164,7 +169,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             }
         }
 
-        if (EnchantmentHelper.hasVanishingCurse(playerEntity.getOffhandItem())) {
+        if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         } else {
             if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
@@ -173,7 +178,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         }
 
         for (int i = 0; i < 4; i++) {
-            if (EnchantmentHelper.hasVanishingCurse(playerEntity.getInventory().armor.get(i))) {
+            if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
                 if (Config.getTransferArmorToZombifiedPlayer()) {
@@ -184,7 +189,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
 
         for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
             if (!playerEntity.getInventory().items.get(i).isEmpty()) {
-                if (EnchantmentHelper.hasVanishingCurse(playerEntity.getInventory().items.get(i))) {
+                if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
                     playerEntity.getInventory().items.set(i, ItemStack.EMPTY);
                     this.main.set(i, ItemStack.EMPTY);
                 }
@@ -196,12 +201,12 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     }
 
     @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
+    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket(@NotNull ServerEntity entity) {
+        return new ClientboundAddEntityPacket(this, entity);
     }
 
     @Override
-    public void writeSpawnData(FriendlyByteBuf buffer) {
+    public void writeSpawnData(@NotNull RegistryFriendlyByteBuf buffer) {
         if (gameProfile != null) {
             buffer.writeUUID(gameProfile.getId());
             buffer.writeUtf(gameProfile.getName());
@@ -209,15 +214,12 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     }
 
     @Override
-    public void readSpawnData(FriendlyByteBuf additionalData) {
+    public void readSpawnData(@NotNull RegistryFriendlyByteBuf additionalData) {
         try {
             UUID playerUUID = additionalData.readUUID();
             String playerName = additionalData.readUtf();
             gameProfile = new GameProfile(playerUUID, playerName);
-            //new GameProfile(!playerUUID.equals("") ? UUIDTypeAdapter.fromString(playerUUID) : null, playerName);
         } catch (Exception ex) {
-            //just log simple message and debug if needed
-            //CULog.dbg("exception for EntityZombiePlayer.readSpawnData: " + ex.toString());
         }
     }
 
@@ -246,7 +248,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             if (!((ItemStack)this.main.get(i)).isEmpty()) {
                 nbtCompound = new CompoundTag();
                 nbtCompound.putByte("Slot", (byte)i);
-                ((ItemStack)this.main.get(i)).deserializeNBT(nbtCompound);
+                ((ItemStack)this.main.get(i)).save(this.registryAccess(), nbtCompound);
                 nbtList.add(nbtCompound);
             }
         }
@@ -259,7 +261,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         for(int i = 0; i < nbtList.size(); ++i) {
             CompoundTag nbtCompound = nbtList.getCompound(i);
             int j = nbtCompound.getByte("Slot") & 255;
-            ItemStack itemStack = ItemStack.of(nbtCompound);
+            ItemStack itemStack = ItemStack.parseOptional(this.registryAccess(), nbtCompound);
             if (!itemStack.isEmpty()) {
                 if (j >= 0 && j < this.main.size()) {
                     this.main.set(j, itemStack);

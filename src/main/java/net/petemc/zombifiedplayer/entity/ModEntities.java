@@ -1,17 +1,19 @@
 package net.petemc.zombifiedplayer.entity;
 
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.neoforge.registries.DeferredRegister;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
-public class ModEntities {
-    public static final DeferredRegister<net.minecraft.world.entity.EntityType<?>> ENTITY_TYPES =
-            DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, ZombifiedPlayer.MOD_ID);
+import java.util.function.Supplier;
 
-    public static final RegistryObject<net.minecraft.world.entity.EntityType<ZombifiedPlayerEntity>> ZOMBIFIED_PLAYER =
+public class ModEntities {
+    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES =
+            DeferredRegister.create(Registries.ENTITY_TYPE, ZombifiedPlayer.MOD_ID);
+
+    public static final Supplier<EntityType<ZombifiedPlayerEntity>> ZOMBIFIED_PLAYER =
             ENTITY_TYPES.register("zombified_player", () -> net.minecraft.world.entity.EntityType.Builder.of(ZombifiedPlayerEntity::new, MobCategory.CREATURE)
                     .sized(0.6f, 1.95f).build("zombified_player"));
 

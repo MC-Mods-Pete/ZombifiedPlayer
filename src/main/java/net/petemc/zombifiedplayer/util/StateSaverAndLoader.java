@@ -1,5 +1,6 @@
 package net.petemc.zombifiedplayer.util;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -15,7 +16,7 @@ public class StateSaverAndLoader extends SavedData {
 
     public HashMap<UUID, GameProfileData> gameProfiles = new HashMap<>();
 
-    public static StateSaverAndLoader load(CompoundTag tag) {
+    public static StateSaverAndLoader load(CompoundTag tag, HolderLookup.Provider registries) {
         StateSaverAndLoader state = new StateSaverAndLoader();
         CompoundTag gameProfilesNbt = tag.getCompound("gameProfiles");
         gameProfilesNbt.getAllKeys().forEach(key -> {
@@ -33,7 +34,7 @@ public class StateSaverAndLoader extends SavedData {
     }
 
     @Override
-    public @NotNull CompoundTag save(CompoundTag tag) {
+    public @NotNull CompoundTag save(CompoundTag tag, HolderLookup.@NotNull Provider registries) {
         CompoundTag gameProfilesNbt = new CompoundTag();
         gameProfiles.forEach((uuid, gameProfileData) -> {
             CompoundTag gameProfileNbt = new CompoundTag();
@@ -47,8 +48,12 @@ public class StateSaverAndLoader extends SavedData {
         return tag;
     }
 
+    public static SavedData.Factory<StateSaverAndLoader> factory() {
+        return new SavedData.Factory<>(StateSaverAndLoader::new, StateSaverAndLoader::load, null);
+    }
+
     public static StateSaverAndLoader getServerState(MinecraftServer server) {
-        return server.overworld().getDataStorage().computeIfAbsent(StateSaverAndLoader::load, StateSaverAndLoader::new, ZombifiedPlayer.MOD_ID);
+        return server.overworld().getDataStorage().computeIfAbsent(factory(), ZombifiedPlayer.MOD_ID);
     }
 
     public static GameProfileData getGameProfileState(UUID zombUuid, Level level) {

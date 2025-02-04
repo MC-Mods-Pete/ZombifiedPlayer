@@ -4,9 +4,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.petemc.zombifiedplayer.Config;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.entity.ModEntities;
@@ -14,7 +14,7 @@ import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
 
 public class PlayerDeathEvents {
-    @Mod.EventBusSubscriber(modid = ZombifiedPlayer.MOD_ID)
+    @EventBusSubscriber(modid = ZombifiedPlayer.MOD_ID)
     public static class ForgeEvents {
         @SubscribeEvent
         public static void onPlayerDeath(LivingDeathEvent event) {
