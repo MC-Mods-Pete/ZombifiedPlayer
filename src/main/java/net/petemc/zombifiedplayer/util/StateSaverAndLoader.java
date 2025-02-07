@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
+// Todo remove (currently unused)
+
 public class StateSaverAndLoader extends SavedData {
 
     public HashMap<UUID, GameProfileData> gameProfiles = new HashMap<>();

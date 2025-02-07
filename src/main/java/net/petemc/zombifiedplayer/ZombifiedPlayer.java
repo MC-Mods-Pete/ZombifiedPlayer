@@ -17,6 +17,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.entity.ModEntities;
+import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.slf4j.Logger;
 
 import java.util.UUID;
@@ -30,6 +31,7 @@ public class ZombifiedPlayer
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static ConcurrentHashMap<UUID, ResourceLocation> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, ResourceLocation> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
 
     public ZombifiedPlayer() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -41,6 +43,7 @@ public class ZombifiedPlayer
         //modEventBus.addListener(this::addCreative);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, Config.SPEC_SERVER);
+        ModCompatibility.init();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event)

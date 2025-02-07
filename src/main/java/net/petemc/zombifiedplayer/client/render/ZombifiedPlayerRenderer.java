@@ -20,11 +20,11 @@ public class ZombifiedPlayerRenderer
         extends AbstractZombieRenderer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> {
 
     private static ResourceLocation TEXTURE_FALLBACK = new ResourceLocation("minecraft","textures/entity/player/wide/steve.png");
-    private static GameProfile receivedGameProfile = null;
+    private GameProfile receivedGameProfile = null;
 
     private final int counterSteps = 40;
     private final int maxSubTries = 5;
-    private final int maxTotalTries = 3;
+    private final int maxTotalTries = 5;
     private final int counterMax = 2000 + (counterSteps * maxSubTries);
 
     private int counter = counterMax;
@@ -38,12 +38,14 @@ public class ZombifiedPlayerRenderer
 
     @Override
     public @NotNull ResourceLocation getTextureLocation(ZombifiedPlayerEntity entity) {
+        if (ZombifiedPlayer.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
+            return ZombifiedPlayer.cachedPlayerSkinsByUUID.get(entity.getGameProfile().getId());
+        }
+        if (ZombifiedPlayer.cachedPlayerSkinsByName.containsKey(entity.getGameProfile().getName())) {
+            return ZombifiedPlayer.cachedPlayerSkinsByName.get(entity.getGameProfile().getName());
+        }
         if (entity.getGameProfile() != null) {
-            if (!ZombifiedPlayer.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
-                getPlayerSkinFromGameProfile(entity.getGameProfile());
-            } else if (ZombifiedPlayer.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
-                return ZombifiedPlayer.cachedPlayerSkinsByUUID.get(entity.getGameProfile().getId());
-            }
+            getPlayerSkinFromGameProfile(entity.getGameProfile());
         }
         return TEXTURE_FALLBACK;
     }
@@ -61,28 +63,39 @@ public class ZombifiedPlayerRenderer
                     }
 
                     SkullBlockEntity.updateGameprofile(profile, owner -> {
-                        ZombifiedPlayerRenderer.receivedGameProfile = owner;
+                        receivedGameProfile = owner;
                     });
+
+                    if (receivedGameProfile != null) {
+                        ZombifiedPlayer.LOGGER.info("Successfully received GameProfile for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
+                        counter = counterMax;
+                        totalTries = 0;
+                    }
                 }
 
                 if (receivedGameProfile != null) {
-                    ZombifiedPlayer.LOGGER.info("Successfully received GameProfile for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
-
                     Minecraft minecraft = Minecraft.getInstance();
 
                     ResourceLocation skinTexture = null;
-
                     skinTexture = minecraft.getSkinManager().getInsecureSkinLocation(receivedGameProfile);
 
                     if (skinTexture != null) {
+                        if (!receivedGameProfile.getId().equals(profile.getId())) {
+                            ZombifiedPlayer.LOGGER.info("The zombified player for {} has a different UUID, using random default skin!", receivedGameProfile.getName());
+                        }
                         ZombifiedPlayer.cachedPlayerSkinsByUUID.put(receivedGameProfile.getId(), skinTexture);
+                        ZombifiedPlayer.cachedPlayerSkinsByName.put(receivedGameProfile.getName(), skinTexture);
+                        if (!receivedGameProfile.getName().equals(profile.getName())) {
+                            ZombifiedPlayer.cachedPlayerSkinsByName.put(profile.getName(), skinTexture);
+                        }
                         ZombifiedPlayer.LOGGER.info("Successfully received Skin for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
                         ZombifiedPlayer.LOGGER.info("Skin Texture: {}", skinTexture);
                         counter = counterMax;
+                        totalTries = 0;
                         receivedGameProfile = null;
+                        return;
                     } else {
                         ZombifiedPlayer.LOGGER.warn("No valid Skin was received for {} yet", receivedGameProfile.getName());
-                        receivedGameProfile = null;
                     }
                 }
             }

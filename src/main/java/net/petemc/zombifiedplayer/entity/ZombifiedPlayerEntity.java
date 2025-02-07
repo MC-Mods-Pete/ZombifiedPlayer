@@ -31,9 +31,6 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
 import net.petemc.zombifiedplayer.Config;
-import net.petemc.zombifiedplayer.ZombifiedPlayer;
-import net.petemc.zombifiedplayer.util.GameProfileData;
-import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -67,19 +64,6 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
 
-    /*
-    @Override
-    public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        return new EntitySpawnS2CPacket(this);
-    }
-
-    @Override
-    public void onSpawnPacket(EntitySpawnS2CPacket packet) {
-        super.onSpawnPacket(packet);
-    }
-
-     */
-
     @Override
     protected boolean isSunSensitive() {
         return false;
@@ -109,14 +93,14 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         this.gameProfile = gameProfile;
     }
 
-    public void storeGameProfile(GameProfile gameProfile) {
+    /*public void storeGameProfile(GameProfile gameProfile) {
         if (!this.level().isClientSide()) {
             GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(this.getUUID(), this.level());
             gameProfileState.gameProfileUUID = gameProfile.getId();
             gameProfileState.gameProfileName = gameProfile.getName();
             ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}",this.getUUID().toString(),gameProfileState.gameProfileUUID.toString(),gameProfileState.gameProfileName);
         }
-    }
+    }*/
 
     @Override
     protected void dropCustomDeathLoot(@NotNull DamageSource pDamageSource, int pLooting, boolean pHitByPlayer) {
@@ -130,7 +114,6 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     }
 
     public void dropInventory() {
-        //super.dropInventory();
         for (int i = 0; i < this.main.size(); i++) {
             if (!this.main.get(i).isEmpty()) {
                 this.spawnAtLocation(this.main.get(i));
@@ -144,7 +127,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         if (player.level() instanceof ServerLevel serverLevel) {
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER.get(), serverLevel);
             zombifiedPlayer.setGameProfile(player.getGameProfile());
-            zombifiedPlayer.storeGameProfile(player.getGameProfile());
+            //zombifiedPlayer.storeGameProfile(player.getGameProfile());
             Component name = Component.literal("Zombified " + player.getName().getString());
             zombifiedPlayer.setCustomName(name);
             zombifiedPlayer.setPos(player.getX(), player.getY(), player.getZ());
@@ -214,10 +197,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             UUID playerUUID = additionalData.readUUID();
             String playerName = additionalData.readUtf();
             gameProfile = new GameProfile(playerUUID, playerName);
-            //new GameProfile(!playerUUID.equals("") ? UUIDTypeAdapter.fromString(playerUUID) : null, playerName);
         } catch (Exception ex) {
-            //just log simple message and debug if needed
-            //CULog.dbg("exception for EntityZombiePlayer.readSpawnData: " + ex.toString());
         }
     }
 
