@@ -24,7 +24,7 @@ public class ServerPlayerEntityMixin
 {
     @Shadow @Final public MinecraftServer server;
 
-    @Inject(method = "die", at = @At("TAIL"))
+    @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V", shift = At.Shift.AFTER))
     public void die(DamageSource pCause, CallbackInfo ci)
     {
         ServerPlayer serverPlayer = (ServerPlayer) (Object) this;

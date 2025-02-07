@@ -112,6 +112,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         this.gameProfile = gameProfile;
     }
 
+    /*
     public void storeGameProfile(GameProfile gameProfile) {
         if (!this.level().isClientSide()) {
             GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(this.getUUID(), this.level());
@@ -119,24 +120,24 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
             gameProfileState.gameProfileName = gameProfile.getName();
             ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}",this.getUUID().toString(),gameProfileState.gameProfileUUID.toString(),gameProfileState.gameProfileName);
         }
-    }
+    }*/
 
     @Override
     protected void dropCustomDeathLoot(@NotNull ServerLevel serverLevel, @NotNull DamageSource pDamageSource, boolean recentlyHit) {
         super.dropCustomDeathLoot(serverLevel, pDamageSource, recentlyHit);
         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
             ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-            this.spawnAtLocation(itemStack);
+            this.spawnAtLocation(serverLevel, itemStack);
             this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
         }
-        dropInventory();
+        dropInventory(serverLevel);
     }
 
-    public void dropInventory() {
+    public void dropInventory(ServerLevel serverLevel) {
         //super.dropInventory();
         for (int i = 0; i < this.main.size(); i++) {
             if (!this.main.get(i).isEmpty()) {
-                this.spawnAtLocation(this.main.get(i));
+                this.spawnAtLocation(serverLevel, this.main.get(i));
                 this.main.set(i, ItemStack.EMPTY);
             }
         }
@@ -147,20 +148,18 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         if (player.level() instanceof ServerLevel serverLevel) {
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER.get(), serverLevel);
             zombifiedPlayer.setGameProfile(player.getGameProfile());
-            zombifiedPlayer.storeGameProfile(player.getGameProfile());
+            //zombifiedPlayer.storeGameProfile(player.getGameProfile());
             Component name = Component.literal("Zombified " + player.getName().getString());
             zombifiedPlayer.setCustomName(name);
             zombifiedPlayer.setPos(player.getX(), player.getY(), player.getZ());
             zombifiedPlayer.setPersistenceRequired();
-            zombifiedPlayer.transferInventory(player);
+            zombifiedPlayer.transferInventory(serverLevel, player);
             serverLevel.addFreshEntity(zombifiedPlayer);
         }
         return zombifiedPlayer;
     }
 
-    public void transferInventory(Player playerEntity) {
-        //!EnchantmentHelper.has(itemstack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)
-        //EnchantmentEffectComponents.EQUIPMENT_DROPS
+    public void transferInventory(ServerLevel serverLevel, Player playerEntity) {
         if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else {
@@ -182,7 +181,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
                 if (Config.getTransferArmorToZombifiedPlayer()) {
-                    this.equipItemIfPossible(playerEntity.getInventory().armor.get(i).copyAndClear());
+                    this.equipItemIfPossible(serverLevel, playerEntity.getInventory().armor.get(i).copyAndClear());
                 }
             }
         }
