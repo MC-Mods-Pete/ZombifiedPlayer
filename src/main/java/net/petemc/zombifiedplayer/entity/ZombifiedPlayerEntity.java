@@ -112,14 +112,14 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         this.gameProfile = gameProfile;
     }
 
-    public void storeGameProfile(GameProfile gameProfile) {
+    /*public void storeGameProfile(GameProfile gameProfile) {
         if (!this.level().isClientSide()) {
             GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(this.getUUID(), this.level());
             gameProfileState.gameProfileUUID = gameProfile.getId();
             gameProfileState.gameProfileName = gameProfile.getName();
             ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}",this.getUUID().toString(),gameProfileState.gameProfileUUID.toString(),gameProfileState.gameProfileName);
         }
-    }
+    }*/
 
     @Override
     protected void dropCustomDeathLoot(@NotNull ServerLevel serverLevel, @NotNull DamageSource pDamageSource, boolean recentlyHit) {
@@ -147,7 +147,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         if (player.level() instanceof ServerLevel serverLevel) {
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER.get(), serverLevel);
             zombifiedPlayer.setGameProfile(player.getGameProfile());
-            zombifiedPlayer.storeGameProfile(player.getGameProfile());
+            //zombifiedPlayer.storeGameProfile(player.getGameProfile());
             Component name = Component.literal("Zombified " + player.getName().getString());
             zombifiedPlayer.setCustomName(name);
             zombifiedPlayer.setPos(player.getX(), player.getY(), player.getZ());
@@ -159,8 +159,6 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
     }
 
     public void transferInventory(Player playerEntity) {
-        //!EnchantmentHelper.has(itemstack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)
-        //EnchantmentEffectComponents.EQUIPMENT_DROPS
         if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else {

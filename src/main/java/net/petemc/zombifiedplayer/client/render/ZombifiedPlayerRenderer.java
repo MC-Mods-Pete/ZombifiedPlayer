@@ -27,7 +27,7 @@ public class ZombifiedPlayerRenderer
         extends AbstractZombieRenderer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> {
 
     private static ResourceLocation TEXTURE_FALLBACK = ResourceLocation.fromNamespaceAndPath("minecraft","textures/entity/player/wide/steve.png");
-    private static GameProfile receivedGameProfile = null;
+    private GameProfile receivedGameProfile = null;
 
     private final int counterSteps = 40;
     private final int maxSubTries = 5;
@@ -45,12 +45,14 @@ public class ZombifiedPlayerRenderer
 
     @Override
     public @NotNull ResourceLocation getTextureLocation(ZombifiedPlayerEntity entity) {
+        if (ZombifiedPlayer.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
+            return ZombifiedPlayer.cachedPlayerSkinsByUUID.get(entity.getGameProfile().getId());
+        }
+        if (ZombifiedPlayer.cachedPlayerSkinsByName.containsKey(entity.getGameProfile().getName())) {
+            return ZombifiedPlayer.cachedPlayerSkinsByName.get(entity.getGameProfile().getName());
+        }
         if (entity.getGameProfile() != null) {
-            if (!ZombifiedPlayer.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
-                getPlayerSkinFromGameProfile(entity.getGameProfile());
-            } else if (ZombifiedPlayer.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
-                return ZombifiedPlayer.cachedPlayerSkinsByUUID.get(entity.getGameProfile().getId());
-            }
+            getPlayerSkinFromGameProfile(entity.getGameProfile());
         }
         return TEXTURE_FALLBACK;
     }
@@ -80,28 +82,32 @@ public class ZombifiedPlayerRenderer
                     Minecraft minecraft = Minecraft.getInstance();
 
                     PlayerSkin skinTexture = null;
-                    skinTexture = minecraft.getSkinManager().getOrLoad(receivedGameProfile).get(300, TimeUnit.MILLISECONDS);;
+                    skinTexture = minecraft.getSkinManager().getOrLoad(receivedGameProfile).get(100, TimeUnit.MILLISECONDS);;
 
                     int tries = 3;
                     while (!minecraft.getSkinManager().getOrLoad(receivedGameProfile).isDone() && (tries > 0)) {
                         try {
-                            skinTexture = minecraft.getSkinManager().getOrLoad(receivedGameProfile).get(300, TimeUnit.MILLISECONDS);
+                            skinTexture = minecraft.getSkinManager().getOrLoad(receivedGameProfile).get(50, TimeUnit.MILLISECONDS);
                         } catch (TimeoutException timeoutException) {
                             tries--;
                         }
                     }
 
                     if (skinTexture != null) {
+                        if (!receivedGameProfile.getId().equals(profile.getId())) {
+                            ZombifiedPlayer.LOGGER.info("The zombified player for {} has a different UUID, using random default skin!", receivedGameProfile.getName());
+                        }
                         ZombifiedPlayer.cachedPlayerSkinsByUUID.put(receivedGameProfile.getId(), skinTexture.texture());
+                        ZombifiedPlayer.cachedPlayerSkinsByName.put(receivedGameProfile.getName(), skinTexture.texture());
                         ZombifiedPlayer.LOGGER.info("Successfully received Skin for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
                         ZombifiedPlayer.LOGGER.info("Skin Texture: {}", skinTexture.texture());
                         ZombifiedPlayer.LOGGER.info("Skin Texture URL: {}", skinTexture.textureUrl());
                         totalTries = 0;
                         receivedGameProfile = null;
                         counter = counterMax;
+                        return;
                     } else {
                         ZombifiedPlayer.LOGGER.warn("No valid Skin was received for {}", receivedGameProfile.getName());
-                        counter--;
                     }
                 }
             }

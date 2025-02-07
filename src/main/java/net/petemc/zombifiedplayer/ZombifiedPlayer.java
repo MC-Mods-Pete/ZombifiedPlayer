@@ -30,6 +30,7 @@ public class ZombifiedPlayer {
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public static ConcurrentHashMap<UUID, ResourceLocation> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, ResourceLocation> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
 
     public ZombifiedPlayer(IEventBus modEventBus, ModContainer modContainer) {
         ModEntities.register(modEventBus);
