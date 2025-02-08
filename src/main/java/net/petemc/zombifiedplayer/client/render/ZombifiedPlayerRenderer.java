@@ -70,15 +70,13 @@ public class ZombifiedPlayerRenderer
                     receivedGameProfile = getGameProfile(profile);
 
                     if (receivedGameProfile != null) {
-                        counter = 0;
                         ZombifiedPlayer.LOGGER.info("Successfully received GameProfile for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
-                    } else {
-                        counter--;
+                        counter = counterMax;
+                        totalTries = 0;
                     }
                 }
 
                 if (receivedGameProfile != null) {
-
                     MinecraftClient minecraft = MinecraftClient.getInstance();
 
                     SkinTextures skinTexture = null;
@@ -97,8 +95,9 @@ public class ZombifiedPlayerRenderer
                         ZombifiedPlayer.LOGGER.info("Successfully received Skin for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
                         ZombifiedPlayer.LOGGER.info("Skin Texture: {}", skinTexture.texture());
                         ZombifiedPlayer.LOGGER.info("Skin Texture URL: {}", skinTexture.textureUrl());
+                        counter = counterMax;
+                        totalTries = 0;
                         receivedGameProfile = null;
-                        counter = 0;
                     } else {
                         ZombifiedPlayer.LOGGER.warn("No valid Skin was received for {}", receivedGameProfile.getName());
                         counter--;
