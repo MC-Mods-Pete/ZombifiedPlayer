@@ -70,7 +70,6 @@ public class ZombifiedPlayerRenderer
     public Identifier getTexture(ZombifiedPlayerEntityRenderState zombieEntityRenderState) {
         if (zombieEntityRenderState.gameProfile != null) {
             if (!ZombifiedPlayerClient.cachedPlayerSkinsByUUID.containsKey(zombieEntityRenderState.gameProfile.getId())) {
-                receivedGameProfile = null;
                 getPlayerSkinFromGameProfile(zombieEntityRenderState.gameProfile);
             }
             if (ZombifiedPlayerClient.cachedPlayerSkinsByUUID.containsKey(zombieEntityRenderState.gameProfile.getId())) {
@@ -93,10 +92,9 @@ public class ZombifiedPlayerRenderer
                     receivedGameProfile = getGameProfile(profile);
 
                     if (receivedGameProfile != null) {
-                        counter = 0;
                         ZombifiedPlayer.LOGGER.info("Successfully received GameProfile for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
-                    } else {
-                        counter--;
+                        counter = counterMax;
+                        totalTries = 0;
                     }
                 }
 
@@ -124,7 +122,9 @@ public class ZombifiedPlayerRenderer
                         ZombifiedPlayer.LOGGER.info("Successfully received Skin for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
                         ZombifiedPlayer.LOGGER.info("Skin Texture: {}", skinTexture.texture());
                         ZombifiedPlayer.LOGGER.info("Skin Texture URL: {}", skinTexture.textureUrl());
+                        counter = counterMax;
                         totalTries = 0;
+                        receivedGameProfile = null;
                     } else {
                         ZombifiedPlayer.LOGGER.warn("No valid Skin was received for {}", receivedGameProfile.getName());
                         receivedGameProfile = null;
