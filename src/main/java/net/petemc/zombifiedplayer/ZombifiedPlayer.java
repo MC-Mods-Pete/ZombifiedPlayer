@@ -32,6 +32,7 @@ public class ZombifiedPlayer
 
     public static ConcurrentHashMap<UUID, ResourceLocation> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<String, ResourceLocation> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<UUID, UUID> uuidMissmatches = new ConcurrentHashMap<>();
 
     public ZombifiedPlayer() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
