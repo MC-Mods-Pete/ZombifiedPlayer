@@ -48,8 +48,11 @@ public class ZombifiedPlayerRenderer
         if (ZombifiedPlayer.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
             return ZombifiedPlayer.cachedPlayerSkinsByUUID.get(entity.getGameProfile().getId());
         }
-        if (ZombifiedPlayer.cachedPlayerSkinsByName.containsKey(entity.getGameProfile().getName())) {
-            return ZombifiedPlayer.cachedPlayerSkinsByName.get(entity.getGameProfile().getName());
+        if (ZombifiedPlayer.uuidMissmatches.containsKey(entity.getGameProfile().getId())) {
+            if (ZombifiedPlayer.cachedPlayerSkinsByName.containsKey(entity.gameProfile.getName()) ||
+                    ZombifiedPlayer.cachedPlayerSkinsByName.containsKey(entity.gameProfile.getName().toLowerCase())) {
+                return ZombifiedPlayer.cachedPlayerSkinsByUUID.get(ZombifiedPlayer.uuidMissmatches.get(entity.gameProfile.getId()));
+            }
         }
         if (entity.getGameProfile() != null) {
             getPlayerSkinFromGameProfile(entity.getGameProfile());
@@ -96,6 +99,8 @@ public class ZombifiedPlayerRenderer
                     if (skinTexture != null) {
                         if (!receivedGameProfile.getId().equals(profile.getId())) {
                             ZombifiedPlayer.LOGGER.info("The zombified player for {} has a different UUID, using random default skin!", receivedGameProfile.getName());
+                            ZombifiedPlayer.uuidMissmatches.put(profile.getId(), receivedGameProfile.getId());
+                            ZombifiedPlayer.cachedPlayerSkinsByName.put(receivedGameProfile.getName(), skinTexture.texture());
                         }
                         ZombifiedPlayer.cachedPlayerSkinsByUUID.put(receivedGameProfile.getId(), skinTexture.texture());
                         ZombifiedPlayer.cachedPlayerSkinsByName.put(receivedGameProfile.getName(), skinTexture.texture());

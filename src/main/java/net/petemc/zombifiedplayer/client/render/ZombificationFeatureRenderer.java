@@ -25,7 +25,6 @@ public class ZombificationFeatureRenderer
     public void render(@NotNull PoseStack pPoseStack, @NotNull MultiBufferSource pBuffer, int pPackedLight, @NotNull ZombifiedPlayerEntity pLivingEntity, float pLimbSwing, float pLimbSwingAmount, float pPartialTick, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
         renderColoredCutoutModel(this.getParentModel(), this.getTextureLocation(pLivingEntity), pPoseStack, pBuffer, pPackedLight, pLivingEntity,0xFF99FF99);
         renderColoredCutoutModel(this.getParentModel(), TEXTURE, pPoseStack, pBuffer, pPackedLight, pLivingEntity,-1);
-        //coloredCutoutModelCopyLayerRender();
     }
 }
 

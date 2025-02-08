@@ -34,9 +34,6 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.extensions.IEntityExtension;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import net.petemc.zombifiedplayer.Config;
-import net.petemc.zombifiedplayer.ZombifiedPlayer;
-import net.petemc.zombifiedplayer.util.GameProfileData;
-import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;

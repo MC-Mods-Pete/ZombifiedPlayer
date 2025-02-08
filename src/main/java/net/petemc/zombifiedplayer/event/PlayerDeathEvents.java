@@ -47,8 +47,4 @@ public class PlayerDeathEvents {
         attackerIsUndead = attackerIsUndead || ModCompatibility.wasKilledByHordeZombie(pAttacker);
         return attackerIsUndead;
     }
-
-    public static void registerEvent() {
-        new PlayerDeathEvents();
-    }
 }
