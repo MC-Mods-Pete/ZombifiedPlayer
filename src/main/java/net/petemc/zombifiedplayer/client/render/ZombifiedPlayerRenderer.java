@@ -24,7 +24,7 @@ public class ZombifiedPlayerRenderer
 
     private final int counterSteps = 40;
     private final int maxSubTries = 5;
-    private final int maxTotalTries = 3;
+    private final int maxTotalTries = 5;
     private final int counterMax = 2000 + (counterSteps * maxSubTries);
 
     private int counter = counterMax;
@@ -62,15 +62,18 @@ public class ZombifiedPlayerRenderer
                     SkullBlockEntity.loadProperties(profile, owner -> {
                         receivedGameProfile = owner;
                     });
+
+                    if (receivedGameProfile != null) {
+                        ZombifiedPlayer.LOGGER.info("Successfully received GameProfile for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
+                        counter = counterMax;
+                        totalTries = 0;
+                    }
                 }
 
                 if (receivedGameProfile != null) {
-                    ZombifiedPlayer.LOGGER.info("Successfully received GameProfile for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
-
                     MinecraftClient minecraft = MinecraftClient.getInstance();
 
                     Identifier skinTexture = null;
-
                     skinTexture = minecraft.getSkinProvider().loadSkin(receivedGameProfile);
 
                     if (skinTexture != null) {
@@ -78,6 +81,7 @@ public class ZombifiedPlayerRenderer
                         ZombifiedPlayer.LOGGER.info("Successfully received Skin for {}, UUID: {}", receivedGameProfile.getName(), receivedGameProfile.getId());
                         ZombifiedPlayer.LOGGER.info("Skin Texture: {}", skinTexture);
                         counter = counterMax;
+                        totalTries = 0;
                         receivedGameProfile = null;
                     } else {
                         ZombifiedPlayer.LOGGER.warn("No valid Skin was received for {} yet", receivedGameProfile.getName());
