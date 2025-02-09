@@ -8,6 +8,7 @@ import net.minecraft.world.World;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 public class StateSaverAndLoader extends PersistentState {
@@ -52,7 +53,7 @@ public class StateSaverAndLoader extends PersistentState {
      * It does this by calling 'StateSaveAndLoader::createFromNbt' passing it the previously saved 'NbtCompound' we wrote in 'writeNbt'.
      */
     public static StateSaverAndLoader getServerState(MinecraftServer server) {
-        PersistentStateManager persistentStateManager = server.getWorld(World.OVERWORLD).getPersistentStateManager();
+        PersistentStateManager persistentStateManager = Objects.requireNonNull(server.getWorld(World.OVERWORLD)).getPersistentStateManager();
 
         StateSaverAndLoader state = persistentStateManager.getOrCreate(
                 StateSaverAndLoader::createFromNbt,
@@ -71,7 +72,7 @@ public class StateSaverAndLoader extends PersistentState {
     }
 
     public static GameProfileData getGameProfileState(UUID zombUuid, World world) {
-        StateSaverAndLoader serverState = getServerState(world.getServer());
+        StateSaverAndLoader serverState = getServerState(Objects.requireNonNull(world.getServer()));
 
         // Either get the player by the uuid, or we don't have data for him yet, make a new player state
         return serverState.gameProfiles.computeIfAbsent(zombUuid, uuid -> new GameProfileData());
