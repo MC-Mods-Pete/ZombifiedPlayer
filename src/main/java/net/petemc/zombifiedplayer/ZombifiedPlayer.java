@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-// The value here should match an entry in the META-INF/mods.toml file
+// The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(ZombifiedPlayer.MOD_ID)
 public class ZombifiedPlayer {
     public static final String MOD_ID = "zombifiedplayer";
@@ -31,6 +31,7 @@ public class ZombifiedPlayer {
 
     public static ConcurrentHashMap<UUID, ResourceLocation> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<String, ResourceLocation> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<UUID, UUID> uuidMissmatches = new ConcurrentHashMap<>();
 
     public ZombifiedPlayer(IEventBus modEventBus, ModContainer modContainer) {
         ModEntities.register(modEventBus);
