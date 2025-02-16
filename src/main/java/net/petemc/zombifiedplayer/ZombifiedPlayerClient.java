@@ -16,6 +16,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ZombifiedPlayerClient implements ClientModInitializer {
 
 	public static ConcurrentHashMap<UUID, Identifier> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<String, Identifier> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<UUID, UUID> uuidMissmatches = new ConcurrentHashMap<>();
 
 	@Override
 	public void onInitializeClient() {
