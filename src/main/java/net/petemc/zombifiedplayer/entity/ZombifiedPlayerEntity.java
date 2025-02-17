@@ -65,6 +65,11 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     }
 
     @Override
+    public boolean fireImmune() {
+        return Config.getMakeTheZombifiedPlayersImmuneToFire();
+    }
+
+    @Override
     protected boolean isSunSensitive() {
         return false;
     }

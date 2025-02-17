@@ -13,7 +13,8 @@ public class ModEntities {
 
     public static final RegistryObject<net.minecraft.world.entity.EntityType<ZombifiedPlayerEntity>> ZOMBIFIED_PLAYER =
             ENTITY_TYPES.register("zombified_player", () -> net.minecraft.world.entity.EntityType.Builder.of(ZombifiedPlayerEntity::new, MobCategory.CREATURE)
-                    .sized(0.6f, 1.95f).build("zombified_player"));
+                    .sized(0.6f, 1.95f)
+                    .build("zombified_player"));
 
     public static void register(IEventBus eventBus) {
         ENTITY_TYPES.register(eventBus);
