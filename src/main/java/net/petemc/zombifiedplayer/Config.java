@@ -40,6 +40,10 @@ public class Config
         return makeTheZombifiedPlayersStronger;
     }
 
+    public static boolean getMakeTheZombifiedPlayersImmuneToFire() {
+        return makeTheZombifiedPlayersImmuneToFire;
+    }
+
     public static boolean getLimitSkinFetchTries() {
         return limitSkinFetchTries;
     }
@@ -84,6 +88,10 @@ public class Config
             .comment("If true, zombified players are stronger, faster and have more health | default: false")
             .define("makeTheZombifiedPlayersStronger", false);
 
+    private static final ModConfigSpec.BooleanValue MAKE_THE_ZOMBIFIED_PLAYERS_IMMUNE_TO_FIRE = BUILDER_SERVER
+            .comment("If true, zombified players are immune to fire and lava | default: false")
+            .define("makeTheZombifiedPlayersImmuneToFire", false);
+
     private static final ModConfigSpec.BooleanValue LIMIT_SKIN_FETCH_TRIES = BUILDER_SERVER
             .comment("If true, the mod will stop trying to fetch the player skin after several unsuccessful tries | default: true")
             .define("limitSkinFetchTries", true);
@@ -109,6 +117,7 @@ public class Config
     private static boolean printSpawnLocationInChat = false;
     private static boolean zombifiedPlayersCanBreakDoors = true;
     private static boolean makeTheZombifiedPlayersStronger = false;
+    private static boolean makeTheZombifiedPlayersImmuneToFire = false;
     private static boolean limitSkinFetchTries = true;
     private static boolean spawnWhenKilledByInfection = true;
 
@@ -124,6 +133,7 @@ public class Config
             printSpawnLocationInChat = PRINT_SPAWN_LOCATION_IN_CHAT.get();
             zombifiedPlayersCanBreakDoors = ZOMBIFIED_PLAYERS_CAN_BREAK_DOORS.get();
             makeTheZombifiedPlayersStronger = MAKE_THE_ZOMBIFIED_PLAYERS_STRONGER.get();
+            makeTheZombifiedPlayersImmuneToFire = MAKE_THE_ZOMBIFIED_PLAYERS_IMMUNE_TO_FIRE.get();
             limitSkinFetchTries = LIMIT_SKIN_FETCH_TRIES.get();
             spawnWhenKilledByInfection = SPAWN_WHEN_KILLED_BY_INFECTION.get();
         }
