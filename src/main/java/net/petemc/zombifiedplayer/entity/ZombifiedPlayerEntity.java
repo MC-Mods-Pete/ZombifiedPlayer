@@ -77,8 +77,12 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
     public void onSpawnPacket(EntitySpawnS2CPacket packet) {
         super.onSpawnPacket(packet);
     }
+    */
 
-     */
+    @Override
+    public boolean fireImmune() {
+        return Config.getMakeTheZombifiedPlayersImmuneToFire();
+    }
 
     @Override
     protected boolean isSunSensitive() {
