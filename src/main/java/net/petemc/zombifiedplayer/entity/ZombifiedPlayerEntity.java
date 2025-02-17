@@ -80,8 +80,12 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
     public void onSpawnPacket(EntitySpawnS2CPacket packet) {
         super.onSpawnPacket(packet);
     }
+    */
 
-     */
+    @Override
+    public boolean fireImmune() {
+        return Config.getMakeTheZombifiedPlayersImmuneToFire();
+    }
 
     @Override
     protected boolean isSunSensitive() {
@@ -112,14 +116,16 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         this.gameProfile = gameProfile;
     }
 
-    /*public void storeGameProfile(GameProfile gameProfile) {
+    /*
+    public void storeGameProfile(GameProfile gameProfile) {
         if (!this.level().isClientSide()) {
             GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(this.getUUID(), this.level());
             gameProfileState.gameProfileUUID = gameProfile.getId();
             gameProfileState.gameProfileName = gameProfile.getName();
             ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}",this.getUUID().toString(),gameProfileState.gameProfileUUID.toString(),gameProfileState.gameProfileName);
         }
-    }*/
+    }
+    */
 
     @Override
     protected void dropCustomDeathLoot(@NotNull ServerLevel serverLevel, @NotNull DamageSource pDamageSource, boolean recentlyHit) {
