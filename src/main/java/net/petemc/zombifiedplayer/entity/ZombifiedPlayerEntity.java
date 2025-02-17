@@ -64,6 +64,11 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     }
 
     @Override
+    public boolean isFireImmune() {
+        return Config.getMakeTheZombifiedPlayersImmuneToFire();
+    }
+
+    @Override
     protected boolean burnsInDaylight() {
         return false;
     }

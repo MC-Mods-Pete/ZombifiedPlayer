@@ -50,12 +50,16 @@ public class Config implements ConfigData
         return INSTANCE.makeTheZombifiedPlayersStronger;
     }
 
+    public static boolean getMakeTheZombifiedPlayersImmuneToFire() {
+        return INSTANCE.makeTheZombifiedPlayersImmuneToFire;
+    }
+
     public static boolean getLimitSkinFetchTries() {
         return INSTANCE.limitSkinFetchTries;
     }
 
     public static boolean getSpawnWhenKilledByInfection() {
-        return false;
+        return false; //INSTANCE.spawnWhenKilledByInfection;
     }
 
     @ConfigEntry.Gui.Tooltip()
@@ -91,6 +95,17 @@ public class Config implements ConfigData
     private boolean makeTheZombifiedPlayersStronger = false;
 
     @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, zombified players are immune to fire and lava | default: false")
+    private boolean makeTheZombifiedPlayersImmuneToFire = false;
+
+    @ConfigEntry.Gui.Tooltip()
     @Comment("If true, the mod will stop trying to fetch the player skin after several unsuccessful tries | default: true")
     private boolean limitSkinFetchTries = true;
+
+    /*
+    @ConfigEntry.Gui.PrefixText
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, spawn zombified player after death by infection (Contagion mod needed!) | default: true")
+    private boolean spawnWhenKilledByInfection = true;
+    */
 }
