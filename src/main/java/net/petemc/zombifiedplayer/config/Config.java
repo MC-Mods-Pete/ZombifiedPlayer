@@ -50,6 +50,10 @@ public class Config implements ConfigData
         return INSTANCE.makeTheZombifiedPlayersStronger;
     }
 
+    public static boolean getMakeTheZombifiedPlayersImmuneToFire() {
+        return INSTANCE.makeTheZombifiedPlayersImmuneToFire;
+    }
+
     public static boolean getLimitSkinFetchTries() {
         return INSTANCE.limitSkinFetchTries;
     }
@@ -89,6 +93,10 @@ public class Config implements ConfigData
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, zombified players are stronger, faster and have more health | default: false")
     private boolean makeTheZombifiedPlayersStronger = false;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, zombified players are immune to fire and lava | default: false")
+    private boolean makeTheZombifiedPlayersImmuneToFire = false;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, the mod will stop trying to fetch the player skin after several unsuccessful tries | default: true")
