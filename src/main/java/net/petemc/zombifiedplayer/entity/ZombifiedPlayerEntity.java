@@ -244,11 +244,10 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         int i;
         CompoundTag nbtCompound;
         for(i = 0; i < this.main.size(); ++i) {
-            if (!((ItemStack)this.main.get(i)).isEmpty()) {
+            if (!this.main.get(i).isEmpty()) {
                 nbtCompound = new CompoundTag();
-                nbtCompound.putByte("Slot", (byte)i);
-                ((ItemStack)this.main.get(i)).save(this.registryAccess(), nbtCompound);
-                nbtList.add(nbtCompound);
+                nbtCompound.putByte("Slot", (byte) i);
+                nbtList.add(this.main.get(i).save(this.registryAccess(), nbtCompound));
             }
         }
         return nbtList;
@@ -260,11 +259,9 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         for(int i = 0; i < nbtList.size(); ++i) {
             CompoundTag nbtCompound = nbtList.getCompound(i);
             int j = nbtCompound.getByte("Slot") & 255;
-            ItemStack itemStack = ItemStack.parseOptional(this.registryAccess(), nbtCompound);
-            if (!itemStack.isEmpty()) {
-                if (j >= 0 && j < this.main.size()) {
-                    this.main.set(j, itemStack);
-                }
+            ItemStack itemStack = ItemStack.parse(this.registryAccess(), nbtCompound).orElse(ItemStack.EMPTY);
+            if (j >= 0 && j < this.main.size()) {
+                this.main.set(j, itemStack);
             }
         }
     }
