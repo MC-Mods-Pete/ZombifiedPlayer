@@ -228,10 +228,10 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         int i;
         CompoundTag nbtCompound;
         for(i = 0; i < this.main.size(); ++i) {
-            if (!((ItemStack)this.main.get(i)).isEmpty()) {
+            if (!this.main.get(i).isEmpty()) {
                 nbtCompound = new CompoundTag();
-                nbtCompound.putByte("Slot", (byte)i);
-                ((ItemStack)this.main.get(i)).deserializeNBT(nbtCompound);
+                nbtCompound.putByte("Slot", (byte) i);
+                this.main.get(i).save(nbtCompound);
                 nbtList.add(nbtCompound);
             }
         }
