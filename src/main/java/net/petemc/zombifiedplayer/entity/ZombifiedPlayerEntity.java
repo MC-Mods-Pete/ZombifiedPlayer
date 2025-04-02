@@ -34,9 +34,6 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.extensions.IEntityExtension;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import net.petemc.zombifiedplayer.Config;
-import net.petemc.zombifiedplayer.ZombifiedPlayer;
-import net.petemc.zombifiedplayer.util.GameProfileData;
-import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
@@ -69,18 +66,6 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, false, false));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
-
-    /*
-    @Override
-    public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        return new EntitySpawnS2CPacket(this);
-    }
-
-    @Override
-    public void onSpawnPacket(EntitySpawnS2CPacket packet) {
-        super.onSpawnPacket(packet);
-    }
-    */
 
     @Override
     public boolean fireImmune() {
@@ -115,17 +100,6 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
     public void setGameProfile(GameProfile gameProfile) {
         this.gameProfile = gameProfile;
     }
-
-    /*
-    public void storeGameProfile(GameProfile gameProfile) {
-        if (!this.level().isClientSide()) {
-            GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(this.getUUID(), this.level());
-            gameProfileState.gameProfileUUID = gameProfile.getId();
-            gameProfileState.gameProfileName = gameProfile.getName();
-            ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}",this.getUUID().toString(),gameProfileState.gameProfileUUID.toString(),gameProfileState.gameProfileName);
-        }
-    }
-    */
 
     @Override
     protected void dropCustomDeathLoot(@NotNull ServerLevel serverLevel, @NotNull DamageSource pDamageSource, boolean recentlyHit) {
@@ -183,22 +157,22 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
 
         for (int i = 0; i < 4; i++) {
             if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
-                playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
+                playerEntity.setItemSlot(EquipmentSlot.BY_ID.apply(i+1), ItemStack.EMPTY);
             } else {
                 if (Config.getTransferArmorToZombifiedPlayer()) {
-                    this.equipItemIfPossible(serverLevel, playerEntity.getInventory().armor.get(i).copyAndClear());
+                    this.equipItemIfPossible(serverLevel, playerEntity.getItemBySlot(EquipmentSlot.BY_ID.apply(i+1)).copyAndClear());
                 }
             }
         }
 
-        for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
-            if (!playerEntity.getInventory().items.get(i).isEmpty()) {
+        for (int i = 0; i < playerEntity.getInventory().getNonEquipmentItems().size(); i++) {
+            if (!playerEntity.getInventory().getNonEquipmentItems().get(i).isEmpty()) {
                 if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
-                    playerEntity.getInventory().items.set(i, ItemStack.EMPTY);
+                    playerEntity.getInventory().getNonEquipmentItems().set(i, ItemStack.EMPTY);
                     this.main.set(i, ItemStack.EMPTY);
                 }
                 if (Config.getTransferInventoryToZombifiedPlayer()) {
-                    this.main.set(i, playerEntity.getInventory().items.get(i).copyAndClear());
+                    this.main.set(i, playerEntity.getInventory().getNonEquipmentItems().get(i).copyAndClear());
                 }
             }
         }
@@ -230,7 +204,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
-        nbt.putUUID("gameProfileUUID", gameProfile.getId());
+        nbt.putString("gameProfileUUID", gameProfile.getId().toString());
         nbt.putString("gameProfileName", gameProfile.getName());
         nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
     }
@@ -238,10 +212,10 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
-        UUID gpUUID = nbt.getUUID("gameProfileUUID");
-        String gpName = nbt.getString("gameProfileName");
+        UUID gpUUID = UUID.fromString(nbt.getString("gameProfileUUID").orElse(""));
+        String gpName = nbt.getString("gameProfileName").orElse("");
         gameProfile = new GameProfile(gpUUID, gpName);
-        ListTag nbtList = nbt.getList("Inventory", Tag.TAG_COMPOUND);
+        ListTag nbtList = nbt.getList("Inventory").orElseThrow();
         this.readInventoryFromNbt(nbtList);
     }
 
@@ -262,8 +236,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         this.main.clear();
 
         for(int i = 0; i < nbtList.size(); ++i) {
-            CompoundTag nbtCompound = nbtList.getCompound(i);
-            int j = nbtCompound.getByte("Slot") & 255;
+            CompoundTag nbtCompound = nbtList.getCompound(i).orElseThrow();
+            int j = nbtCompound.getByte("Slot").orElseThrow() & 255;
             ItemStack itemStack = ItemStack.parse(this.registryAccess(), nbtCompound).orElse(ItemStack.EMPTY);
             if (j >= 0 && j < this.main.size()) {
                 this.main.set(j, itemStack);

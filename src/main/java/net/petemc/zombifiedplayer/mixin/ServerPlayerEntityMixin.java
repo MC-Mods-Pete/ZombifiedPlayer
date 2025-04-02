@@ -35,7 +35,9 @@ public class ServerPlayerEntityMixin
             if (Config.getPrintSpawnLocationInChat()) {
                 BlockPos blockpos = serverPlayer.getOnPos();
                 Component textCoordinates = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", blockpos.getX(), (blockpos.getY()+1), blockpos.getZ())).withStyle((style) -> {
-                    return style.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + blockpos.getX() + " " + (blockpos.getY()+1) + " " + blockpos.getZ())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")));
+                    return style.withColor(ChatFormatting.GREEN)
+                            .withClickEvent(new ClickEvent.SuggestCommand("/tp @s " + blockpos.getX() + " " + (blockpos.getY()+1) + " " + blockpos.getZ()))
+                            .withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.coordinates.tooltip")));
                 });
                 serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.location.message", textCoordinates), false);
             }
