@@ -17,7 +17,6 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
@@ -30,8 +29,6 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.config.Config;
-import net.petemc.zombifiedplayer.util.GameProfileData;
-import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
 
 import java.util.Objects;
 
@@ -110,10 +107,14 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
 
     public void storeGameProfile(GameProfile gameProfile) {
         if (!this.getWorld().isClient) {
-            GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(this.getUuid(), this.getWorld());
-            gameProfileState.gameProfileUUID = gameProfile.getId();
-            gameProfileState.gameProfileName = gameProfile.getName();
-            ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}",this.getUuid().toString(),gameProfileState.gameProfileUUID.toString(),gameProfileState.gameProfileName);
+            if (ZombifiedPlayer.serverState == null) {
+                ZombifiedPlayer.LOGGER.warn("Persistant State still null!");
+            }
+            if (ZombifiedPlayer.serverState != null) {
+                ZombifiedPlayer.serverState.gameProfiles.put(this.getUuid(), gameProfile.getId().toString() + ":" + gameProfile.getName());
+                ZombifiedPlayer.serverState.markDirty();
+                ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}", this.getUuid().toString(), gameProfile.getId().toString(), gameProfile.getName());
+            }
         }
     }
 
@@ -178,23 +179,23 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         }
 
         for (int i = 0; i < 4; i++) {
-            if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getInventory().armor.get(i), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
-                playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
+            if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getEquippedStack(EquipmentSlot.FROM_INDEX.apply(i+1)), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
+                playerEntity.equipStack(EquipmentSlot.FROM_INDEX.apply(i+1), ItemStack.EMPTY);//.getInventory().getMainStacks().set(i, ItemStack.EMPTY);
             } else {
                 if (Config.getTransferArmorToZombifiedPlayer()) {
-                    this.tryEquip(world, playerEntity.getInventory().armor.get(i).copyAndEmpty());
+                    this.tryEquip(world, playerEntity.getEquippedStack(EquipmentSlot.FROM_INDEX.apply(i+1)).copyAndEmpty());//getInventory().getMainStacks().get(i).copyAndEmpty());
                 }
             }
         }
 
-        for (int i = 0; i < playerEntity.getInventory().main.size(); i++) {
-            if (!playerEntity.getInventory().main.get(i).isEmpty()) {
-                if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getInventory().main.get(i), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
-                    playerEntity.getInventory().main.set(i, ItemStack.EMPTY);
+        for (int i = 0; i < playerEntity.getInventory().getMainStacks().size(); i++) {
+            if (!playerEntity.getInventory().getMainStacks().get(i).isEmpty()) {
+                if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getInventory().getMainStacks().get(i), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
+                    playerEntity.getInventory().getMainStacks().set(i, ItemStack.EMPTY);
                     this.main.set(i, ItemStack.EMPTY);
                 }
                 if (Config.getTransferInventoryToZombifiedPlayer()) {
-                    this.main.set(i, playerEntity.getInventory().main.get(i).copyAndEmpty());
+                    this.main.set(i, playerEntity.getInventory().getMainStacks().get(i).copyAndEmpty());
                 }
             }
         }
@@ -209,7 +210,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
-        NbtList nbtList = nbt.getList("Inventory", NbtElement.COMPOUND_TYPE);
+        NbtList nbtList = nbt.getListOrEmpty("Inventory");
         this.readNbt(nbtList);
     }
 
@@ -228,9 +229,9 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         this.main.clear();
 
         for (int i = 0; i < nbtList.size(); i++) {
-            NbtCompound nbtCompound = nbtList.getCompound(i);
-            int j = nbtCompound.getByte("Slot") & 255;
-            ItemStack itemStack = (ItemStack) ItemStack.fromNbt(super.getRegistryManager(), nbtCompound).orElse(ItemStack.EMPTY);
+            NbtCompound nbtCompound = nbtList.getCompoundOrEmpty(i);
+            int j = nbtCompound.getByte("Slot", (byte)0) & 255;
+            ItemStack itemStack = (ItemStack)ItemStack.fromNbt(super.getRegistryManager(), nbtCompound).orElse(ItemStack.EMPTY);
             if (j < this.main.size()) {
                 this.main.set(j, itemStack);
             }

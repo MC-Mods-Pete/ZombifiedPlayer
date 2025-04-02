@@ -66,8 +66,8 @@ public class PlayerDeathEvents {
                             Text textCoordinates = Texts.bracketed(Text.translatable("chat.coordinates", pPlayer.getBlockPos().getX(), pPlayer.getBlockPos().getY(), pPlayer.getBlockPos().getZ()))
                                     .styled(
                                             style -> style.withColor(Formatting.GREEN)
-                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + pPlayer.getBlockPos().getX() + " " + pPlayer.getBlockPos().getY() + " " + pPlayer.getBlockPos().getZ()))
-                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.coordinates.tooltip")))
+                                                    .withClickEvent(new ClickEvent.SuggestCommand("/tp @s " + pPlayer.getBlockPos().getX() + " " + pPlayer.getBlockPos().getY() + " " + pPlayer.getBlockPos().getZ()))
+                                                    .withHoverEvent(new HoverEvent.ShowText(Text.translatable("chat.coordinates.tooltip")))
                                     );
                             serverPlayer.sendMessageToClient(Text.translatable("zombifiedplayer.location.message", textCoordinates), false);
                         }
