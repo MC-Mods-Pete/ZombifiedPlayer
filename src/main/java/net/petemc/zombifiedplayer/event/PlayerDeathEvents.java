@@ -33,7 +33,7 @@ public class PlayerDeathEvents {
     }
 
     public static boolean attackerIsUndead(Entity pAttacker) {
-        boolean attackerIsUndead = true;
+        boolean attackerIsUndead = false;
         if (pAttacker != null) {
             attackerIsUndead =
                    ((pAttacker.getType() == EntityType.ZOMBIE) ||
