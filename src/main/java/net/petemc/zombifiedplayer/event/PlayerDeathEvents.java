@@ -11,7 +11,7 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 import net.minecraft.util.Formatting;
-import net.petemc.zombifiedplayer.config.Config;
+import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
@@ -45,9 +45,9 @@ public class PlayerDeathEvents {
         if (pPlayer != null) {
             if (pPlayer instanceof ServerPlayerEntity serverPlayer) {
                 if (!(pPlayer.getMainHandStack().isOf(Items.TOTEM_OF_UNDYING) || pPlayer.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING))) {
-                    if ((Config.getSpawnOnAnyDeath() ||
-                            (ModCompatibility.diedFromInfection(serverPlayer) && Config.getSpawnWhenKilledByInfection()) ||
-                            (attackerIsUndead() && Config.getSpawnZombifiedPlayerAfterDeath()))) {
+                    if ((MainConfig.getSpawnOnAnyDeath() ||
+                            (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
+                            (attackerIsUndead() && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
                         ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer);
                     }
                 }
@@ -58,11 +58,11 @@ public class PlayerDeathEvents {
     public static void executeAfterDeath() {
         if (pPlayer != null) {
             if (pPlayer instanceof ServerPlayerEntity serverPlayer) {
-                if ((Config.getSpawnOnAnyDeath() ||
-                    (ModCompatibility.diedFromInfection(serverPlayer) && Config.getSpawnWhenKilledByInfection()) ||
-                    (attackerIsUndead() && Config.getSpawnZombifiedPlayerAfterDeath()))) {
+                if ((MainConfig.getSpawnOnAnyDeath() ||
+                    (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
+                    (attackerIsUndead() && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
                         serverPlayer.sendMessageToClient(Text.translatable("zombifiedplayer.spawn.message"), false);
-                        if (Config.getPrintSpawnLocationInChat()) {
+                        if (MainConfig.getPrintSpawnLocationInChat()) {
                             Text textCoordinates = Texts.bracketed(Text.translatable("chat.coordinates", pPlayer.getBlockPos().getX(), pPlayer.getBlockPos().getY(), pPlayer.getBlockPos().getZ()))
                                     .styled(
                                             style -> style.withColor(Formatting.GREEN)

@@ -1,6 +1,8 @@
 package net.petemc.zombifiedplayer.entity;
 
 import com.mojang.authlib.GameProfile;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.component.EnchantmentEffectComponentTypes;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -15,6 +17,7 @@ import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.StackWithSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -23,19 +26,23 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.server.network.EntityTrackerEntry;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
-import net.petemc.zombifiedplayer.config.Config;
+import net.petemc.zombifiedplayer.config.MainConfig;
 
+import java.util.Map;
 import java.util.Objects;
 
 
 public class ZombifiedPlayerEntity extends ZombieEntity {
     public GameProfile gameProfile;
     public final DefaultedList<ItemStack> main = DefaultedList.ofSize(36, ItemStack.EMPTY);
+    public static final Int2ObjectMap<EquipmentSlot> EQUIPMENT_SLOTS;
 
     public ZombifiedPlayerEntity(EntityType<? extends ZombieEntity> entityType, World world) {
         super(entityType, world);
@@ -43,11 +50,11 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
 
     public static DefaultAttributeContainer.Builder createZombifiedPlayerAttributes() {
         return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.MAX_HEALTH, Config.getMakeTheZombifiedPlayersStronger() ? 40.0 : 20.0)
-                .add(EntityAttributes.FOLLOW_RANGE, Config.getMakeTheZombifiedPlayersStronger() ? 50.0 : 40.0)
-                .add(EntityAttributes.MOVEMENT_SPEED, Config.getMakeTheZombifiedPlayersStronger() ? 0.29f : 0.23f)
-                .add(EntityAttributes.ATTACK_DAMAGE, Config.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
-                .add(EntityAttributes.ARMOR, Config.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
+                .add(EntityAttributes.MAX_HEALTH, MainConfig.getMakeTheZombifiedPlayersStronger() ? 40.0 : 20.0)
+                .add(EntityAttributes.FOLLOW_RANGE, MainConfig.getMakeTheZombifiedPlayersStronger() ? 50.0 : 40.0)
+                .add(EntityAttributes.MOVEMENT_SPEED, MainConfig.getMakeTheZombifiedPlayersStronger() ? 0.29f : 0.23f)
+                .add(EntityAttributes.ATTACK_DAMAGE, MainConfig.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
+                .add(EntityAttributes.ARMOR, MainConfig.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
                 .add(EntityAttributes.SPAWN_REINFORCEMENTS);
     }
 
@@ -73,7 +80,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
 
     @Override
     public boolean isFireImmune() {
-        return Config.getMakeTheZombifiedPlayersImmuneToFire();
+        return MainConfig.getMakeTheZombifiedPlayersImmuneToFire();
     }
 
     @Override
@@ -84,7 +91,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     @Override
     public boolean canBreakDoors()
     {
-        return Config.getZombifiedPlayersCanBreakDoors();
+        return MainConfig.getZombifiedPlayersCanBreakDoors();
     }
 
     @Override
@@ -165,7 +172,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getMainHandStack(), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (MainConfig.getTransferMainandOffHandToZombifiedPlayer()) {
                 this.setStackInHand(Hand.MAIN_HAND, playerEntity.getMainHandStack().copyAndEmpty());
             }
         }
@@ -173,7 +180,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getOffHandStack(), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (MainConfig.getTransferMainandOffHandToZombifiedPlayer()) {
                 this.setStackInHand(Hand.OFF_HAND, playerEntity.getOffHandStack().copyAndEmpty());
             }
         }
@@ -182,7 +189,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getEquippedStack(EquipmentSlot.FROM_INDEX.apply(i+1)), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
                 playerEntity.equipStack(EquipmentSlot.FROM_INDEX.apply(i+1), ItemStack.EMPTY);//.getInventory().getMainStacks().set(i, ItemStack.EMPTY);
             } else {
-                if (Config.getTransferArmorToZombifiedPlayer()) {
+                if (MainConfig.getTransferArmorToZombifiedPlayer()) {
                     this.tryEquip(world, playerEntity.getEquippedStack(EquipmentSlot.FROM_INDEX.apply(i+1)).copyAndEmpty());//getInventory().getMainStacks().get(i).copyAndEmpty());
                 }
             }
@@ -194,7 +201,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                     playerEntity.getInventory().getMainStacks().set(i, ItemStack.EMPTY);
                     this.main.set(i, ItemStack.EMPTY);
                 }
-                if (Config.getTransferInventoryToZombifiedPlayer()) {
+                if (MainConfig.getTransferInventoryToZombifiedPlayer()) {
                     this.main.set(i, playerEntity.getInventory().getMainStacks().get(i).copyAndEmpty());
                 }
             }
@@ -202,39 +209,51 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
-        nbt.put("Inventory", this.writeNbt(new NbtList()));
+    public void writeCustomData(WriteView view) {
+        super.writeCustomData(view);
+        this.writeData(view.getListAppender("Inventory", StackWithSlot.CODEC));
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
-        NbtList nbtList = nbt.getListOrEmpty("Inventory");
-        this.readNbt(nbtList);
+    public void readCustomData(ReadView view) {
+        super.readCustomData(view);
+        this.readData(view.getTypedListView("Inventory", StackWithSlot.CODEC));
     }
 
-    public NbtList writeNbt(NbtList nbtList) {
-        for (int i = 0; i < this.main.size(); i++) {
-            if (!this.main.get(i).isEmpty()) {
-                NbtCompound nbtCompound = new NbtCompound();
-                nbtCompound.putByte("Slot", (byte)i);
-                nbtList.add(this.main.get(i).toNbt(this.getRegistryManager(), nbtCompound));
+    public void writeData(WriteView.ListAppender<StackWithSlot> list) {
+        for(int i = 0; i < this.main.size(); ++i) {
+            ItemStack itemStack = (ItemStack)this.main.get(i);
+            if (!itemStack.isEmpty()) {
+                list.add(new StackWithSlot(i, itemStack));
             }
         }
-        return nbtList;
+
     }
 
-    public void readNbt(NbtList nbtList) {
+    public void readData(ReadView.TypedListReadView<StackWithSlot> list) {
         this.main.clear();
 
-        for (int i = 0; i < nbtList.size(); i++) {
-            NbtCompound nbtCompound = nbtList.getCompoundOrEmpty(i);
-            int j = nbtCompound.getByte("Slot", (byte)0) & 255;
-            ItemStack itemStack = (ItemStack)ItemStack.fromNbt(super.getRegistryManager(), nbtCompound).orElse(ItemStack.EMPTY);
-            if (j < this.main.size()) {
-                this.main.set(j, itemStack);
+        for(StackWithSlot stackWithSlot : list) {
+            if (stackWithSlot.isValidSlot(this.main.size())) {
+                this.setStack(stackWithSlot.slot(), stackWithSlot.stack());
             }
         }
+
+    }
+
+    public void setStack(int slot, ItemStack stack) {
+        if (slot < this.main.size()) {
+            this.main.set(slot, stack);
+        }
+
+        EquipmentSlot equipmentSlot = (EquipmentSlot)EQUIPMENT_SLOTS.get(slot);
+        if (equipmentSlot != null) {
+            this.equipment.put(equipmentSlot, stack);
+        }
+
+    }
+
+    static {
+        EQUIPMENT_SLOTS = new Int2ObjectArrayMap(Map.of(EquipmentSlot.FEET.getOffsetEntitySlotId(36), EquipmentSlot.FEET, EquipmentSlot.LEGS.getOffsetEntitySlotId(36), EquipmentSlot.LEGS, EquipmentSlot.CHEST.getOffsetEntitySlotId(36), EquipmentSlot.CHEST, EquipmentSlot.HEAD.getOffsetEntitySlotId(36), EquipmentSlot.HEAD, 40, EquipmentSlot.OFFHAND, 41, EquipmentSlot.BODY, 42, EquipmentSlot.SADDLE));
     }
 }

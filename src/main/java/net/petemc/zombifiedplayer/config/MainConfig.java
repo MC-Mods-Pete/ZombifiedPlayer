@@ -8,14 +8,14 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 @me.shedaniel.autoconfig.annotation.Config(name = ZombifiedPlayer.MOD_ID)
-public class Config implements ConfigData
+public class MainConfig implements ConfigData
 {
     @ConfigEntry.Gui.Excluded
-    public static Config INSTANCE;
+    public static MainConfig INSTANCE;
 
     public static void init() {
-        AutoConfig.register(Config.class, JanksonConfigSerializer::new);
-        INSTANCE = AutoConfig.getConfigHolder(Config.class).getConfig();
+        AutoConfig.register(MainConfig.class, JanksonConfigSerializer::new);
+        INSTANCE = AutoConfig.getConfigHolder(MainConfig.class).getConfig();
     }
 
     public static boolean getSpawnZombifiedPlayerAfterDeath() {
