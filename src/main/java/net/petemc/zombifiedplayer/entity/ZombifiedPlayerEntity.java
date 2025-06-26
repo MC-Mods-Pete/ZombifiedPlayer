@@ -1,6 +1,8 @@
 package net.petemc.zombifiedplayer.entity;
 
 import com.mojang.authlib.GameProfile;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -13,6 +15,7 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -31,17 +34,21 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.common.extensions.IEntityExtension;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import net.petemc.zombifiedplayer.Config;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
 public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, IEntityWithComplexSpawn {
     public GameProfile gameProfile;
     public final NonNullList<ItemStack> main = NonNullList.withSize(36, ItemStack.EMPTY);
+    public static final Int2ObjectMap<EquipmentSlot> EQUIPMENT_SLOT_MAPPING;
 
     public ZombifiedPlayerEntity(EntityType<? extends Zombie> entityType, Level level) {
         super(entityType, level);
@@ -202,21 +209,56 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
     }
 
     @Override
-    public void addAdditionalSaveData(@NotNull CompoundTag nbt) {
-        super.addAdditionalSaveData(nbt);
-        nbt.putString("gameProfileUUID", gameProfile.getId().toString());
-        nbt.putString("gameProfileName", gameProfile.getName());
-        nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
+    public void addAdditionalSaveData(@NotNull ValueOutput valueOutput) {
+        super.addAdditionalSaveData(valueOutput);
+        valueOutput.putString("gameProfileUUID", gameProfile.getId().toString());
+        valueOutput.putString("gameProfileName", gameProfile.getName());
+        //valueOutput.put("Inventory", this.writeInventoryToNbt(new ListTag()));
+        this.save(valueOutput.list("Inventory", ItemStackWithSlot.CODEC));
     }
 
     @Override
-    public void readAdditionalSaveData(@NotNull CompoundTag nbt) {
-        super.readAdditionalSaveData(nbt);
-        UUID gpUUID = UUID.fromString(nbt.getString("gameProfileUUID").orElse(""));
-        String gpName = nbt.getString("gameProfileName").orElse("");
+    public void readAdditionalSaveData(@NotNull ValueInput valueInput) {
+        super.readAdditionalSaveData(valueInput);
+        UUID gpUUID = UUID.fromString(valueInput.getString("gameProfileUUID").orElse(""));
+        String gpName = valueInput.getString("gameProfileName").orElse("");
         gameProfile = new GameProfile(gpUUID, gpName);
-        ListTag nbtList = nbt.getList("Inventory").orElseThrow();
-        this.readInventoryFromNbt(nbtList);
+        //ListTag nbtList = valueInput.getList("Inventory").orElseThrow();
+        //this.readInventoryFromNbt(nbtList);
+        this.load(valueInput.listOrEmpty("Inventory", ItemStackWithSlot.CODEC));
+    }
+
+    public void save(ValueOutput.TypedOutputList<ItemStackWithSlot> list) {
+        for(int i = 0; i < this.main.size(); ++i) {
+            ItemStack itemstack = (ItemStack)this.main.get(i);
+            if (!itemstack.isEmpty()) {
+                list.add(new ItemStackWithSlot(i, itemstack));
+            }
+        }
+
+    }
+
+    public void load(ValueInput.TypedInputList<ItemStackWithSlot> list) {
+        this.main.clear();
+
+        for(ItemStackWithSlot itemstackwithslot : list) {
+            if (itemstackwithslot.isValidInContainer(this.main.size())) {
+                this.setItem(itemstackwithslot.slot(), itemstackwithslot.stack());
+            }
+        }
+
+    }
+
+    public void setItem(int index, ItemStack stack) {
+        if (index < this.main.size()) {
+            this.main.set(index, stack);
+        }
+
+        EquipmentSlot equipmentslot = (EquipmentSlot)EQUIPMENT_SLOT_MAPPING.get(index);
+        if (equipmentslot != null) {
+            this.equipment.set(equipmentslot, stack);
+        }
+
     }
 
     public ListTag writeInventoryToNbt(ListTag nbtList) {
@@ -226,7 +268,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
             if (!this.main.get(i).isEmpty()) {
                 nbtCompound = new CompoundTag();
                 nbtCompound.putByte("Slot", (byte)i);
-                nbtList.add(this.main.get(i).save(this.registryAccess(), nbtCompound));
+                //nbtList.add(this.main.get(i).save(this.registryAccess(), nbtCompound));
             }
         }
         return nbtList;
@@ -238,10 +280,14 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         for(int i = 0; i < nbtList.size(); ++i) {
             CompoundTag nbtCompound = nbtList.getCompound(i).orElseThrow();
             int j = nbtCompound.getByte("Slot").orElseThrow() & 255;
-            ItemStack itemStack = ItemStack.parse(this.registryAccess(), nbtCompound).orElse(ItemStack.EMPTY);
+            //ItemStack itemStack = ItemStack.parse(this.registryAccess(), nbtCompound).orElse(ItemStack.EMPTY);
             if (j >= 0 && j < this.main.size()) {
-                this.main.set(j, itemStack);
+                //this.main.set(j, itemStack);
             }
         }
+    }
+
+    static {
+        EQUIPMENT_SLOT_MAPPING = new Int2ObjectArrayMap(Map.of(EquipmentSlot.FEET.getIndex(36), EquipmentSlot.FEET, EquipmentSlot.LEGS.getIndex(36), EquipmentSlot.LEGS, EquipmentSlot.CHEST.getIndex(36), EquipmentSlot.CHEST, EquipmentSlot.HEAD.getIndex(36), EquipmentSlot.HEAD, 40, EquipmentSlot.OFFHAND, 41, EquipmentSlot.BODY, 42, EquipmentSlot.SADDLE));
     }
 }
