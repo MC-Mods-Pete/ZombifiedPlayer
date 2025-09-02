@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 public class ZombifiedPlayerRenderer
         extends AbstractZombieRenderer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> {
 
-    private static ResourceLocation TEXTURE_FALLBACK = new ResourceLocation("minecraft","textures/entity/player/wide/steve.png");
+    private static ResourceLocation TEXTURE_FALLBACK = ResourceLocation.fromNamespaceAndPath("minecraft","textures/entity/player/wide/steve.png");
     private static GameProfile receivedGameProfile = null;
     private static GameProfile inProgress = null;
     private boolean gameProfileReceived = false;

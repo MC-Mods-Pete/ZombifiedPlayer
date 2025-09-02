@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 @OnlyIn(Dist.CLIENT)
 public class ZombificationFeatureRenderer
         extends RenderLayer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(ZombifiedPlayer.MOD_ID,"textures/entity/zombify.png");
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(ZombifiedPlayer.MOD_ID,"textures/entity/zombify.png");
 
     public ZombificationFeatureRenderer(AbstractZombieRenderer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> featureRendererContext) {
         super(featureRendererContext);
