@@ -31,13 +31,15 @@ public class ServerPlayerEntityMixin
         if ((Config.getSpawnOnAnyDeath() ||
                 (ModCompatibility.diedFromInfection(serverPlayer) && Config.getSpawnWhenKilledByInfection()) ||
                 (PlayerDeathEvents.attackerIsUndead(pCause.getEntity()) && Config.getSpawnZombifiedPlayerAfterDeath()))) {
-            serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"));
-            if (Config.getPrintSpawnLocationInChat()) {
-                BlockPos blockpos = serverPlayer.getOnPos();
-                Component textCoordinates = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", blockpos.getX(), (blockpos.getY()+1), blockpos.getZ())).withStyle((style) -> {
-                    return style.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + blockpos.getX() + " " + (blockpos.getY()+1) + " " + blockpos.getZ())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")));
-                });
-                serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.location.message", textCoordinates), false);
+            if (Config.getPrintSpawnMessageInChat()) {
+                serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"));
+                if (Config.getPrintSpawnLocationInChat()) {
+                    BlockPos blockpos = serverPlayer.getOnPos();
+                    Component textCoordinates = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", blockpos.getX(), (blockpos.getY()+1), blockpos.getZ())).withStyle((style) -> {
+                        return style.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + blockpos.getX() + " " + (blockpos.getY() + 1) + " " + blockpos.getZ())).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")));
+                    });
+                    serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.location.message", textCoordinates), false);
+                }
             }
         }
     }

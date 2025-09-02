@@ -135,7 +135,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER.get(), serverLevel);
             zombifiedPlayer.setGameProfile(player.getGameProfile());
             //zombifiedPlayer.storeGameProfile(player.getGameProfile());
-            Component name = Component.literal(player.getName().getString());
+            Component name = Component.literal("Zombified " + player.getName().getString());
             zombifiedPlayer.setCustomName(name);
             zombifiedPlayer.setPos(player.getX(), player.getY(), player.getZ());
             zombifiedPlayer.setPersistenceRequired();
@@ -219,6 +219,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         nbt.putUUID("gameProfileUUID", gameProfile.getId());
         nbt.putString("gameProfileName", gameProfile.getName());
         nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
+        // Store Curios items
         nbt.put("CuriosItems", CuriosUtil.curiosItemsToNbt(this.curiosItems));
     }
 
@@ -230,7 +231,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         gameProfile = new GameProfile(gpUUID, gpName);
         ListTag nbtList = nbt.getList("Inventory", Tag.TAG_COMPOUND);
         this.readInventoryFromNbt(nbtList);
-        // Cargar items de Curios
+        // Load Curios items
         if (nbt.contains("CuriosItems")) {
             ListTag curiosNbt = nbt.getList("CuriosItems", Tag.TAG_COMPOUND);
             this.curiosItems.clear();
