@@ -31,14 +31,18 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
 import net.petemc.zombifiedplayer.Config;
+import net.petemc.zombifiedplayer.util.CuriosUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSpawnData {
     public GameProfile gameProfile;
     public final NonNullList<ItemStack> main = NonNullList.withSize(36, ItemStack.EMPTY);
+    public final List<ItemStack> curiosItems = new ArrayList<>();
 
     public ZombifiedPlayerEntity(EntityType<? extends Zombie> entityType, Level level) {
         super(entityType, level);
@@ -98,15 +102,6 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         this.gameProfile = gameProfile;
     }
 
-    /*public void storeGameProfile(GameProfile gameProfile) {
-        if (!this.level().isClientSide()) {
-            GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(this.getUUID(), this.level());
-            gameProfileState.gameProfileUUID = gameProfile.getId();
-            gameProfileState.gameProfileName = gameProfile.getName();
-            ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}",this.getUUID().toString(),gameProfileState.gameProfileUUID.toString(),gameProfileState.gameProfileName);
-        }
-    }*/
-
     @Override
     protected void dropCustomDeathLoot(@NotNull DamageSource pDamageSource, int pLooting, boolean pHitByPlayer) {
         super.dropCustomDeathLoot(pDamageSource, pLooting, pHitByPlayer);
@@ -125,6 +120,13 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
                 this.main.set(i, ItemStack.EMPTY);
             }
         }
+        
+        for (ItemStack curiosItem : this.curiosItems) {
+            if (!curiosItem.isEmpty()) {
+                this.spawnAtLocation(curiosItem);
+            }
+        }
+        this.curiosItems.clear();
     }
 
     public static ZombifiedPlayerEntity spawnZombifiedPlayer(Player player) {
@@ -133,7 +135,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER.get(), serverLevel);
             zombifiedPlayer.setGameProfile(player.getGameProfile());
             //zombifiedPlayer.storeGameProfile(player.getGameProfile());
-            Component name = Component.literal("Zombified " + player.getName().getString());
+            Component name = Component.literal(player.getName().getString());
             zombifiedPlayer.setCustomName(name);
             zombifiedPlayer.setPos(player.getX(), player.getY(), player.getZ());
             zombifiedPlayer.setPersistenceRequired();
@@ -181,6 +183,11 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
                 }
             }
         }
+        
+        if (CuriosUtil.isCuriosLoaded()) {
+            List<ItemStack> playerCuriosItems = CuriosUtil.getCuriosItemsAndClear(playerEntity);
+            this.curiosItems.addAll(playerCuriosItems);
+        }
     }
 
     @Override
@@ -212,6 +219,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         nbt.putUUID("gameProfileUUID", gameProfile.getId());
         nbt.putString("gameProfileName", gameProfile.getName());
         nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
+        nbt.put("CuriosItems", CuriosUtil.curiosItemsToNbt(this.curiosItems));
     }
 
     @Override
@@ -222,6 +230,12 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         gameProfile = new GameProfile(gpUUID, gpName);
         ListTag nbtList = nbt.getList("Inventory", Tag.TAG_COMPOUND);
         this.readInventoryFromNbt(nbtList);
+        // Cargar items de Curios
+        if (nbt.contains("CuriosItems")) {
+            ListTag curiosNbt = nbt.getList("CuriosItems", Tag.TAG_COMPOUND);
+            this.curiosItems.clear();
+            this.curiosItems.addAll(CuriosUtil.curiosItemsFromNbt(curiosNbt));
+        }
     }
 
     public ListTag writeInventoryToNbt(ListTag nbtList) {
