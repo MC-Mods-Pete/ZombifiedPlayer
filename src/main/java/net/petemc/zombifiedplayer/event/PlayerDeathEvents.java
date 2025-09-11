@@ -18,7 +18,7 @@ public class PlayerDeathEvents {
     public static class ForgeEvents {
         @SubscribeEvent
         public static void onPlayerDeath(LivingDeathEvent event) {
-            if(!event.getEntity().level().isClientSide()) {
+            if(!event.getEntity().level.isClientSide()) {
                 if(event.getEntity() instanceof ServerPlayer serverPlayer) {
                     if (!(serverPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING))) {
                         if ((Config.getSpawnOnAnyDeath() ||

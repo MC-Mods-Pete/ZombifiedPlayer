@@ -19,11 +19,14 @@ public class CuriosUtil {
 
     public static List<ItemStack> getCuriosItemsAndClear(Player player) {
         List<ItemStack> curiosItems = new ArrayList<>();
-        
+
         if (!isCuriosLoaded()) {
             return curiosItems;
         }
-        
+
+        // TODO implement Curios API for Forge 1.19.2
+
+        /*
         try {
             CuriosApi.getCuriosInventory(player).ifPresent(curiosInventory -> {
                 for (String identifier : curiosInventory.getCurios().keySet()) {
@@ -39,6 +42,8 @@ public class CuriosUtil {
             });
         } catch (Exception e) {
         }
+
+         */
         
         return curiosItems;
     }

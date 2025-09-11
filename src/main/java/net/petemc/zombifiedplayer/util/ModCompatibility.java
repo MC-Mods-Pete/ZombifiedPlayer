@@ -3,7 +3,7 @@ package net.petemc.zombifiedplayer.util;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.fml.ModList;
-import net.petemc.contagion.casts.InfectedPlayer;
+//import net.petemc.contagion.casts.InfectedPlayer;
 import net.petemc.undeadnights.entity.EliteZombieEntity;
 import net.petemc.undeadnights.entity.HordeZombieEntity;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
@@ -22,11 +22,14 @@ public class ModCompatibility {
         return ModList.get().isLoaded("contagion");
     }
 
+    // Contagion is currently not available for Forge 1.19.2
     public static boolean diedFromInfection(ServerPlayer serverPlayer) {
         if (contagionDetected()) {
+            /*
             if (serverPlayer instanceof InfectedPlayer infectedPlayer) {
                 return infectedPlayer.contagion_playerDiedFromInfection();
             }
+            */
         }
         return false;
     }

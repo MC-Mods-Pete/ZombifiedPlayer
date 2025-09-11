@@ -19,8 +19,8 @@ import org.jetbrains.annotations.NotNull;
 public class ZombifiedPlayerRenderer
         extends AbstractZombieRenderer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> {
 
-    private static ResourceLocation TEXTURE_FALLBACK = ResourceLocation.fromNamespaceAndPath("minecraft","textures/entity/player/wide/steve.png");
-    private static GameProfile receivedGameProfile = null;
+    private static ResourceLocation TEXTURE_FALLBACK = new ResourceLocation("minecraft","textures/entity/steve.png");
+    private GameProfile receivedGameProfile = null;
     private static GameProfile inProgress = null;
     private boolean gameProfileReceived = false;
 
@@ -39,16 +39,16 @@ public class ZombifiedPlayerRenderer
 
     @Override
     public @NotNull ResourceLocation getTextureLocation(ZombifiedPlayerEntity entity) {
-        if (ZombifiedPlayer.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
-            return ZombifiedPlayer.cachedPlayerSkinsByUUID.get(entity.getGameProfile().getId());
-        }
-        if (ZombifiedPlayer.uuidMissmatches.containsKey(entity.getGameProfile().getId())) {
-            if (ZombifiedPlayer.cachedPlayerSkinsByName.containsKey(entity.gameProfile.getName()) ||
-                    ZombifiedPlayer.cachedPlayerSkinsByName.containsKey(entity.gameProfile.getName().toLowerCase())) {
-                return ZombifiedPlayer.cachedPlayerSkinsByUUID.get(ZombifiedPlayer.uuidMissmatches.get(entity.gameProfile.getId()));
-            }
-        }
         if (entity.getGameProfile() != null) {
+            if (ZombifiedPlayer.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
+                return ZombifiedPlayer.cachedPlayerSkinsByUUID.get(entity.getGameProfile().getId());
+            }
+            if (ZombifiedPlayer.uuidMissmatches.containsKey(entity.getGameProfile().getId())) {
+                if (ZombifiedPlayer.cachedPlayerSkinsByName.containsKey(entity.gameProfile.getName()) ||
+                        ZombifiedPlayer.cachedPlayerSkinsByName.containsKey(entity.gameProfile.getName().toLowerCase())) {
+                    return ZombifiedPlayer.cachedPlayerSkinsByUUID.get(ZombifiedPlayer.uuidMissmatches.get(entity.gameProfile.getId()));
+                }
+            }
             getPlayerSkinFromGameProfile(entity.getGameProfile());
         }
         return TEXTURE_FALLBACK;
@@ -108,7 +108,7 @@ public class ZombifiedPlayerRenderer
                         gameProfileReceived = false;
                         return;
                     } else {
-                        ZombifiedPlayer.LOGGER.warn("No valid Skin was received for {} yet", receivedGameProfile.getName());
+                        ZombifiedPlayer.LOGGER.warn("No valid Skin was received for {}", receivedGameProfile.getName());
                     }
                 }
             }

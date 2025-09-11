@@ -7,8 +7,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -31,7 +29,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
-import net.minecraftforge.network.NetworkHooks;
 import net.petemc.zombifiedplayer.Config;
 import net.petemc.zombifiedplayer.util.CuriosUtil;
 import org.jetbrains.annotations.NotNull;
@@ -137,7 +134,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
 
     public static ZombifiedPlayerEntity spawnZombifiedPlayer(Player player) {
         ZombifiedPlayerEntity zombifiedPlayer = null;
-        if (player.level() instanceof ServerLevel serverLevel) {
+        if (player.level instanceof ServerLevel serverLevel) {
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER.get(), serverLevel);
             zombifiedPlayer.setGameProfile(player.getGameProfile());
             //zombifiedPlayer.storeGameProfile(player.getGameProfile());
@@ -156,7 +153,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             playerEntity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else {
             if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
-                this.setItemInHand(InteractionHand.MAIN_HAND, playerEntity.getMainHandItem().copyAndClear());
+                this.setItemInHand(InteractionHand.MAIN_HAND, playerEntity.getMainHandItem().copy());
+                playerEntity.getMainHandItem().setCount(0);
             }
         }
 
@@ -164,7 +162,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             playerEntity.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         } else {
             if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
-                this.setItemInHand(InteractionHand.OFF_HAND, playerEntity.getOffhandItem().copyAndClear());
+                this.setItemInHand(InteractionHand.OFF_HAND, playerEntity.getOffhandItem().copy());
+                playerEntity.getOffhandItem().setCount(0);
             }
         }
 
@@ -173,7 +172,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
                 if (Config.getTransferArmorToZombifiedPlayer()) {
-                    this.equipItemIfPossible(playerEntity.getInventory().armor.get(i).copyAndClear());
+                    this.equipItemIfPossible(playerEntity.getInventory().armor.get(i).copy());
+                    playerEntity.getInventory().armor.get(i).setCount(0);
                 }
             }
         }
@@ -185,7 +185,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
                     this.main.set(i, ItemStack.EMPTY);
                 }
                 if (Config.getTransferInventoryToZombifiedPlayer()) {
-                    this.main.set(i, playerEntity.getInventory().items.get(i).copyAndClear());
+                    this.main.set(i, playerEntity.getInventory().items.get(i).copy());
+                    playerEntity.getInventory().items.get(i).setCount(0);
                 }
             }
         }
@@ -194,11 +195,6 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             List<ItemStack> playerCuriosItems = CuriosUtil.getCuriosItemsAndClear(playerEntity);
             this.curiosItems.addAll(playerCuriosItems);
         }
-    }
-
-    @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
     }
 
     @Override
