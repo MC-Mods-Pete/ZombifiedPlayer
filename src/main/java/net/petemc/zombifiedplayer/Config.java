@@ -28,6 +28,10 @@ public class Config
         return spawnOnAnyDeath;
     }
 
+    public static boolean getPrintSpawnMessageInChat() {
+        return printSpawnMessageInChat;
+    }
+
     public static boolean getPrintSpawnLocationInChat() {
         return printSpawnLocationInChat;
     }
@@ -76,6 +80,10 @@ public class Config
             .comment("If true, a zombified player will spawn no matter how the player died | default: false")
             .define("spawnOnAnyDeath", false);
 
+    private static final ModConfigSpec.BooleanValue PRINT_SPAWN_MESSAGE_IN_CHAT = BUILDER_SERVER
+            .comment("If true, a message will be printed out in chat that a zombified player has spawned | default: true")
+            .define("printSpawnMessageInChat", true);
+
     private static final ModConfigSpec.BooleanValue PRINT_SPAWN_LOCATION_IN_CHAT = BUILDER_SERVER
             .comment("If true, the spawn location of the zombified player will be printed out in chat | default: false")
             .define("printSpawnLocationInChat", false);
@@ -114,6 +122,7 @@ public class Config
     private static boolean transferArmorToZombifiedPlayer = true;
     private static boolean transferInventoryToZombifiedPlayer = true;
     private static boolean spawnOnAnyDeath = false;
+    private static boolean printSpawnMessageInChat = true;
     private static boolean printSpawnLocationInChat = false;
     private static boolean zombifiedPlayersCanBreakDoors = true;
     private static boolean makeTheZombifiedPlayersStronger = false;
@@ -130,6 +139,7 @@ public class Config
             transferArmorToZombifiedPlayer = TRANSFER_ARMOR_TO_ZOMBIFIED_PLAYER.get();
             transferInventoryToZombifiedPlayer = TRANSFER_INVENTORY_TO_ZOMBIFIED_PLAYER.get();
             spawnOnAnyDeath = SPAWN_ON_ANY_DEATH.get();
+            printSpawnMessageInChat = PRINT_SPAWN_MESSAGE_IN_CHAT.get();
             printSpawnLocationInChat = PRINT_SPAWN_LOCATION_IN_CHAT.get();
             zombifiedPlayersCanBreakDoors = ZOMBIFIED_PLAYERS_CAN_BREAK_DOORS.get();
             makeTheZombifiedPlayersStronger = MAKE_THE_ZOMBIFIED_PLAYERS_STRONGER.get();
