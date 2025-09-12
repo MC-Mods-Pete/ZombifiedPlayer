@@ -24,11 +24,8 @@ public class CuriosUtil {
             return curiosItems;
         }
 
-        // TODO implement Curios API for Forge 1.19.2
-
-        /*
         try {
-            CuriosApi.getCuriosInventory(player).ifPresent(curiosInventory -> {
+            CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(curiosInventory -> {
                 for (String identifier : curiosInventory.getCurios().keySet()) {
                     ICurioStacksHandler stacksHandler = curiosInventory.getCurios().get(identifier);
                     for (int i = 0; i < stacksHandler.getSlots(); i++) {
@@ -42,8 +39,6 @@ public class CuriosUtil {
             });
         } catch (Exception e) {
         }
-
-         */
         
         return curiosItems;
     }
