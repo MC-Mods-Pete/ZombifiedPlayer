@@ -12,6 +12,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerEntity;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -28,20 +29,25 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.extensions.IEntityExtension;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import net.petemc.zombifiedplayer.Config;
+import net.petemc.zombifiedplayer.util.CuriosUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
 public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, IEntityWithComplexSpawn {
     public GameProfile gameProfile;
     public final NonNullList<ItemStack> main = NonNullList.withSize(36, ItemStack.EMPTY);
+    public final List<ItemStack> curiosItems = new ArrayList<>();
 
     public ZombifiedPlayerEntity(EntityType<? extends Zombie> entityType, Level level) {
         super(entityType, level);
@@ -66,18 +72,6 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, false, false));
         this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
-
-    /*
-    @Override
-    public Packet<ClientPlayPacketListener> createSpawnPacket() {
-        return new EntitySpawnS2CPacket(this);
-    }
-
-    @Override
-    public void onSpawnPacket(EntitySpawnS2CPacket packet) {
-        super.onSpawnPacket(packet);
-    }
-    */
 
     @Override
     public boolean fireImmune() {
@@ -113,18 +107,16 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         this.gameProfile = gameProfile;
     }
 
-    /*public void storeGameProfile(GameProfile gameProfile) {
-        if (!this.level().isClientSide()) {
-            GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(this.getUUID(), this.level());
-            gameProfileState.gameProfileUUID = gameProfile.getId();
-            gameProfileState.gameProfileName = gameProfile.getName();
-            ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}",this.getUUID().toString(),gameProfileState.gameProfileUUID.toString(),gameProfileState.gameProfileName);
-        }
-    }*/
-
     @Override
     protected void dropCustomDeathLoot(@NotNull ServerLevel serverLevel, @NotNull DamageSource pDamageSource, boolean recentlyHit) {
         super.dropCustomDeathLoot(serverLevel, pDamageSource, recentlyHit);
+
+        // drop rotten flesh
+        RandomSource random = this.getRandom();
+        ItemStack rottenFleshStack = new ItemStack(Items.ROTTEN_FLESH, random.nextIntBetweenInclusive(1,3));
+        this.spawnAtLocation(rottenFleshStack);
+
+        // drop equipment and inventory
         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
             ItemStack itemStack = this.getItemBySlot(equipmentSlot);
             this.spawnAtLocation(itemStack);
@@ -141,6 +133,13 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
                 this.main.set(i, ItemStack.EMPTY);
             }
         }
+        
+        for (ItemStack curiosItem : this.curiosItems) {
+            if (!curiosItem.isEmpty()) {
+                this.spawnAtLocation(curiosItem);
+            }
+        }
+        this.curiosItems.clear();
     }
 
     public static ZombifiedPlayerEntity spawnZombifiedPlayer(Player player) {
@@ -197,6 +196,11 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
                 }
             }
         }
+        
+        if (CuriosUtil.isCuriosLoaded()) {
+            List<ItemStack> playerCuriosItems = CuriosUtil.getCuriosItemsAndClear(playerEntity);
+            this.curiosItems.addAll(playerCuriosItems);
+        }
     }
 
     @Override
@@ -228,6 +232,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         nbt.putUUID("gameProfileUUID", gameProfile.getId());
         nbt.putString("gameProfileName", gameProfile.getName());
         nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
+        // Store Curios items
+        nbt.put("CuriosItems", CuriosUtil.curiosItemsToNbt(this, this.curiosItems, new ListTag()));
     }
 
     @Override
@@ -238,6 +244,12 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         gameProfile = new GameProfile(gpUUID, gpName);
         ListTag nbtList = nbt.getList("Inventory", Tag.TAG_COMPOUND);
         this.readInventoryFromNbt(nbtList);
+        // Load Curios items
+        if (nbt.contains("CuriosItems")) {
+            ListTag curiosNbt = nbt.getList("CuriosItems", Tag.TAG_COMPOUND);
+            this.curiosItems.clear();
+            this.curiosItems.addAll(CuriosUtil.curiosItemsFromNbt(this, curiosNbt));
+        }
     }
 
     public ListTag writeInventoryToNbt(ListTag nbtList) {

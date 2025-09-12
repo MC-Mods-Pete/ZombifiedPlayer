@@ -147,9 +147,17 @@ dependencies {
     implementation "curse.maven:contagion-1027702:${contagion_version}"
     implementation "curse.maven:undeadnights-1166914:${undeadnights_version}"
 
-    //runtimeOnly fg.deobf("curse.maven:jade--324717:${jade_version}")
-    //runtimeOnly fg.deobf("curse.maven:contagion-1027702:${contagion_version}")
-    //runtimeOnly fg.deobf("curse.maven:undeadnights-1166914:${undeadnights_version}")
+    runtimeOnly "curse.maven:jade--324717:${jade_version}"
+    runtimeOnly "curse.maven:contagion-1027702:${contagion_version}"
+    runtimeOnly "curse.maven:undeadnights-1166914:${undeadnights_version}"
+
+    // use when not test Curios (comment out when testing curios)
+    compileOnly "curse.maven:curios-309927:${curios_version}"
+
+    // enable for curios testing, note: minecraft version needs to be switched to 1.21.1, NeoForge to 21.1.60)
+    //implementation "curse.maven:curios-309927:${curios_version}"
+    //runtimeOnly "curse.maven:sophisticated-backpacks-422301:${sophisticated_backpacks_version}"
+    //runtimeOnly "curse.maven:sophisticated-core-618298:${sophisticated_core_version}"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
