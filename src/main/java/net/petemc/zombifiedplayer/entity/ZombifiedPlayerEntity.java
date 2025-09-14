@@ -155,7 +155,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         if (EnchantmentHelper.hasVanishingCurse(playerEntity.getMainHandItem())) {
             playerEntity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (Config.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setItemInHand(InteractionHand.MAIN_HAND, playerEntity.getMainHandItem().copyAndClear());
             }
         }
@@ -163,7 +163,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         if (EnchantmentHelper.hasVanishingCurse(playerEntity.getOffhandItem())) {
             playerEntity.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (Config.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setItemInHand(InteractionHand.OFF_HAND, playerEntity.getOffhandItem().copyAndClear());
             }
         }
@@ -189,8 +189,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
                 }
             }
         }
-        
-        if (CuriosUtil.isCuriosLoaded()) {
+
+        if (CuriosUtil.isCuriosLoaded() && Config.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
             List<ItemStack> playerCuriosItems = CuriosUtil.getCuriosItemsAndClear(playerEntity);
             this.curiosItems.addAll(playerCuriosItems);
         }
@@ -226,7 +226,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         nbt.putString("gameProfileName", gameProfile.getName());
         nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
         // Store Curios items
-        nbt.put("CuriosItems", CuriosUtil.curiosItemsToNbt(this.curiosItems));
+        nbt.put("CuriosItems", CuriosUtil.writeCuriosItemsToNbt(this.curiosItems));
     }
 
     @Override
@@ -234,14 +234,14 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         super.readAdditionalSaveData(nbt);
         UUID gpUUID = nbt.getUUID("gameProfileUUID");
         String gpName = nbt.getString("gameProfileName");
-        gameProfile = new GameProfile(gpUUID, gpName);
+        setGameProfile(new GameProfile(gpUUID, gpName));
         ListTag nbtList = nbt.getList("Inventory", Tag.TAG_COMPOUND);
         this.readInventoryFromNbt(nbtList);
         // Load Curios items
         if (nbt.contains("CuriosItems")) {
             ListTag curiosNbt = nbt.getList("CuriosItems", Tag.TAG_COMPOUND);
             this.curiosItems.clear();
-            this.curiosItems.addAll(CuriosUtil.curiosItemsFromNbt(curiosNbt));
+            this.curiosItems.addAll(CuriosUtil.readCuriosItemsFromNbt(curiosNbt));
         }
     }
 

@@ -14,8 +14,8 @@ public class Config
         return spawnZombifiedPlayerAfterDeath;
     }
 
-    public static boolean getTransferMainandOffHandToZombifiedPlayer() {
-        return transferMainandOffHandToZombifiedPlayer;
+    public static boolean getTransferMainAndOffHandToZombifiedPlayer() {
+        return transferMainAndOffHandToZombifiedPlayer;
     }
 
     public static boolean getTransferArmorToZombifiedPlayer() {
@@ -24,6 +24,10 @@ public class Config
 
     public static boolean getTransferInventoryToZombifiedPlayer() {
         return transferInventoryToZombifiedPlayer;
+    }
+
+    public static boolean getTransferCuriosOrTrinketItemsToZombifiedPlayer() {
+        return transferCuriosOrTrinketItemsToZombifiedPlayer;
     }
 
     public static boolean getSpawnOnAnyDeath() {
@@ -68,7 +72,7 @@ public class Config
 
     private static final ForgeConfigSpec.BooleanValue TRANSFER_MAIN_AND_OFF_HAND_TO_ZOMBIFIED_PLAYER = BUILDER_SERVER
             .comment("If true, the Main and the OffHand of the dead player will be transferred to the zombified player | default: true")
-            .define("transferMainandOffHandToZombifiedPlayer", true);
+            .define("transferMainAndOffHandToZombifiedPlayer", true);
 
     private static final ForgeConfigSpec.BooleanValue TRANSFER_ARMOR_TO_ZOMBIFIED_PLAYER = BUILDER_SERVER
             .comment("If true, the armor of the dead player will be transferred to the zombified player | default: true")
@@ -77,6 +81,10 @@ public class Config
     private static final ForgeConfigSpec.BooleanValue TRANSFER_INVENTORY_TO_ZOMBIFIED_PLAYER = BUILDER_SERVER
             .comment("If true, the inventory of the dead player will be transferred to the zombified player | default: true")
             .define("transferInventoryToZombifiedPlayer", true);
+
+    private static final ForgeConfigSpec.BooleanValue TRANSFER_CURIOS_TRINKET_ITEMS_TO_ZOMBIFIED_PLAYER = BUILDER_SERVER
+            .comment("If true, all equipped curios/trinket items of the dead player will be transferred to the zombified player | default: true")
+            .define("transferCuriosOrTrinketItemsToZombifiedPlayer", true);
 
     private static final ForgeConfigSpec.BooleanValue SPAWN_ON_ANY_DEATH = BUILDER_SERVER
             .comment("If true, a zombified player will spawn no matter how the player died | default: false")
@@ -120,9 +128,10 @@ public class Config
 
 
     private static boolean spawnZombifiedPlayerAfterDeath = true;
-    private static boolean transferMainandOffHandToZombifiedPlayer = true;
+    private static boolean transferMainAndOffHandToZombifiedPlayer = true;
     private static boolean transferArmorToZombifiedPlayer = true;
     private static boolean transferInventoryToZombifiedPlayer = true;
+    private static boolean transferCuriosOrTrinketItemsToZombifiedPlayer = true;
     private static boolean spawnOnAnyDeath = false;
     private static boolean printSpawnMessageInChat = true;
     private static boolean printSpawnLocationInChat = false;
@@ -137,9 +146,10 @@ public class Config
         ZombifiedPlayer.LOGGER.info("Loading Config");
         if (SPEC_SERVER.isLoaded()) {
             spawnZombifiedPlayerAfterDeath = SPAWN_ZOMBIFIED_PLAYER_AFTER_DEATH.get();
-            transferMainandOffHandToZombifiedPlayer = TRANSFER_MAIN_AND_OFF_HAND_TO_ZOMBIFIED_PLAYER.get();
+            transferMainAndOffHandToZombifiedPlayer = TRANSFER_MAIN_AND_OFF_HAND_TO_ZOMBIFIED_PLAYER.get();
             transferArmorToZombifiedPlayer = TRANSFER_ARMOR_TO_ZOMBIFIED_PLAYER.get();
             transferInventoryToZombifiedPlayer = TRANSFER_INVENTORY_TO_ZOMBIFIED_PLAYER.get();
+            transferCuriosOrTrinketItemsToZombifiedPlayer = TRANSFER_CURIOS_TRINKET_ITEMS_TO_ZOMBIFIED_PLAYER.get();
             spawnOnAnyDeath = SPAWN_ON_ANY_DEATH.get();
             printSpawnMessageInChat = PRINT_SPAWN_MESSAGE_IN_CHAT.get();
             printSpawnLocationInChat = PRINT_SPAWN_LOCATION_IN_CHAT.get();

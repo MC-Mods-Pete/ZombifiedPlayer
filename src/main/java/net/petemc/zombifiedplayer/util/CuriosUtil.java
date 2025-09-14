@@ -43,7 +43,7 @@ public class CuriosUtil {
         return curiosItems;
     }
 
-    public static ListTag curiosItemsToNbt(List<ItemStack> curiosItems) {
+    public static ListTag writeCuriosItemsToNbt(List<ItemStack> curiosItems) {
         ListTag nbtList = new ListTag();
         
         for (int i = 0; i < curiosItems.size(); i++) {
@@ -59,7 +59,7 @@ public class CuriosUtil {
         return nbtList;
     }
 
-    public static List<ItemStack> curiosItemsFromNbt(ListTag nbtList) {
+    public static List<ItemStack> readCuriosItemsFromNbt(ListTag nbtList) {
         List<ItemStack> curiosItems = new ArrayList<>();
         
         for (int i = 0; i < nbtList.size(); i++) {

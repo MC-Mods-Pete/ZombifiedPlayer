@@ -40,7 +40,7 @@ public class ZombifiedPlayer
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
-        //modEventBus.addListener(this::addCreative);
+        modEventBus.addListener(this::addCreative);
 
         context.registerConfig(ModConfig.Type.SERVER, Config.SPEC_SERVER);
         ModCompatibility.init();
