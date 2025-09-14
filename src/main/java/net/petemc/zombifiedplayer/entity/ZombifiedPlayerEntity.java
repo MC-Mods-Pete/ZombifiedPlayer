@@ -7,6 +7,9 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -36,9 +39,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSpawnData {
+    private static final EntityDataAccessor<Optional<UUID>> DATA_UUID_ID = SynchedEntityData.defineId(ZombifiedPlayerEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<String> DATA_NAME_ID = SynchedEntityData.defineId(ZombifiedPlayerEntity.class, EntityDataSerializers.STRING);
     public GameProfile gameProfile;
     public final NonNullList<ItemStack> main = NonNullList.withSize(36, ItemStack.EMPTY);
     public final List<ItemStack> curiosItems = new ArrayList<>();
+    private UUID tempUUID = null;
+    private String tempName = null;
 
     public ZombifiedPlayerEntity(EntityType<? extends Zombie> entityType, Level level) {
         super(entityType, level);
@@ -96,6 +103,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
 
     public void setGameProfile(GameProfile gameProfile) {
         this.gameProfile = gameProfile;
+        this.entityData.set(DATA_UUID_ID, Optional.ofNullable(gameProfile.getId()));
+        this.entityData.set(DATA_NAME_ID, gameProfile.getName());
     }
 
     @Override
@@ -152,7 +161,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         if (EnchantmentHelper.hasVanishingCurse(playerEntity.getMainHandItem())) {
             playerEntity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (Config.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setItemInHand(InteractionHand.MAIN_HAND, playerEntity.getMainHandItem().copy());
                 playerEntity.getMainHandItem().setCount(0);
             }
@@ -161,7 +170,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         if (EnchantmentHelper.hasVanishingCurse(playerEntity.getOffhandItem())) {
             playerEntity.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (Config.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setItemInHand(InteractionHand.OFF_HAND, playerEntity.getOffhandItem().copy());
                 playerEntity.getOffhandItem().setCount(0);
             }
@@ -191,10 +200,31 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             }
         }
         
-        if (CuriosUtil.isCuriosLoaded()) {
+        if (CuriosUtil.isCuriosLoaded() && Config.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
             List<ItemStack> playerCuriosItems = CuriosUtil.getCuriosItemsAndClear(playerEntity);
             this.curiosItems.addAll(playerCuriosItems);
         }
+    }
+
+    protected void defineSynchedData() {
+        super.defineSynchedData();
+        this.getEntityData().define(DATA_UUID_ID, Optional.empty());
+        this.getEntityData().define(DATA_NAME_ID, "");
+    }
+
+    public void onSyncedDataUpdated(EntityDataAccessor<?> pKey) {
+        if (DATA_UUID_ID.equals(pKey)) {
+            tempUUID = this.getEntityData().get(DATA_UUID_ID).orElse(null);
+        }
+        if (DATA_NAME_ID.equals(pKey)) {
+            tempName = this.getEntityData().get(DATA_NAME_ID);
+        }
+
+        if ((tempName != null) && (tempUUID != null)) {
+            gameProfile = new GameProfile(tempUUID, tempName);
+        }
+
+        super.onSyncedDataUpdated(pKey);
     }
 
     @Override
@@ -222,7 +252,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         nbt.putString("gameProfileName", gameProfile.getName());
         nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
         // Store Curios items
-        nbt.put("CuriosItems", CuriosUtil.curiosItemsToNbt(this.curiosItems));
+        nbt.put("CuriosItems", CuriosUtil.writeCuriosItemsToNbt(this.curiosItems));
     }
 
     @Override
@@ -230,14 +260,14 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         super.readAdditionalSaveData(nbt);
         UUID gpUUID = nbt.getUUID("gameProfileUUID");
         String gpName = nbt.getString("gameProfileName");
-        gameProfile = new GameProfile(gpUUID, gpName);
+        setGameProfile(new GameProfile(gpUUID, gpName));
         ListTag nbtList = nbt.getList("Inventory", Tag.TAG_COMPOUND);
         this.readInventoryFromNbt(nbtList);
         // Load Curios items
         if (nbt.contains("CuriosItems")) {
             ListTag curiosNbt = nbt.getList("CuriosItems", Tag.TAG_COMPOUND);
             this.curiosItems.clear();
-            this.curiosItems.addAll(CuriosUtil.curiosItemsFromNbt(curiosNbt));
+            this.curiosItems.addAll(CuriosUtil.readCuriosItemsFromNbt(curiosNbt));
         }
     }
 

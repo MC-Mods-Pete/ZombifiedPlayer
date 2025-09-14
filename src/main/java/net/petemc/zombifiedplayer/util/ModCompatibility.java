@@ -3,43 +3,43 @@ package net.petemc.zombifiedplayer.util;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.fml.ModList;
-//import net.petemc.contagion.casts.InfectedPlayer;
+import net.petemc.contagion.casts.InfectedPlayer;
 import net.petemc.undeadnights.entity.EliteZombieEntity;
 import net.petemc.undeadnights.entity.HordeZombieEntity;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 public class ModCompatibility {
     public static void init() {
-        if (contagionDetected()) {
+        if (isContagionLoaded()) {
             ZombifiedPlayer.LOGGER.info("Contagion detected. Death by Infection can spawn Zombified Players.");
         }
-        if (undeadNightsDetected()) {
-            ZombifiedPlayer.LOGGER.info("Undead Nights mod detected. Death by a Horde Zombie will spawn a Zombified Players.");
+        if (isUndeadNightsLoaded()) {
+            ZombifiedPlayer.LOGGER.info("Undead Nights mod detected. Death by a Horde Zombie will spawn a Zombified Player.");
+        }
+        if (CuriosUtil.isCuriosLoaded()) {
+            ZombifiedPlayer.LOGGER.info("Curios API detected. If enabled curios items will be transferred to the Zombified Player.");
         }
     }
 
-    public static boolean contagionDetected() {
+    public static boolean isContagionLoaded() {
         return ModList.get().isLoaded("contagion");
     }
 
-    // Contagion is currently not available for Forge 1.19.2
     public static boolean diedFromInfection(ServerPlayer serverPlayer) {
-        if (contagionDetected()) {
-            /*
+        if (isContagionLoaded()) {
             if (serverPlayer instanceof InfectedPlayer infectedPlayer) {
                 return infectedPlayer.contagion_playerDiedFromInfection();
             }
-            */
         }
         return false;
     }
 
-    public static boolean undeadNightsDetected() {
+    public static boolean isUndeadNightsLoaded() {
         return ModList.get().isLoaded("undeadnights");
     }
 
     public static boolean wasKilledByHordeZombie(Entity pAttacker) {
-        if (undeadNightsDetected()) {
+        if (isUndeadNightsLoaded()) {
             return (pAttacker instanceof HordeZombieEntity) || (pAttacker instanceof EliteZombieEntity);
         }
         return false;
