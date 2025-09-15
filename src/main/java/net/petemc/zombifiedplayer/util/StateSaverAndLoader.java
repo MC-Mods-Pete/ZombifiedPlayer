@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.UUID;
 
+// Deprecated --> will be removed
+
 public class StateSaverAndLoader extends PersistentState {
 
     public HashMap<UUID, GameProfileData> gameProfiles = new HashMap<>();

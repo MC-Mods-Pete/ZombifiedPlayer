@@ -22,8 +22,8 @@ public class Config implements ConfigData
         return INSTANCE.spawnZombifiedPlayerAfterDeath;
     }
 
-    public static boolean getTransferMainandOffHandToZombifiedPlayer() {
-        return INSTANCE.transferMainandOffHandToZombifiedPlayer;
+    public static boolean getTransferMainAndOffHandToZombifiedPlayer() {
+        return INSTANCE.transferMainAndOffHandToZombifiedPlayer;
     }
 
     public static boolean getTransferArmorToZombifiedPlayer() {
@@ -34,8 +34,16 @@ public class Config implements ConfigData
         return INSTANCE.transferInventoryToZombifiedPlayer;
     }
 
+    public static boolean getTransferCuriosOrTrinketItemsToZombifiedPlayer() {
+        return INSTANCE.transferCuriosOrTrinketItemsToZombifiedPlayer;
+    }
+
     public static boolean getSpawnOnAnyDeath() {
         return INSTANCE.spawnOnAnyDeath;
+    }
+
+    public static boolean getPrintSpawnMessageInChat() {
+        return INSTANCE.printSpawnMessageInChat;
     }
 
     public static boolean getPrintSpawnLocationInChat() {
@@ -68,7 +76,7 @@ public class Config implements ConfigData
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, the Main and the Off Hand of the dead player will be transferred to the zombified player | default: true")
-    private boolean transferMainandOffHandToZombifiedPlayer = true;
+    private boolean transferMainAndOffHandToZombifiedPlayer = true;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, the armor of the dead player will be transferred to the zombified player | default: true")
@@ -79,8 +87,16 @@ public class Config implements ConfigData
     private boolean transferInventoryToZombifiedPlayer = true;
 
     @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, the inventory of the dead player will be transferred to the zombified player | default: true")
+    private boolean transferCuriosOrTrinketItemsToZombifiedPlayer = true;
+
+    @ConfigEntry.Gui.Tooltip()
     @Comment("If true, a zombified player will spawn no matter how the player died | default: false")
     private boolean spawnOnAnyDeath = false;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, a message will be printed out in chat that a zombified player has spawned | default: true")
+    private boolean printSpawnMessageInChat = true;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, spawn location of the zombified player will printed out in chat | default: false")
