@@ -1,11 +1,8 @@
-/*
- * Decompiled with CFR 0.2.2 (FabricMC 7c48b8c4).
- */
 package net.petemc.zombifiedplayer.client.render.entity.feature;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.render.entity.model.ZombieEntityModel;
@@ -24,9 +21,9 @@ extends FeatureRenderer<ZombifiedPlayerEntityRenderState, ZombieEntityModel<Zomb
     }
 
     @Override
-    public void render(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, ZombifiedPlayerEntityRenderState state, float limbAngle, float limbDistance) {
-        ZombificationFeatureRenderer.renderModel(this.getContextModel(), state.skinTexture, matrices, vertexConsumers, light, state, 0xFF99FF99);
-        ZombificationFeatureRenderer.renderModel(this.getContextModel(), TEXTURE, matrices, vertexConsumers, light, state, -1);
+    public void render(MatrixStack matrices, OrderedRenderCommandQueue queue, int light, ZombifiedPlayerEntityRenderState state, float limbAngle, float limbDistance) {
+        ZombificationFeatureRenderer.renderModel(this.getContextModel(), state.skinTexture, matrices, queue, light, state, 0xFF99FF99, 0);
+        ZombificationFeatureRenderer.renderModel(this.getContextModel(), TEXTURE, matrices, queue, light, state, -1, 1);
     }
 }
 

@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.10.1'
+	id 'fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -36,6 +36,11 @@ repositories {
 			includeGroup "curse.maven"
 		}
 	}
+
+    maven {
+        name 'Ladysnake Mods'
+        url 'https://maven.ladysnake.org/releases'
+    }
 }
 
 fabricApi {
@@ -60,6 +65,12 @@ dependencies {
 	modImplementation "curse.maven:jade-324717:${project.jade_version}"
 	modImplementation "curse.maven:contagion-1027702:${project.contagion_version}"
 	modImplementation "curse.maven:undeadnights-1166914:${project.undeadnights_version}"
+
+    // Trinkets and Cardinal Components API (uncomment if you use them), make sure to set the version in gradle.properties
+    // currently not compatible with Minecraft 1.21.9
+    //modImplementation "curse.maven:trinkets-341284:${trinkets_version}"
+    //modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:6.0.0"
+    //modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:6.0.0"
 }
 
 processResources {

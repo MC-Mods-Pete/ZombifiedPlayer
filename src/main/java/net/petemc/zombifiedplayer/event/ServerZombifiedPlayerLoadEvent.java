@@ -41,7 +41,7 @@ public class ServerZombifiedPlayerLoadEvent {
                         if ((strArray[0] != null) && (strArray[1] != null)) {
                             zombifiedPlayerEntity.gameProfile = new GameProfile(uuid, strArray[1]);
                             for (ServerPlayerEntity player : PlayerLookup.world((ServerWorld) pWorld)) {
-                                ServerPlayNetworking.send(player, new NetworkPayloads.GameProfilePayload(zombifiedPlayerEntity.getUuid(), zombifiedPlayerEntity.getId(), zombifiedPlayerEntity.gameProfile.getId(), zombifiedPlayerEntity.gameProfile.getName()));
+                                ServerPlayNetworking.send(player, new NetworkPayloads.GameProfilePayload(zombifiedPlayerEntity.getUuid(), zombifiedPlayerEntity.getId(), zombifiedPlayerEntity.gameProfile.id(), zombifiedPlayerEntity.gameProfile.name()));
                             }
                         }
                     }

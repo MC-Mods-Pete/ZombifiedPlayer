@@ -14,7 +14,7 @@
   "text.autoconfig.zombifiedplayer.option.spawnOnAnyDeath": "Spawn zombified player no matter how the player died",
   "text.autoconfig.zombifiedplayer.option.spawnOnAnyDeath.@Tooltip": "If enabled, a zombified player will spawn no matter how the player died | default: disabled",
   "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat": "Print spawn location of the zombified player to the chat",
-  "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat.@Tooltip": "If enabled, spawn location of the zombified player will printed out in chat | default: disabled",
+  "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat.@Tooltip": "If enabled, spawn location of the zombified player will be printed out in chat | default: disabled",
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors": "Zombified Players can break doors",
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors.@Tooltip": "If enabled, zombified players can break through doors | default: enabled",
   "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger": "Make Zombified Players stronger",

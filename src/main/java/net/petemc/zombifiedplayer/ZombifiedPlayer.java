@@ -41,7 +41,7 @@ public class ZombifiedPlayer implements ModInitializer {
 		PayloadTypeRegistry.playC2S().register(NetworkPayloads.RequestGameProfilePayload.ID, NetworkPayloads.RequestGameProfilePayload.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(NetworkPayloads.RequestGameProfilePayload.ID, (payload, context) -> {
-			Objects.requireNonNull(context.player().getServer()).execute(() -> {
+			Objects.requireNonNull(context.player().getEntityWorld().getServer()).execute(() -> {
 				NetworkHandlerServer.processGameProfileRequest(context.player(), payload.entityUUID(), payload.entityID());
 			});
 		});

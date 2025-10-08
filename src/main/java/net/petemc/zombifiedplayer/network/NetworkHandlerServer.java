@@ -10,11 +10,11 @@ import java.util.UUID;
 
 public class NetworkHandlerServer {
     public static void processGameProfileRequest(ServerPlayerEntity serverPlayer, UUID zombifiedPlayerUuid, Integer zombifiedPlayerId) {
-        Entity zombifiedPlayer = serverPlayer.getWorld().getEntity(zombifiedPlayerUuid);
+        Entity zombifiedPlayer = serverPlayer.getEntityWorld().getEntity(zombifiedPlayerUuid);
 
         if (zombifiedPlayer instanceof ZombifiedPlayerEntity zombifiedPlayerEntity) {
             if (zombifiedPlayerEntity.getGameProfile() != null) {
-                ServerPlayNetworking.send(serverPlayer, new NetworkPayloads.GameProfilePayload(zombifiedPlayerEntity.getUuid(), zombifiedPlayerEntity.getId(), zombifiedPlayerEntity.getGameProfile().getId(), zombifiedPlayerEntity.getGameProfile().getName()));
+                ServerPlayNetworking.send(serverPlayer, new NetworkPayloads.GameProfilePayload(zombifiedPlayerEntity.getUuid(), zombifiedPlayerEntity.getId(), zombifiedPlayerEntity.getGameProfile().id(), zombifiedPlayerEntity.getGameProfile().name()));
             } else {
                 ZombifiedPlayer.LOGGER.warn("Zombified Player with UUID {} does not have a valid gameProfile!", zombifiedPlayerUuid);
             }

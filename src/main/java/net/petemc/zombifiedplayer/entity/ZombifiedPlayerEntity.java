@@ -19,8 +19,7 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackWithSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.item.Items;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
@@ -31,10 +30,14 @@ import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.collection.DefaultedList;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.config.MainConfig;
+import net.petemc.zombifiedplayer.util.TrinketsUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -43,6 +46,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     public GameProfile gameProfile;
     public final DefaultedList<ItemStack> main = DefaultedList.ofSize(36, ItemStack.EMPTY);
     public static final Int2ObjectMap<EquipmentSlot> EQUIPMENT_SLOTS;
+    public final List<ItemStack> trinketsItems = new ArrayList<>();
 
     public ZombifiedPlayerEntity(EntityType<? extends ZombieEntity> entityType, World world) {
         super(entityType, world);
@@ -113,25 +117,33 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     }
 
     public void storeGameProfile(GameProfile gameProfile) {
-        if (!this.getWorld().isClient) {
+        if (!this.getEntityWorld().isClient()) {
             if (ZombifiedPlayer.serverState == null) {
                 ZombifiedPlayer.LOGGER.warn("Persistant State still null!");
             }
             if (ZombifiedPlayer.serverState != null) {
-                ZombifiedPlayer.serverState.gameProfiles.put(this.getUuid(), gameProfile.getId().toString() + ":" + gameProfile.getName());
+                ZombifiedPlayer.serverState.gameProfiles.put(this.getUuid(), gameProfile.id().toString() + ":" + gameProfile.name());
                 ZombifiedPlayer.serverState.markDirty();
-                ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}", this.getUuid().toString(), gameProfile.getId().toString(), gameProfile.getName());
+                ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}", this.getUuid().toString(), gameProfile.id().toString(), gameProfile.name());
             }
         }
     }
 
     @Override
     protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+        super.dropEquipment(world, source, causedByPlayer);
+
+        // drop rotten flesh
+        Random random = this.getRandom();
+        ItemStack rottenFleshStack = new ItemStack(Items.ROTTEN_FLESH, random.nextBetween(1,3));
+        this.dropStack(world, rottenFleshStack);
+
+        // drop equipment and inventory
         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
             ItemStack itemStack = this.getEquippedStack(equipmentSlot);
             Object object = source.getAttacker();
             if (object instanceof LivingEntity livingEntity) {
-                object = this.getWorld();
+                object = this.getEntityWorld();
                 if (object instanceof ServerWorld serverWorld) {
                     EnchantmentHelper.getEquipmentDropChance(serverWorld, livingEntity, source, 1.0f);
                 }
@@ -154,7 +166,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
 
     public static ZombifiedPlayerEntity spawnZombifiedPlayer(PlayerEntity player) {
         ZombifiedPlayerEntity zombifiedPlayer = null;
-        if (player.getWorld() instanceof ServerWorld serverWorld) {
+        if (player.getEntityWorld() instanceof ServerWorld serverWorld) {
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER, serverWorld);
             zombifiedPlayer.setGameProfile(player.getGameProfile());
             zombifiedPlayer.storeGameProfile(player.getGameProfile());
@@ -172,7 +184,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getMainHandStack(), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
         } else {
-            if (MainConfig.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (MainConfig.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setStackInHand(Hand.MAIN_HAND, playerEntity.getMainHandStack().copyAndEmpty());
             }
         }
@@ -180,7 +192,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getOffHandStack(), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
         } else {
-            if (MainConfig.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (MainConfig.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setStackInHand(Hand.OFF_HAND, playerEntity.getOffHandStack().copyAndEmpty());
             }
         }
@@ -206,21 +218,31 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                 }
             }
         }
+
+        // Trinkets are currently not compatible with 1.21.9
+        /*
+        if (TrinketsUtil.isTrinketsLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+            List<ItemStack> playerCuriosItems = TrinketsUtil.getTrinketItemsAndClear(playerEntity);
+            this.trinketsItems.addAll(playerCuriosItems);
+        }
+        */
     }
 
     @Override
     public void writeCustomData(WriteView view) {
         super.writeCustomData(view);
-        this.writeData(view.getListAppender("Inventory", StackWithSlot.CODEC));
+        this.writeInventoryData(view.getListAppender("Inventory", StackWithSlot.CODEC));
+        TrinketsUtil.saveTrinketItems(view.getListAppender("TrinketItems", StackWithSlot.CODEC), this.trinketsItems);
     }
 
     @Override
     public void readCustomData(ReadView view) {
         super.readCustomData(view);
-        this.readData(view.getTypedListView("Inventory", StackWithSlot.CODEC));
+        this.readInventoryData(view.getTypedListView("Inventory", StackWithSlot.CODEC));
+        TrinketsUtil.loadTrinketItems(view.getTypedListView("TrinketItems", StackWithSlot.CODEC), this.trinketsItems);
     }
 
-    public void writeData(WriteView.ListAppender<StackWithSlot> list) {
+    public void writeInventoryData(WriteView.ListAppender<StackWithSlot> list) {
         for(int i = 0; i < this.main.size(); ++i) {
             ItemStack itemStack = (ItemStack)this.main.get(i);
             if (!itemStack.isEmpty()) {
@@ -230,7 +252,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
 
     }
 
-    public void readData(ReadView.TypedListReadView<StackWithSlot> list) {
+    public void readInventoryData(ReadView.TypedListReadView<StackWithSlot> list) {
         this.main.clear();
 
         for(StackWithSlot stackWithSlot : list) {

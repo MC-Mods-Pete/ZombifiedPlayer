@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class NetworkHandlerClient {
     public static void processGameProfile(ClientPlayerEntity clientPlayerEntity, UUID zombifiedPlayerUuid, Integer zombifiedPlayerId, UUID gameProfileUuid, String gameProfileName) {
-        Entity entity = clientPlayerEntity.getWorld().getEntityById(zombifiedPlayerId);
+        Entity entity = clientPlayerEntity.getEntityWorld().getEntityById(zombifiedPlayerId);
 
         if (entity instanceof ZombifiedPlayerEntity zombifiedPlayerEntity) {
             zombifiedPlayerEntity.setGameProfile(new GameProfile(gameProfileUuid, gameProfileName));
