@@ -7,7 +7,7 @@ import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
-import net.petemc.zombifiedplayer.Config;
+import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
@@ -21,9 +21,9 @@ public class PlayerDeathEvents {
             if(!event.getEntity().level().isClientSide()) {
                 if(event.getEntity() instanceof ServerPlayer serverPlayer) {
                     if (!(serverPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING))) {
-                        if ((Config.getSpawnOnAnyDeath() ||
-                                (ModCompatibility.diedFromInfection(serverPlayer) && Config.getSpawnWhenKilledByInfection()) ||
-                                (attackerIsUndead(event.getSource().getEntity()) && Config.getSpawnZombifiedPlayerAfterDeath()))) {
+                        if ((MainConfig.getSpawnOnAnyDeath() ||
+                                (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
+                                (attackerIsUndead(event.getSource().getEntity()) && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
                             ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer);
                         }
                     }

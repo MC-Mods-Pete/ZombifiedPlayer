@@ -1,19 +1,20 @@
-package net.petemc.zombifiedplayer;
+package net.petemc.zombifiedplayer.config;
 
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
+import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 @EventBusSubscriber(modid = ZombifiedPlayer.MOD_ID)
-public class Config
+public class MainConfig
 {
     public static boolean getSpawnZombifiedPlayerAfterDeath() {
         return spawnZombifiedPlayerAfterDeath;
     }
 
-    public static boolean getTransferMainandOffHandToZombifiedPlayer() {
-        return transferMainandOffHandToZombifiedPlayer;
+    public static boolean getTransferMainAndOffHandToZombifiedPlayer() {
+        return transferMainAndOffHandToZombifiedPlayer;
     }
 
     public static boolean getTransferArmorToZombifiedPlayer() {
@@ -24,8 +25,19 @@ public class Config
         return transferInventoryToZombifiedPlayer;
     }
 
+    // Curios items are currently not compatible with 1.21.9
+    /*
+    public static boolean getTransferCuriosOrTrinketItemsToZombifiedPlayer() {
+        return transferCuriosOrTrinketItemsToZombifiedPlayer;
+    }
+    */
+
     public static boolean getSpawnOnAnyDeath() {
         return spawnOnAnyDeath;
+    }
+
+    public static boolean getPrintSpawnMessageInChat() {
+        return printSpawnMessageInChat;
     }
 
     public static boolean getPrintSpawnLocationInChat() {
@@ -54,7 +66,7 @@ public class Config
 
 
     // Server Config
-    private static final ModConfigSpec.Builder BUILDER_SERVER = new ModConfigSpec.Builder();
+    public static final ModConfigSpec.Builder BUILDER_SERVER = new ModConfigSpec.Builder();
 
     private static final ModConfigSpec.BooleanValue SPAWN_ZOMBIFIED_PLAYER_AFTER_DEATH = BUILDER_SERVER
             .comment("If true, a zombified player will spawn after the player gets killed by an Undead | default: true")
@@ -62,7 +74,7 @@ public class Config
 
     private static final ModConfigSpec.BooleanValue TRANSFER_MAIN_AND_OFF_HAND_TO_ZOMBIFIED_PLAYER = BUILDER_SERVER
             .comment("If true, the Main and the OffHand of the dead player will be transferred to the zombified player | default: true")
-            .define("transferMainandOffHandToZombifiedPlayer", true);
+            .define("transferMainAndOffHandToZombifiedPlayer", true);
 
     private static final ModConfigSpec.BooleanValue TRANSFER_ARMOR_TO_ZOMBIFIED_PLAYER = BUILDER_SERVER
             .comment("If true, the armor of the dead player will be transferred to the zombified player | default: true")
@@ -72,9 +84,20 @@ public class Config
             .comment("If true, the inventory of the dead player will be transferred to the zombified player | default: true")
             .define("transferInventoryToZombifiedPlayer", true);
 
+    // Curios items are currently not compatible with 1.21.9
+    /*
+    private static final ModConfigSpec.BooleanValue TRANSFER_CURIOS_TRINKET_ITEMS_TO_ZOMBIFIED_PLAYER = BUILDER_SERVER
+            .comment("If true, all equipped curios/trinket items of the dead player will be transferred to the zombified player | default: true")
+            .define("transferCuriosOrTrinketItemsToZombifiedPlayer", true);
+    */
+
     private static final ModConfigSpec.BooleanValue SPAWN_ON_ANY_DEATH = BUILDER_SERVER
             .comment("If true, a zombified player will spawn no matter how the player died | default: false")
             .define("spawnOnAnyDeath", false);
+
+    private static final ModConfigSpec.BooleanValue PRINT_SPAWN_MESSAGE_IN_CHAT = BUILDER_SERVER
+            .comment("If true, a message will be printed out in chat that a zombified player has spawned | default: true")
+            .define("printSpawnMessageInChat", true);
 
     private static final ModConfigSpec.BooleanValue PRINT_SPAWN_LOCATION_IN_CHAT = BUILDER_SERVER
             .comment("If true, the spawn location of the zombified player will be printed out in chat | default: false")
@@ -100,20 +123,22 @@ public class Config
             .comment("If true, spawn zombified player after death by infection (Contagion mod needed!) | default: true")
             .define("spawnWhenKilledByInfection", true);
 
-    static final ModConfigSpec SPEC_SERVER = BUILDER_SERVER.build();
+    public static final ModConfigSpec SPEC_SERVER = BUILDER_SERVER.build();
 
 
     // Client Config
-    private static final ModConfigSpec.Builder BUILDER_CLIENT = new ModConfigSpec.Builder();
+    public static final ModConfigSpec.Builder BUILDER_CLIENT = new ModConfigSpec.Builder();
     // no client config
     static final ModConfigSpec SPEC_CLIENT = BUILDER_CLIENT.build();
 
 
     private static boolean spawnZombifiedPlayerAfterDeath = true;
-    private static boolean transferMainandOffHandToZombifiedPlayer = true;
+    private static boolean transferMainAndOffHandToZombifiedPlayer = true;
     private static boolean transferArmorToZombifiedPlayer = true;
     private static boolean transferInventoryToZombifiedPlayer = true;
+    //private static boolean transferCuriosOrTrinketItemsToZombifiedPlayer = true;
     private static boolean spawnOnAnyDeath = false;
+    private static boolean printSpawnMessageInChat = true;
     private static boolean printSpawnLocationInChat = false;
     private static boolean zombifiedPlayersCanBreakDoors = true;
     private static boolean makeTheZombifiedPlayersStronger = false;
@@ -126,10 +151,12 @@ public class Config
         ZombifiedPlayer.LOGGER.info("Loading Config");
         if (SPEC_SERVER.isLoaded()) {
             spawnZombifiedPlayerAfterDeath = SPAWN_ZOMBIFIED_PLAYER_AFTER_DEATH.get();
-            transferMainandOffHandToZombifiedPlayer = TRANSFER_MAIN_AND_OFF_HAND_TO_ZOMBIFIED_PLAYER.get();
+            transferMainAndOffHandToZombifiedPlayer = TRANSFER_MAIN_AND_OFF_HAND_TO_ZOMBIFIED_PLAYER.get();
             transferArmorToZombifiedPlayer = TRANSFER_ARMOR_TO_ZOMBIFIED_PLAYER.get();
             transferInventoryToZombifiedPlayer = TRANSFER_INVENTORY_TO_ZOMBIFIED_PLAYER.get();
+            //transferCuriosOrTrinketItemsToZombifiedPlayer = TRANSFER_CURIOS_TRINKET_ITEMS_TO_ZOMBIFIED_PLAYER.get();
             spawnOnAnyDeath = SPAWN_ON_ANY_DEATH.get();
+            printSpawnMessageInChat = PRINT_SPAWN_MESSAGE_IN_CHAT.get();
             printSpawnLocationInChat = PRINT_SPAWN_LOCATION_IN_CHAT.get();
             zombifiedPlayersCanBreakDoors = ZOMBIFIED_PLAYERS_CAN_BREAK_DOORS.get();
             makeTheZombifiedPlayersStronger = MAKE_THE_ZOMBIFIED_PLAYERS_STRONGER.get();
