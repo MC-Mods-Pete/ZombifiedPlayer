@@ -1,7 +1,7 @@
 package net.petemc.zombifiedplayer;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -26,8 +26,8 @@ public class ZombifiedPlayer {
     public static final String MOD_NAME = "ZombifiedPlayer";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public static ConcurrentHashMap<UUID, ResourceLocation> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<String, ResourceLocation> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<UUID, Identifier> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, Identifier> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
     public static ConcurrentHashMap<UUID, UUID> uuidMissmatches = new ConcurrentHashMap<>();
 
     public ZombifiedPlayer(IEventBus modEventBus, ModContainer modContainer) {

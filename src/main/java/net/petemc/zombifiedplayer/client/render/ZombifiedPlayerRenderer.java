@@ -2,14 +2,14 @@ package net.petemc.zombifiedplayer.client.render;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.ZombieModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.model.monster.zombie.ZombieModel;
 import net.minecraft.client.renderer.PlayerSkinRenderCache;
 import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
 import net.minecraft.client.renderer.entity.ArmorModelSet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.PlayerSkin;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.petemc.zombifiedplayer.config.MainConfig;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeoutException;
 public class ZombifiedPlayerRenderer
         extends AbstractZombieRenderer<ZombifiedPlayerEntity, ZombifiedPlayerEntityRenderState, ZombieModel<ZombifiedPlayerEntityRenderState>> {
 
-    private static ResourceLocation TEXTURE_FALLBACK = ResourceLocation.fromNamespaceAndPath("minecraft","textures/entity/player/wide/steve.png");
+    private static Identifier TEXTURE_FALLBACK = Identifier.fromNamespaceAndPath("minecraft","textures/entity/player/wide/steve.png");
     private static GameProfile receivedGameProfile = null;
     private static GameProfile inProgress = null;
     private boolean gameProfileReceived = false;
@@ -63,7 +63,7 @@ public class ZombifiedPlayerRenderer
     }
 
     @Override
-    public @NotNull ResourceLocation getTextureLocation(@NotNull ZombifiedPlayerEntityRenderState zombifiedPlayerEntityRenderState) {
+    public @NotNull Identifier getTextureLocation(@NotNull ZombifiedPlayerEntityRenderState zombifiedPlayerEntityRenderState) {
         if (zombifiedPlayerEntityRenderState.gameProfile != null) {
             if (ZombifiedPlayer.cachedPlayerSkinsByUUID.containsKey(zombifiedPlayerEntityRenderState.gameProfile.id())) {
                 zombifiedPlayerEntityRenderState.skinTexture = ZombifiedPlayer.cachedPlayerSkinsByUUID.get(zombifiedPlayerEntityRenderState.gameProfile.id());
@@ -83,7 +83,7 @@ public class ZombifiedPlayerRenderer
         return TEXTURE_FALLBACK;
     }
 
-    public void setTexture(ResourceLocation id) {
+    public void setTexture(Identifier id) {
         TEXTURE_FALLBACK = id;
     }
 
