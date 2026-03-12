@@ -32,7 +32,6 @@ public class ServerZombifiedPlayerLoadEvent {
                 if (pEntity instanceof ZombifiedPlayerEntity zombifiedPlayerEntity) {
                     //GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(zombifiedPlayerEntity.getUuid(), pWorld);
                     if ((zombifiedPlayerEntity.getGameProfile().getId() != null) && (zombifiedPlayerEntity.getGameProfile().getName() != null)) {
-                        zombifiedPlayerEntity.gameProfile = new GameProfile(zombifiedPlayerEntity.getGameProfile().getId(), zombifiedPlayerEntity.getGameProfile().getName());
                         for (ServerPlayerEntity serverPlayer : PlayerLookup.world((ServerWorld) pWorld)) {
                             PacketByteBuf buf = PacketByteBufs.create();
 

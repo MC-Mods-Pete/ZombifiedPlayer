@@ -12,7 +12,7 @@ import net.minecraft.client.render.entity.model.ZombieEntityModel;
 import net.minecraft.util.Identifier;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.ZombifiedPlayerClient;
-import net.petemc.zombifiedplayer.config.Config;
+import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 
 @Environment(EnvType.CLIENT)
@@ -118,7 +118,7 @@ public class ZombifiedPlayerRenderer
                 counter = counterMax;
                 totalTries++;
                 if (totalTries == maxTotalTries - 1) {
-                    if (Config.getLimitSkinFetchTries()) {
+                    if (MainConfig.getLimitSkinFetchTries()) {
                         ZombifiedPlayer.LOGGER.warn("Could not fetch a valid Skin for {}, will stop trying.", profile.getName());
                     } else {
                         totalTries = 0;

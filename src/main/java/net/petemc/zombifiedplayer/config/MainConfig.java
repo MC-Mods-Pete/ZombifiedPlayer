@@ -8,39 +8,35 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 @me.shedaniel.autoconfig.annotation.Config(name = ZombifiedPlayer.MOD_ID)
-public class Config implements ConfigData
+public class MainConfig implements ConfigData
 {
     @ConfigEntry.Gui.Excluded
-    public static Config INSTANCE;
+    public static MainConfig INSTANCE;
 
     public static void init() {
-        AutoConfig.register(Config.class, JanksonConfigSerializer::new);
-        INSTANCE = AutoConfig.getConfigHolder(Config.class).getConfig();
+        AutoConfig.register(MainConfig.class, JanksonConfigSerializer::new);
+        INSTANCE = AutoConfig.getConfigHolder(MainConfig.class).getConfig();
     }
 
     public static boolean getSpawnZombifiedPlayerAfterDeath() {
         return INSTANCE.spawnZombifiedPlayerAfterDeath;
     }
 
-    public static boolean getTransferMainAndOffHandToZombifiedPlayer() {
-        return INSTANCE.transferMainAndOffHandToZombifiedPlayer;
-    }
+    public static boolean getTransferMainAndOffHandToZombifiedPlayer() { return INSTANCE.transferMainAndOffHandToZombifiedPlayer; }
 
     public static boolean getTransferArmorToZombifiedPlayer() {
         return INSTANCE.transferArmorToZombifiedPlayer;
     }
 
-    public static boolean getTransferInventoryToZombifiedPlayer() {
-        return INSTANCE.transferInventoryToZombifiedPlayer;
-    }
+    public static boolean getTransferInventoryToZombifiedPlayer() { return INSTANCE.transferInventoryToZombifiedPlayer; }
 
-    public static boolean getTransferCuriosOrTrinketItemsToZombifiedPlayer() {
-        return INSTANCE.transferCuriosOrTrinketItemsToZombifiedPlayer;
-    }
+    public static boolean getTransferCuriosOrTrinketItemsToZombifiedPlayer() { return INSTANCE.transferCuriosOrTrinketItemsToZombifiedPlayer; }
 
     public static boolean getSpawnOnAnyDeath() {
         return INSTANCE.spawnOnAnyDeath;
     }
+
+    public static boolean getDisplayNameTagForZombifiedPlayer() { return INSTANCE.displayNameTagForZombifiedPlayer; }
 
     public static boolean getPrintSpawnMessageInChat() {
         return INSTANCE.printSpawnMessageInChat;
@@ -58,9 +54,7 @@ public class Config implements ConfigData
         return INSTANCE.makeTheZombifiedPlayersStronger;
     }
 
-    public static boolean getMakeTheZombifiedPlayersImmuneToFire() {
-        return INSTANCE.makeTheZombifiedPlayersImmuneToFire;
-    }
+    public static boolean getMakeTheZombifiedPlayersImmuneToFire() { return INSTANCE.makeTheZombifiedPlayersImmuneToFire; }
 
     public static boolean getLimitSkinFetchTries() {
         return INSTANCE.limitSkinFetchTries;
@@ -93,6 +87,10 @@ public class Config implements ConfigData
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, a zombified player will spawn no matter how the player died | default: false")
     private boolean spawnOnAnyDeath = false;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, the zombified player will display the name of the dead player | default: true")
+    private boolean displayNameTagForZombifiedPlayer = true;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, a message will be printed out in chat that a zombified player has spawned | default: true")

@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.8-SNAPSHOT'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -41,6 +41,25 @@ repositories {
         name 'Ladysnake Mods'
         url 'https://maven.ladysnake.org/releases'
     }
+    maven {
+        name 'Wispforest'
+        url 'https://maven.wispforest.io/'
+    }
+    maven {
+        name 'Architectury'
+        url 'https://maven.architectury.dev/'
+    }
+    maven {
+        name 'Jamalam'
+        url 'https://maven.jamalam.tech/releases/'
+    }
+    maven {
+        name 'Modrinth'
+        url 'https://api.modrinth.com/maven'
+        content {
+            includeGroup 'maven.modrinth'
+        }
+    }
 }
 
 fabricApi {
@@ -66,12 +85,22 @@ dependencies {
 	modImplementation "curse.maven:contagion-1027702:${project.contagion_version}"
 	modImplementation "curse.maven:undeadnights-1166914:${project.undeadnights_version}"
 
-    modImplementation "curse.maven:trinkets-341284:4657534"
+    modImplementation "curse.maven:trinkets-341284:${project.trinkets_version}"
+	modImplementation "curse.maven:utility-belt-664053:${project.utility_belt}"
+	modImplementation "maven.modrinth:gravestones:${project.gravestones_version}"
+	modImplementation "dev.architectury:architectury-fabric:9.2.14"
+	modImplementation "io.github.jamalam360:jamlib-fabric:1.3.5+1.20.1"
+	modImplementation "curse.maven:accessories-938917:7164886"
+	modImplementation "io.wispforest:endec:0.1.8"
+	modImplementation "io.wispforest.endec:gson:0.1.5"
+	modImplementation "io.wispforest.endec:netty:0.1.4"
+	// Sodium needed in dev env to satisfy accessories' optional Sodium mixin
+	modLocalRuntime "maven.modrinth:sodium:OihdIimA"
 
     // Adds a dependency on the base cardinal components module (required by every other module)
     // Replace modImplementation with modApi if you expose components in your own API
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.0.0"
-    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.0.0"
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-base:5.2.3"
+    modImplementation "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:5.2.3"
     // Adds a dependency on a specific module
     //modImplementation "org.ladysnake.cardinal-components-api:<MODULE>:<VERSION>"
     // Includes Cardinal Components API as a Jar-in-Jar dependency (optional)

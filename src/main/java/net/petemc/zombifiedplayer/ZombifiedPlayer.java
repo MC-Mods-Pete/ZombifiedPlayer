@@ -4,7 +4,7 @@ import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.petemc.zombifiedplayer.config.Config;
+import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import net.petemc.zombifiedplayer.event.PlayerDeathEvents;
@@ -24,7 +24,7 @@ public class ZombifiedPlayer implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LOGGER.info("Initializing Zombified Player Mod");
-		Config.init();
+		MainConfig.init();
 		PlayerDeathEvents.registerEvent();
 		ServerZombifiedPlayerLoadEvent.registerEvent();
 		ModCompatibility.init();
