@@ -209,10 +209,10 @@ dependencies {
 
     implementation fg.deobf("curse.maven:curios-309927:${curios_version}")
 
+    implementation fg.deobf("curse.maven:accessories-938917:7164863")
+
     implementation fg.deobf("curse.maven:sophisticated-backpacks-422301:6869024")
     implementation fg.deobf("curse.maven:sophisticated-core-618298:6850808")
-
-
 }
 
 mixin {

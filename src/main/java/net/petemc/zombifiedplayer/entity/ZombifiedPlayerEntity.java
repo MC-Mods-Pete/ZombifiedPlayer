@@ -33,6 +33,7 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
 import net.petemc.zombifiedplayer.Config;
+import net.petemc.zombifiedplayer.util.AccessoriesUtil;
 import net.petemc.zombifiedplayer.util.CuriosUtil;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,6 +43,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     public GameProfile gameProfile;
     public final NonNullList<ItemStack> main = NonNullList.withSize(36, ItemStack.EMPTY);
     public final List<ItemStack> curiosItems = new ArrayList<>();
+    public final List<ItemStack> accessoriesItems = new ArrayList<>();
 
     public ZombifiedPlayerEntity(EntityType<? extends Zombie> entityType, Level level) {
         super(entityType, level);
@@ -133,6 +135,13 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             }
         }
         this.curiosItems.clear();
+
+        for (ItemStack accessoriesItem : this.accessoriesItems) {
+            if (!accessoriesItem.isEmpty()) {
+                this.spawnAtLocation(accessoriesItem);
+            }
+        }
+        this.accessoriesItems.clear();
     }
 
     public static ZombifiedPlayerEntity spawnZombifiedPlayer(Player player) {
@@ -194,6 +203,11 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             List<ItemStack> playerCuriosItems = CuriosUtil.getCuriosItemsAndClear(playerEntity);
             this.curiosItems.addAll(playerCuriosItems);
         }
+
+        if (AccessoriesUtil.isAccessoriesLoaded() && Config.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+            List<ItemStack> playerAccessoriesItems = AccessoriesUtil.getAccessoriesItemsAndClear(playerEntity);
+            this.accessoriesItems.addAll(playerAccessoriesItems);
+        }
     }
 
     @Override
@@ -227,6 +241,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
         // Store Curios items
         nbt.put("CuriosItems", CuriosUtil.writeCuriosItemsToNbt(this.curiosItems));
+        nbt.put("AccessoriesItems", AccessoriesUtil.writeAccessoriesItemsToNbt(this.accessoriesItems));
     }
 
     @Override
@@ -242,6 +257,11 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             ListTag curiosNbt = nbt.getList("CuriosItems", Tag.TAG_COMPOUND);
             this.curiosItems.clear();
             this.curiosItems.addAll(CuriosUtil.readCuriosItemsFromNbt(curiosNbt));
+        }
+        if (nbt.contains("AccessoriesItems")) {
+            ListTag accessoriesNbt = nbt.getList("AccessoriesItems", Tag.TAG_COMPOUND);
+            this.accessoriesItems.clear();
+            this.accessoriesItems.addAll(AccessoriesUtil.readAccessoriesItemsFromNbt(accessoriesNbt));
         }
     }
 

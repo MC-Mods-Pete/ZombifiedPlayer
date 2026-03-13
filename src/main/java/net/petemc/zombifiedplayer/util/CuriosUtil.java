@@ -5,11 +5,13 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.ModList;
+import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CuriosUtil {
 
@@ -41,6 +43,33 @@ public class CuriosUtil {
         }
         
         return curiosItems;
+    }
+
+    public static boolean checkForItemInCurios(Player player, ItemStack itemToCheck) {
+        AtomicBoolean foundItem = new AtomicBoolean(false);
+
+        if (!isCuriosLoaded()) {
+            return foundItem.get();
+        }
+
+        try {
+            CuriosApi.getCuriosInventory(player).ifPresent(curiosInventory -> {
+                for (String identifier : curiosInventory.getCurios().keySet()) {
+                    ICurioStacksHandler stacksHandler = curiosInventory.getCurios().get(identifier);
+                    for (int i = 0; i < stacksHandler.getSlots(); i++) {
+                        ItemStack stack = stacksHandler.getStacks().getStackInSlot(i);
+                        if (!stack.isEmpty() && stack.getItem() == itemToCheck.getItem()) {
+                            ZombifiedPlayer.LOGGER.info("Found " + itemToCheck + " in curios!");
+                            foundItem.set(true);
+                            return;
+                        }
+                    }
+                }
+            });
+        } catch (Exception e) {
+        }
+
+        return foundItem.get();
     }
 
     public static ListTag writeCuriosItemsToNbt(List<ItemStack> curiosItems) {
