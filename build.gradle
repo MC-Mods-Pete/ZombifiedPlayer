@@ -209,28 +209,18 @@ dependencies {
 
     implementation fg.deobf("curse.maven:curios-309927:${curios_version}")
 
-    implementation fg.deobf("curse.maven:accessories-938917:7164863")
+    compileOnly fg.deobf("curse.maven:accessories-938917:7164863")
+
+    implementation fg.deobf("curse.maven:corpse-316582:7018272")
+    implementation fg.deobf("curse.maven:gravestone-mod-238551:7099725")
 
     implementation fg.deobf("curse.maven:sophisticated-backpacks-422301:6869024")
     implementation fg.deobf("curse.maven:sophisticated-core-618298:6850808")
 }
 
 mixin {
-    // MixinGradle Settings
     add sourceSets.main, 'zombifiedplayer.refmap.json'
     config 'zombifiedplayer.mixins.json'
-
-
-    add sourceSets.main, "${mod_id}.refmap.json"
-
-    config "${mod_id}.mixins.json"
-}
-
-
-sourceSets {
-    main {
-        ext.refMap = "zombifiedplayer.refmap.json"
-    }
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

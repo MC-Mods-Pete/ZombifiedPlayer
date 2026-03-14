@@ -7,7 +7,7 @@ import net.minecraft.world.item.Items;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.petemc.zombifiedplayer.Config;
+import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
@@ -23,9 +23,9 @@ public class PlayerDeathEvents {
                 if(event.getEntity() instanceof ServerPlayer serverPlayer) {
                     boolean flag = CuriosUtil.checkForItemInCurios(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance());
                     if (!(serverPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING) || flag)) {
-                        if ((Config.getSpawnOnAnyDeath() ||
-                                (ModCompatibility.diedFromInfection(serverPlayer) && Config.getSpawnWhenKilledByInfection()) ||
-                                (attackerIsUndead(event.getSource().getEntity()) && Config.getSpawnZombifiedPlayerAfterDeath()))) {
+                        if ((MainConfig.getSpawnOnAnyDeath() ||
+                                (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
+                                (attackerIsUndead(event.getSource().getEntity()) && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
                             ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer);
                         }
                     }
@@ -35,7 +35,7 @@ public class PlayerDeathEvents {
     }
 
     public static boolean attackerIsUndead(Entity pAttacker) {
-        boolean attackerIsUndead = true;
+        boolean attackerIsUndead = false;
         if (pAttacker != null) {
             attackerIsUndead =
                    ((pAttacker.getType() == EntityType.ZOMBIE) ||

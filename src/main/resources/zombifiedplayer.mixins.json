@@ -5,7 +5,9 @@
 	"compatibilityLevel": "JAVA_17",
 	"refmap": "zombifiedplayer.refmap.json",
 	"mixins": [
-		"ServerPlayerEntityMixin"
+		"ServerPlayerEntityMixin",
+		"CorpseDeathEventsMixin",
+		"GravestoneDeathEventsMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

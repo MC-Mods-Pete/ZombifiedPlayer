@@ -13,8 +13,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -32,14 +34,36 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.entity.IEntityAdditionalSpawnData;
 import net.minecraftforge.network.NetworkHooks;
-import net.petemc.zombifiedplayer.Config;
+import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.util.AccessoriesUtil;
 import net.petemc.zombifiedplayer.util.CuriosUtil;
+import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSpawnData {
+    /** UUIDs of players for whom a corpse should be suppressed (set by spawnZombifiedPlayer). */
+    private static final Set<UUID> SKIP_CORPSE_PLAYERS = new HashSet<>();
+    /** UUIDs of players for whom a gravestone should be suppressed (set by spawnZombifiedPlayer). */
+    private static final Set<UUID> SKIP_GRAVESTONE_PLAYERS = new HashSet<>();
+
+    public static boolean shouldSkipCorpse(UUID playerUUID) {
+        return SKIP_CORPSE_PLAYERS.contains(playerUUID);
+    }
+
+    public static void removeFromSkipCorpse(UUID playerUUID) {
+        SKIP_CORPSE_PLAYERS.remove(playerUUID);
+    }
+
+    public static boolean shouldSkipGravestone(UUID playerUUID) {
+        return SKIP_GRAVESTONE_PLAYERS.contains(playerUUID);
+    }
+
+    public static void removeFromSkipGravestone(UUID playerUUID) {
+        SKIP_GRAVESTONE_PLAYERS.remove(playerUUID);
+    }
+
     public GameProfile gameProfile;
     public final NonNullList<ItemStack> main = NonNullList.withSize(36, ItemStack.EMPTY);
     public final List<ItemStack> curiosItems = new ArrayList<>();
@@ -51,11 +75,11 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
 
     public static AttributeSupplier.@NotNull Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, Config.getMakeTheZombifiedPlayersStronger() ? 40.0 : 20.0)
-                .add(Attributes.FOLLOW_RANGE, Config.getMakeTheZombifiedPlayersStronger() ? 50.0 : 40.0)
-                .add(Attributes.MOVEMENT_SPEED, Config.getMakeTheZombifiedPlayersStronger() ? 0.29f : 0.23f)
-                .add(Attributes.ATTACK_DAMAGE, Config.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
-                .add(Attributes.ARMOR, Config.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
+                .add(Attributes.MAX_HEALTH, MainConfig.getMakeTheZombifiedPlayersStronger() ? 40.0 : 20.0)
+                .add(Attributes.FOLLOW_RANGE, MainConfig.getMakeTheZombifiedPlayersStronger() ? 50.0 : 40.0)
+                .add(Attributes.MOVEMENT_SPEED, MainConfig.getMakeTheZombifiedPlayersStronger() ? 0.29f : 0.23f)
+                .add(Attributes.ATTACK_DAMAGE, MainConfig.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
+                .add(Attributes.ARMOR, MainConfig.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE);
     }
 
@@ -70,8 +94,16 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     }
 
     @Override
+    public float getStandingEyeHeight(@NotNull Pose pPose, @NotNull EntityDimensions pSize) {
+        if (MainConfig.getUseCustomEyeHeight()) {
+            return MainConfig.getCustomEyeHeight();
+        }
+        return super.getStandingEyeHeight(pPose, pSize);
+    }
+
+    @Override
     public boolean fireImmune() {
-        return Config.getMakeTheZombifiedPlayersImmuneToFire();
+        return MainConfig.getMakeTheZombifiedPlayersImmuneToFire();
     }
 
     @Override
@@ -82,7 +114,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     @Override
     public boolean canBreakDoors()
     {
-        return Config.getZombifiedPlayersCanBreakDoors();
+        return MainConfig.getZombifiedPlayersCanBreakDoors();
     }
 
     @Override
@@ -150,12 +182,22 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER.get(), serverLevel);
             zombifiedPlayer.setGameProfile(player.getGameProfile());
             //zombifiedPlayer.storeGameProfile(player.getGameProfile());
-            Component name = Component.literal("Zombified " + player.getName().getString());
-            zombifiedPlayer.setCustomName(name);
+            if (MainConfig.getDisplayNameTagForZombifiedPlayer()) {
+                Component name = Component.literal("Zombified " + player.getName().getString());
+                zombifiedPlayer.setCustomName(name);
+            }
             zombifiedPlayer.setPos(player.getX(), player.getY(), player.getZ());
             zombifiedPlayer.setPersistenceRequired();
             zombifiedPlayer.transferInventory(player);
             serverLevel.addFreshEntity(zombifiedPlayer);
+            // Prevent the corpse mod from spawning a corpse for this death
+            if (ModCompatibility.isCorpseLoaded() && MainConfig.getCorpseCompatibility()) {
+                SKIP_CORPSE_PLAYERS.add(player.getUUID());
+            }
+            // Prevent the gravestone mod from spawning a gravestone for this death
+            if (ModCompatibility.isGravestoneLoaded() && MainConfig.getGravestoneCompatibility()) {
+                SKIP_GRAVESTONE_PLAYERS.add(player.getUUID());
+            }
         }
         return zombifiedPlayer;
     }
@@ -164,7 +206,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         if (EnchantmentHelper.hasVanishingCurse(playerEntity.getMainHandItem())) {
             playerEntity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainAndOffHandToZombifiedPlayer()) {
+            if (MainConfig.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setItemInHand(InteractionHand.MAIN_HAND, playerEntity.getMainHandItem().copyAndClear());
             }
         }
@@ -172,7 +214,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         if (EnchantmentHelper.hasVanishingCurse(playerEntity.getOffhandItem())) {
             playerEntity.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainAndOffHandToZombifiedPlayer()) {
+            if (MainConfig.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setItemInHand(InteractionHand.OFF_HAND, playerEntity.getOffhandItem().copyAndClear());
             }
         }
@@ -181,7 +223,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             if (EnchantmentHelper.hasVanishingCurse(playerEntity.getInventory().armor.get(i))) {
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
-                if (Config.getTransferArmorToZombifiedPlayer()) {
+                if (MainConfig.getTransferArmorToZombifiedPlayer()) {
                     this.equipItemIfPossible(playerEntity.getInventory().armor.get(i).copyAndClear());
                 }
             }
@@ -193,18 +235,18 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
                     playerEntity.getInventory().items.set(i, ItemStack.EMPTY);
                     this.main.set(i, ItemStack.EMPTY);
                 }
-                if (Config.getTransferInventoryToZombifiedPlayer()) {
+                if (MainConfig.getTransferInventoryToZombifiedPlayer()) {
                     this.main.set(i, playerEntity.getInventory().items.get(i).copyAndClear());
                 }
             }
         }
 
-        if (CuriosUtil.isCuriosLoaded() && Config.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+        if (CuriosUtil.isCuriosLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
             List<ItemStack> playerCuriosItems = CuriosUtil.getCuriosItemsAndClear(playerEntity);
             this.curiosItems.addAll(playerCuriosItems);
         }
 
-        if (AccessoriesUtil.isAccessoriesLoaded() && Config.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+        if (AccessoriesUtil.isAccessoriesLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
             List<ItemStack> playerAccessoriesItems = AccessoriesUtil.getAccessoriesItemsAndClear(playerEntity);
             this.accessoriesItems.addAll(playerAccessoriesItems);
         }
