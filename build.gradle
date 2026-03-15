@@ -15,6 +15,7 @@ modmenu_version = project.modmenu_version
 jade_version = project.jade_version
 contagion_version = project.contagion_version
 undeadnights_version = project.undeadnights_version
+cardinal_components_version = project.cardinal_components_version
 
 base {
 	archivesName = project.archives_base_name
@@ -36,6 +37,11 @@ repositories {
 			includeGroup "curse.maven"
 		}
 	}
+
+    maven {
+        name 'Ladysnake Mods'
+        url 'https://maven.ladysnake.org/releases'
+    }
 }
 
 fabricApi {
@@ -60,6 +66,11 @@ dependencies {
 	modImplementation "curse.maven:jade-324717:${project.jade_version}"
 	modImplementation "curse.maven:contagion-1027702:${project.contagion_version}"
 	modImplementation "curse.maven:undeadnights-1166914:${project.undeadnights_version}"
+
+    modImplementation "curse.maven:trinkets-341284:${trinkets_version}"
+
+    modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:${cardinal_components_version}"
+    modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:${cardinal_components_version}"
 }
 
 processResources {

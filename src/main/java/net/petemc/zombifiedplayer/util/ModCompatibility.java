@@ -10,20 +10,23 @@ import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 public class ModCompatibility {
     public static void init() {
-        if (contagionDetected()) {
-            ZombifiedPlayer.LOGGER.info("Contagion detected. Death by Infection can spawn Zombified Players.");
+        if (isContagionLoaded()) {
+            ZombifiedPlayer.LOGGER.info("Contagion mod detected. Death by Infection can spawn Zombified Players.");
         }
-        if (undeadNightsDetected()) {
-            ZombifiedPlayer.LOGGER.info("Undead Nights mod detected. Death by a Horde Zombie will spawn a Zombified Players.");
+        if (isUndeadNightsLoaded()) {
+            ZombifiedPlayer.LOGGER.info("Undead Nights mod detected. Death by a Horde Zombie will spawn a Zombified Player.");
+        }
+        if (TrinketsUtil.isTrinketsLoaded()) {
+            ZombifiedPlayer.LOGGER.info("Trinkets API detected. If enabled trinket items will be transferred to the Zombified Player.");
         }
     }
 
-    public static boolean contagionDetected() {
+    public static boolean isContagionLoaded() {
         return FabricLoader.getInstance().isModLoaded("contagion");
     }
 
     public static boolean diedFromInfection(ServerPlayerEntity serverPlayer) {
-        if (contagionDetected()) {
+        if (isContagionLoaded()) {
             if (serverPlayer instanceof InfectedPlayer infectedPlayer) {
                 return infectedPlayer.contagion_playerDiedFromInfection();
             }
@@ -31,12 +34,12 @@ public class ModCompatibility {
         return false;
     }
 
-    public static boolean undeadNightsDetected() {
+    public static boolean isUndeadNightsLoaded() {
         return FabricLoader.getInstance().isModLoaded("undeadnights");
     }
 
     public static boolean wasKilledByHordeZombie(LivingEntity pAttacker) {
-        if (undeadNightsDetected()) {
+        if (isUndeadNightsLoaded()) {
             return (pAttacker instanceof HordeZombieEntity) || (pAttacker instanceof EliteZombieEntity);
         }
         return false;

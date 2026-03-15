@@ -10,7 +10,7 @@ import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 import java.util.HashMap;
 import java.util.UUID;
-
+/*
 public class StateSaverAndLoader extends PersistentState {
 
     public HashMap<UUID, GameProfileData> gameProfiles = new HashMap<>();
@@ -80,3 +80,5 @@ public class StateSaverAndLoader extends PersistentState {
         return serverState.gameProfiles.computeIfAbsent(zombUuid, uuid -> new GameProfileData());
     }
 }
+
+ */

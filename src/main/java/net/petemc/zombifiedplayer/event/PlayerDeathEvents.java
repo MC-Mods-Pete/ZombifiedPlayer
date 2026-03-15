@@ -59,8 +59,9 @@ public class PlayerDeathEvents {
         if (pPlayer != null) {
             if (pPlayer instanceof ServerPlayerEntity serverPlayer) {
                 if ((Config.getSpawnOnAnyDeath() ||
-                    (ModCompatibility.diedFromInfection(serverPlayer) && Config.getSpawnWhenKilledByInfection()) ||
-                    (attackerIsUndead() && Config.getSpawnZombifiedPlayerAfterDeath()))) {
+                        (ModCompatibility.diedFromInfection(serverPlayer) && Config.getSpawnWhenKilledByInfection()) ||
+                        (attackerIsUndead() && Config.getSpawnZombifiedPlayerAfterDeath()))) {
+                    if (Config.getPrintSpawnMessageInChat()) {
                         serverPlayer.sendMessageToClient(Text.translatable("zombifiedplayer.spawn.message"), false);
                         if (Config.getPrintSpawnLocationInChat()) {
                             Text textCoordinates = Texts.bracketed(Text.translatable("chat.coordinates", pPlayer.getBlockPos().getX(), pPlayer.getBlockPos().getY(), pPlayer.getBlockPos().getZ()))
@@ -71,6 +72,7 @@ public class PlayerDeathEvents {
                                     );
                             serverPlayer.sendMessageToClient(Text.translatable("zombifiedplayer.location.message", textCoordinates), false);
                         }
+                    }
                 }
             }
         }
