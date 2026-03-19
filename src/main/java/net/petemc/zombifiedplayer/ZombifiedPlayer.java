@@ -17,6 +17,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.entity.ModEntities;
+import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.slf4j.Logger;
 
 import java.util.UUID;
@@ -42,6 +43,7 @@ public class ZombifiedPlayer {
         //modEventBus.addListener(this::addCreative);
 
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC_SERVER);
+        ModCompatibility.init();
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {

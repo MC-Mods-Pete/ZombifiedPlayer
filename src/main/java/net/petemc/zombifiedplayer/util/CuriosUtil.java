@@ -44,7 +44,7 @@ public class CuriosUtil {
         return curiosItems;
     }
 
-    public static ListTag curiosItemsToNbt(Entity entity, List<ItemStack> curiosItems, ListTag nbtList) {
+    public static ListTag writeCuriosItemsToNbt(Entity entity, List<ItemStack> curiosItems, ListTag nbtList) {
         int i;
         CompoundTag nbtCompound;
         
@@ -59,7 +59,7 @@ public class CuriosUtil {
         return nbtList;
     }
 
-    public static List<ItemStack> curiosItemsFromNbt(Entity entity, ListTag nbtList) {
+    public static List<ItemStack> loadCuriosItemsFromNbt(Entity entity, ListTag nbtList) {
         List<ItemStack> curiosItems = new ArrayList<>();
         
         for (int i = 0; i < nbtList.size(); ++i) {

@@ -162,7 +162,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (Config.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setItemInHand(InteractionHand.MAIN_HAND, playerEntity.getMainHandItem().copyAndClear());
             }
         }
@@ -170,7 +170,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (Config.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setItemInHand(InteractionHand.OFF_HAND, playerEntity.getOffhandItem().copyAndClear());
             }
         }
@@ -196,8 +196,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
                 }
             }
         }
-        
-        if (CuriosUtil.isCuriosLoaded()) {
+
+        if (CuriosUtil.isCuriosLoaded() && Config.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
             List<ItemStack> playerCuriosItems = CuriosUtil.getCuriosItemsAndClear(playerEntity);
             this.curiosItems.addAll(playerCuriosItems);
         }
@@ -233,7 +233,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         nbt.putString("gameProfileName", gameProfile.getName());
         nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
         // Store Curios items
-        nbt.put("CuriosItems", CuriosUtil.curiosItemsToNbt(this, this.curiosItems, new ListTag()));
+        nbt.put("CuriosItems", CuriosUtil.writeCuriosItemsToNbt(this, this.curiosItems, new ListTag()));
     }
 
     @Override
@@ -248,7 +248,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         if (nbt.contains("CuriosItems")) {
             ListTag curiosNbt = nbt.getList("CuriosItems", Tag.TAG_COMPOUND);
             this.curiosItems.clear();
-            this.curiosItems.addAll(CuriosUtil.curiosItemsFromNbt(this, curiosNbt));
+            this.curiosItems.addAll(CuriosUtil.loadCuriosItemsFromNbt(this, curiosNbt));
         }
     }
 
