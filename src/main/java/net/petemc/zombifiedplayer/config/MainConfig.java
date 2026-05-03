@@ -25,15 +25,16 @@ public class MainConfig
         return transferInventoryToZombifiedPlayer;
     }
 
-    // Curios items are currently not compatible with 1.21.9
-    /*
     public static boolean getTransferCuriosOrTrinketItemsToZombifiedPlayer() {
         return transferCuriosOrTrinketItemsToZombifiedPlayer;
     }
-    */
 
     public static boolean getSpawnOnAnyDeath() {
         return spawnOnAnyDeath;
+    }
+
+    public static boolean getDisplayNameTagForZombifiedPlayer() {
+        return displayNameTagForZombifiedPlayer;
     }
 
     public static boolean getPrintSpawnMessageInChat() {
@@ -64,9 +65,24 @@ public class MainConfig
         return spawnWhenKilledByInfection;
     }
 
+    public static boolean getCorpseCompatibility() {
+        return corpseCompatibility;
+    }
+
+    public static boolean getGravestoneCompatibility() {
+        return gravestoneCompatibility;
+    }
+
+    public static boolean getUseCustomEyeHeight() {
+        return useCustomEyeHeight;
+    }
+
+    public static float getCustomEyeHeight() {
+        return customEyeHeight;
+    }
 
     // Server Config
-    public static final ModConfigSpec.Builder BUILDER_SERVER = new ModConfigSpec.Builder();
+    private static final ModConfigSpec.Builder BUILDER_SERVER = new ModConfigSpec.Builder();
 
     private static final ModConfigSpec.BooleanValue SPAWN_ZOMBIFIED_PLAYER_AFTER_DEATH = BUILDER_SERVER
             .comment("If true, a zombified player will spawn after the player gets killed by an Undead | default: true")
@@ -84,16 +100,17 @@ public class MainConfig
             .comment("If true, the inventory of the dead player will be transferred to the zombified player | default: true")
             .define("transferInventoryToZombifiedPlayer", true);
 
-    // Curios items are currently not compatible with 1.21.9
-    /*
     private static final ModConfigSpec.BooleanValue TRANSFER_CURIOS_TRINKET_ITEMS_TO_ZOMBIFIED_PLAYER = BUILDER_SERVER
             .comment("If true, all equipped curios/trinket items of the dead player will be transferred to the zombified player | default: true")
             .define("transferCuriosOrTrinketItemsToZombifiedPlayer", true);
-    */
 
     private static final ModConfigSpec.BooleanValue SPAWN_ON_ANY_DEATH = BUILDER_SERVER
             .comment("If true, a zombified player will spawn no matter how the player died | default: false")
             .define("spawnOnAnyDeath", false);
+
+    private static final ModConfigSpec.BooleanValue DISPLAY_NAME_TAG_FOR_ZOMBIFIED_PLAYER = BUILDER_SERVER
+            .comment("If true, the name tag will be displayed above the Zombified Player | default: true")
+            .define("displayNameTagForZombifiedPlayer", true);
 
     private static final ModConfigSpec.BooleanValue PRINT_SPAWN_MESSAGE_IN_CHAT = BUILDER_SERVER
             .comment("If true, a message will be printed out in chat that a zombified player has spawned | default: true")
@@ -123,21 +140,38 @@ public class MainConfig
             .comment("If true, spawn zombified player after death by infection (Contagion mod needed!) | default: true")
             .define("spawnWhenKilledByInfection", true);
 
+    private static final ModConfigSpec.BooleanValue CORPSE_COMPATIBILITY = BUILDER_SERVER
+            .comment("If true, no corpse (Corpse mod) will spawn when a Zombified Player is created | default: false")
+            .define("corpseCompatibility", false);
+
+    private static final ModConfigSpec.BooleanValue GRAVESTONE_COMPATIBILITY = BUILDER_SERVER
+            .comment("If true, no gravestone (Gravestone mod) will spawn when a Zombified Player is created | default: false")
+            .define("gravestoneCompatibility", false);
+
+    private static final ModConfigSpec.BooleanValue USE_CUSTOM_EYE_HEIGHT = BUILDER_SERVER
+            .comment("If true, the custom eye height defined by customEyeHeight will be used for the Zombified Player | default: false")
+            .define("useCustomEyeHeight", false);
+
+    private static final ModConfigSpec.DoubleValue CUSTOM_EYE_HEIGHT = BUILDER_SERVER
+            .comment("The custom eye height of the Zombified Player (only used if useCustomEyeHeight is true) | default: 1.74")
+            .defineInRange("customEyeHeight", 1.74, 0.0, 10.0);
+
     public static final ModConfigSpec SPEC_SERVER = BUILDER_SERVER.build();
 
 
     // Client Config
-    public static final ModConfigSpec.Builder BUILDER_CLIENT = new ModConfigSpec.Builder();
+    private static final ModConfigSpec.Builder BUILDER_CLIENT = new ModConfigSpec.Builder();
     // no client config
-    static final ModConfigSpec SPEC_CLIENT = BUILDER_CLIENT.build();
+    public static final ModConfigSpec SPEC_CLIENT = BUILDER_CLIENT.build();
 
 
     private static boolean spawnZombifiedPlayerAfterDeath = true;
     private static boolean transferMainAndOffHandToZombifiedPlayer = true;
     private static boolean transferArmorToZombifiedPlayer = true;
     private static boolean transferInventoryToZombifiedPlayer = true;
-    //private static boolean transferCuriosOrTrinketItemsToZombifiedPlayer = true;
+    private static boolean transferCuriosOrTrinketItemsToZombifiedPlayer = true;
     private static boolean spawnOnAnyDeath = false;
+    private static boolean displayNameTagForZombifiedPlayer = true;
     private static boolean printSpawnMessageInChat = true;
     private static boolean printSpawnLocationInChat = false;
     private static boolean zombifiedPlayersCanBreakDoors = true;
@@ -145,6 +179,10 @@ public class MainConfig
     private static boolean makeTheZombifiedPlayersImmuneToFire = false;
     private static boolean limitSkinFetchTries = true;
     private static boolean spawnWhenKilledByInfection = true;
+    private static boolean corpseCompatibility = false;
+    private static boolean gravestoneCompatibility = false;
+    private static boolean useCustomEyeHeight = false;
+    private static float customEyeHeight = 1.74f;
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
@@ -154,8 +192,9 @@ public class MainConfig
             transferMainAndOffHandToZombifiedPlayer = TRANSFER_MAIN_AND_OFF_HAND_TO_ZOMBIFIED_PLAYER.get();
             transferArmorToZombifiedPlayer = TRANSFER_ARMOR_TO_ZOMBIFIED_PLAYER.get();
             transferInventoryToZombifiedPlayer = TRANSFER_INVENTORY_TO_ZOMBIFIED_PLAYER.get();
-            //transferCuriosOrTrinketItemsToZombifiedPlayer = TRANSFER_CURIOS_TRINKET_ITEMS_TO_ZOMBIFIED_PLAYER.get();
+            transferCuriosOrTrinketItemsToZombifiedPlayer = TRANSFER_CURIOS_TRINKET_ITEMS_TO_ZOMBIFIED_PLAYER.get();
             spawnOnAnyDeath = SPAWN_ON_ANY_DEATH.get();
+            displayNameTagForZombifiedPlayer = DISPLAY_NAME_TAG_FOR_ZOMBIFIED_PLAYER.get();
             printSpawnMessageInChat = PRINT_SPAWN_MESSAGE_IN_CHAT.get();
             printSpawnLocationInChat = PRINT_SPAWN_LOCATION_IN_CHAT.get();
             zombifiedPlayersCanBreakDoors = ZOMBIFIED_PLAYERS_CAN_BREAK_DOORS.get();
@@ -163,6 +202,10 @@ public class MainConfig
             makeTheZombifiedPlayersImmuneToFire = MAKE_THE_ZOMBIFIED_PLAYERS_IMMUNE_TO_FIRE.get();
             limitSkinFetchTries = LIMIT_SKIN_FETCH_TRIES.get();
             spawnWhenKilledByInfection = SPAWN_WHEN_KILLED_BY_INFECTION.get();
+            corpseCompatibility = CORPSE_COMPATIBILITY.get();
+            gravestoneCompatibility = GRAVESTONE_COMPATIBILITY.get();
+            useCustomEyeHeight = USE_CUSTOM_EYE_HEIGHT.get();
+            customEyeHeight = CUSTOM_EYE_HEIGHT.get().floatValue();
         }
         if (SPEC_CLIENT.isLoaded()) {
             // no client config

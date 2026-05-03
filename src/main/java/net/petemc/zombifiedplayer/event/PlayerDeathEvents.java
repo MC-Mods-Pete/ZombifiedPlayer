@@ -11,6 +11,7 @@ import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
+import net.petemc.zombifiedplayer.util.CuriosUtil;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
 
 public class PlayerDeathEvents {
@@ -20,7 +21,9 @@ public class PlayerDeathEvents {
         public static void onPlayerDeath(LivingDeathEvent event) {
             if(!event.getEntity().level().isClientSide()) {
                 if(event.getEntity() instanceof ServerPlayer serverPlayer) {
-                    if (!(serverPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING))) {
+                    boolean flag = CuriosUtil.checkForItemInCurios(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance());
+                    boolean flag2 = CuriosUtil.checkForItemInCurios(serverPlayer, "chargedcharms:charged_totem_charm");
+                    if (!(serverPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING) || flag)) {
                         if ((MainConfig.getSpawnOnAnyDeath() ||
                                 (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
                                 (attackerIsUndead(event.getSource().getEntity()) && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {

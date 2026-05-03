@@ -1,7 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.123'
+    id 'net.neoforged.moddev' version '2.0.141'
     id 'idea'
 }
 
@@ -19,6 +19,8 @@ group = mod_group_id
 
 repositories {
     mavenLocal()
+    maven { url "https://maven.shedaniel.me/"}
+
     // curse maven
     maven {
         url "https://cursemaven.com"
@@ -29,20 +31,15 @@ repositories {
 }
 
 base {
-    archivesName = project.mod_archives_name
+    archivesName = mod_archives_name
 }
 
-// Mojang ships Java 21 to end users starting in 1.20.5, so mods should target Java 21.
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+// Mojang ships Java 25 to end users in 26.1, so mods should target Java 25.
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 neoForge {
     // Specify the version of NeoForge to use.
     version = project.neo_version
-
-    parchment {
-        mappingsVersion = project.parchment_mappings_version
-        minecraftVersion = project.parchment_minecraft_version
-    }
 
     // This line is optional. Access Transformers are automatically detected
     // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
@@ -71,7 +68,7 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
-        clientData {
+        data {
             clientData()
 
             // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
@@ -140,13 +137,21 @@ dependencies {
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
-    //other dependencies
+
+    //implementation "curse.maven:comforts-276951:${comforts_version}"
+
+    // other mod dependencies
+    runtimeOnly "curse.maven:jade-324717:${jade_version}"
     implementation "curse.maven:contagion-1027702:${contagion_version}"
     implementation "curse.maven:undeadnights-1166914:${undeadnights_version}"
 
-    //runtimeOnly "curse.maven:jade--324717:${jade_version}"
+    compileOnly "curse.maven:curios-309927:${curios_version}"
 
-    //compileOnly "curse.maven:curios-309927:${curios_version}"
+    //compileOnly "curse.maven:accessories-938917:${accessories_version}"
+
+    implementation "curse.maven:corpse-316582:${corpse_version}"
+    implementation "curse.maven:gravestone-mod-238551:${gravestone_version}"
+
     //runtimeOnly "curse.maven:sophisticated-backpacks-422301:${sophisticated_backpacks_version}"
     //runtimeOnly "curse.maven:sophisticated-core-618298:${sophisticated_core_version}"
 }

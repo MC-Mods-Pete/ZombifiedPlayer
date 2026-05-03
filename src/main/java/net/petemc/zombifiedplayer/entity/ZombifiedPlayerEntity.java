@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -37,21 +38,41 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.common.extensions.IEntityExtension;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
+import net.petemc.undeadnights.UndeadNights;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.util.CuriosUtil;
+import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, IEntityWithComplexSpawn {
+    /** UUIDs of players for whom a corpse should be suppressed (set by spawnZombifiedPlayer). */
+    private static final Set<UUID> SKIP_CORPSE_PLAYERS = new HashSet<>();
+    /** UUIDs of players for whom a gravestone should be suppressed (set by spawnZombifiedPlayer). */
+    private static final Set<UUID> SKIP_GRAVESTONE_PLAYERS = new HashSet<>();
+
+    public static boolean shouldSkipCorpse(UUID playerUUID) {
+        return SKIP_CORPSE_PLAYERS.contains(playerUUID);
+    }
+
+    public static void removeFromSkipCorpse(UUID playerUUID) {
+        SKIP_CORPSE_PLAYERS.remove(playerUUID);
+    }
+
+    public static boolean shouldSkipGravestone(UUID playerUUID) {
+        return SKIP_GRAVESTONE_PLAYERS.contains(playerUUID);
+    }
+
+    public static void removeFromSkipGravestone(UUID playerUUID) {
+        SKIP_GRAVESTONE_PLAYERS.remove(playerUUID);
+    }
+
     public GameProfile gameProfile;
     public final NonNullList<ItemStack> main = NonNullList.withSize(36, ItemStack.EMPTY);
     public static final Int2ObjectMap<EquipmentSlot> EQUIPMENT_SLOT_MAPPING;
     public final List<ItemStack> curiosItems = new ArrayList<>();
+    public final List<ItemStack> accessoriesItems = new ArrayList<>();
 
     public ZombifiedPlayerEntity(EntityType<? extends Zombie> entityType, Level level) {
         super(entityType, level);
@@ -126,11 +147,11 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
             this.spawnAtLocation(serverLevel, itemStack);
             this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
         }
-        dropInventory(serverLevel);
     }
 
-    public void dropInventory(ServerLevel serverLevel) {
-        //super.dropInventory();
+    @Override
+    protected void dropEquipment(ServerLevel serverLevel) {
+        //super.dropEquipment();
         for (int i = 0; i < this.main.size(); i++) {
             if (!this.main.get(i).isEmpty()) {
                 this.spawnAtLocation(serverLevel, this.main.get(i));
@@ -144,6 +165,13 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
             }
         }
         this.curiosItems.clear();
+
+        for (ItemStack accessoriesItem : this.accessoriesItems) {
+            if (!accessoriesItem.isEmpty()) {
+                this.spawnAtLocation(serverLevel, accessoriesItem);
+            }
+        }
+        this.accessoriesItems.clear();
     }
 
     public static ZombifiedPlayerEntity spawnZombifiedPlayer(Player player) {
@@ -152,12 +180,22 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER.get(), serverLevel);
             zombifiedPlayer.setGameProfile(player.getGameProfile());
             //zombifiedPlayer.storeGameProfile(player.getGameProfile());
-            Component name = Component.literal("Zombified " + player.getName().getString());
-            zombifiedPlayer.setCustomName(name);
+            if (MainConfig.getDisplayNameTagForZombifiedPlayer()) {
+                Component name = Component.literal("Zombified " + player.getName().getString());
+                zombifiedPlayer.setCustomName(name);
+            }
             zombifiedPlayer.setPos(player.getX(), player.getY(), player.getZ());
             zombifiedPlayer.setPersistenceRequired();
             zombifiedPlayer.transferInventory(serverLevel, player);
             serverLevel.addFreshEntity(zombifiedPlayer);
+            // Prevent the corpse mod from spawning a corpse for this death
+            if (ModCompatibility.isCorpseLoaded() && MainConfig.getCorpseCompatibility()) {
+                SKIP_CORPSE_PLAYERS.add(player.getUUID());
+            }
+            // Prevent the gravestone mod from spawning a gravestone for this death
+            if (ModCompatibility.isGravestoneLoaded() && MainConfig.getGravestoneCompatibility()) {
+                SKIP_GRAVESTONE_PLAYERS.add(player.getUUID());
+            }
         }
         return zombifiedPlayer;
     }
@@ -201,13 +239,17 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
             }
         }
 
-        // Curios items are currently not compatible with 1.21.9
-        /*
         if (CuriosUtil.isCuriosLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
             List<ItemStack> playerCuriosItems = CuriosUtil.getCuriosItemsAndClear(playerEntity);
             this.curiosItems.addAll(playerCuriosItems);
         }
-        */
+
+        // Accessories not available yet, will add in a future update
+        /* if (AccessoriesUtil.isAccessoriesLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+            List<ItemStack> playerAccessoriesItems = AccessoriesUtil.getAccessoriesItemsAndClear(playerEntity);
+            this.accessoriesItems.addAll(playerAccessoriesItems);
+        }
+         */
     }
 
     @Override
@@ -239,7 +281,10 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         valueOutput.putString("gameProfileUUID", gameProfile.id().toString());
         valueOutput.putString("gameProfileName", gameProfile.name());
         this.saveInventory(valueOutput.list("Inventory", ItemStackWithSlot.CODEC));
+        // Store Curios items
         CuriosUtil.saveCuriosItems(valueOutput.list("CuriosItems", ItemStackWithSlot.CODEC), this.curiosItems);
+        // Store Accessories items
+        //AccessoriesUtil.saveAccessoriesItems(valueOutput.list("AccessoriesItems", ItemStackWithSlot.CODEC), this.accessoriesItems);
     }
 
     @Override
@@ -249,7 +294,10 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         String gpName = valueInput.getString("gameProfileName").orElse("");
         gameProfile = new GameProfile(gpUUID, gpName);
         this.loadInventory(valueInput.listOrEmpty("Inventory", ItemStackWithSlot.CODEC));
+        // Load Curios items
         CuriosUtil.loadCuriosItems(valueInput.listOrEmpty("CuriosItems", ItemStackWithSlot.CODEC), this.curiosItems);
+        // Load Accessories items
+        //AccessoriesUtil.loadAccessoriesItems(valueInput.listOrEmpty("AccessoriesItems", ItemStackWithSlot.CODEC), this.accessoriesItems);
     }
 
     public void saveInventory(ValueOutput.TypedOutputList<ItemStackWithSlot> list) {

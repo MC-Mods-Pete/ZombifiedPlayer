@@ -4,7 +4,9 @@
 	"package": "net.petemc.zombifiedplayer.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-		"ServerPlayerEntityMixin"
+		"ServerPlayerEntityMixin",
+		"CorpseDeathEventsMixin",
+		"GravestoneDeathEventsMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
