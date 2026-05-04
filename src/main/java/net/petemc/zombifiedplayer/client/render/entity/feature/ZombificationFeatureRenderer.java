@@ -1,29 +1,26 @@
 package net.petemc.zombifiedplayer.client.render.entity.feature;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.feature.FeatureRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.ZombieEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.model.monster.zombie.ZombieModel;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.resources.Identifier;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.client.render.entity.state.ZombifiedPlayerEntityRenderState;
 
-@Environment(value=EnvType.CLIENT)
 public class ZombificationFeatureRenderer
-extends FeatureRenderer<ZombifiedPlayerEntityRenderState, ZombieEntityModel<ZombifiedPlayerEntityRenderState>> {
-    private static final Identifier TEXTURE = Identifier.of(ZombifiedPlayer.MOD_ID,"textures/entity/zombify.png");
+extends RenderLayer<ZombifiedPlayerEntityRenderState, ZombieModel<ZombifiedPlayerEntityRenderState>> {
+    private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(ZombifiedPlayer.MOD_ID,"textures/entity/zombify.png");
 
-    public ZombificationFeatureRenderer(FeatureRendererContext<ZombifiedPlayerEntityRenderState, ZombieEntityModel<ZombifiedPlayerEntityRenderState>> featureRendererContext) {
+    public ZombificationFeatureRenderer(RenderLayerParent<ZombifiedPlayerEntityRenderState, ZombieModel<ZombifiedPlayerEntityRenderState>> featureRendererContext) {
         super(featureRendererContext);
     }
 
     @Override
-    public void render(MatrixStack matrices, OrderedRenderCommandQueue queue, int light, ZombifiedPlayerEntityRenderState state, float limbAngle, float limbDistance) {
-        ZombificationFeatureRenderer.renderModel(this.getContextModel(), state.skinTexture, matrices, queue, light, state, 0xFF99FF99, 0);
-        ZombificationFeatureRenderer.renderModel(this.getContextModel(), TEXTURE, matrices, queue, light, state, -1, 1);
+    public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int i, ZombifiedPlayerEntityRenderState zombifiedPlayerEntityRenderState, float v, float v1) {
+        renderColoredCutoutModel(this.getParentModel(), zombifiedPlayerEntityRenderState.skinTexture, poseStack, submitNodeCollector, i, zombifiedPlayerEntityRenderState,0xFF99FF99,0);
+        renderColoredCutoutModel(this.getParentModel(), TEXTURE, poseStack, submitNodeCollector, i, zombifiedPlayerEntityRenderState,-1, 1);
     }
 }
 

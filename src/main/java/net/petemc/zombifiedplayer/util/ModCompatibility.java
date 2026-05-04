@@ -1,8 +1,8 @@
 package net.petemc.zombifiedplayer.util;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.petemc.contagion.casts.InfectedPlayer;
 import net.petemc.undeadnights.entity.EliteZombieEntity;
 import net.petemc.undeadnights.entity.HordeZombieEntity;
@@ -19,13 +19,21 @@ public class ModCompatibility {
         if (TrinketsUtil.isTrinketsLoaded()) {
             ZombifiedPlayer.LOGGER.info("Trinkets API detected. If enabled trinket items will be transferred to the Zombified Player.");
         }
+        if (UniversalGravesUtil.isUniversalGravesLoaded()) {
+            UniversalGravesUtil.registerEvent();
+            ZombifiedPlayer.LOGGER.info("Universal Graves mod detected. Graves will be suppressed when a Zombified Player spawns.");
+        }
+        if (PneumonoGravestonesUtil.isPneumonoGravestonesLoaded()) {
+            PneumonoGravestonesUtil.registerEvent();
+            ZombifiedPlayer.LOGGER.info("Pneumono Gravestones mod detected. Gravestones will be suppressed when a Zombified Player spawns.");
+        }
     }
 
     public static boolean isContagionLoaded() {
         return FabricLoader.getInstance().isModLoaded("contagion");
     }
 
-    public static boolean diedFromInfection(ServerPlayerEntity serverPlayer) {
+    public static boolean diedFromInfection(ServerPlayer serverPlayer) {
         if (isContagionLoaded()) {
             if (serverPlayer instanceof InfectedPlayer infectedPlayer) {
                 return infectedPlayer.contagion_playerDiedFromInfection();

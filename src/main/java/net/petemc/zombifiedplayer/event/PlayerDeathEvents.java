@@ -1,20 +1,26 @@
 package net.petemc.zombifiedplayer.event;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.Items;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Items;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
+import net.petemc.zombifiedplayer.util.PneumonoGravestonesUtil;
+import net.petemc.zombifiedplayer.util.TrinketsUtil;
+import net.petemc.zombifiedplayer.util.UniversalGravesUtil;
 
 public class PlayerDeathEvents {
 
@@ -26,7 +32,7 @@ public class PlayerDeathEvents {
     public PlayerDeathEvents() {
         ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, amount) -> {
             pPlayer = entity;
-            pAttacker = damageSource.getAttacker() instanceof LivingEntity ? ((LivingEntity) damageSource.getAttacker()) : null;
+            pAttacker = damageSource.getEntity() instanceof LivingEntity ? ((LivingEntity) damageSource.getEntity()) : null;
             pSource = damageSource;
             pAmount = amount;
             executeAllowDeath();
@@ -35,7 +41,7 @@ public class PlayerDeathEvents {
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
             pPlayer = entity;
-            pAttacker = damageSource.getAttacker() instanceof LivingEntity ? ((LivingEntity) damageSource.getAttacker()) : null;
+            pAttacker = damageSource.getEntity() instanceof LivingEntity ? ((LivingEntity) damageSource.getEntity()) : null;
             pSource = damageSource;
             executeAfterDeath();
         });
@@ -43,11 +49,15 @@ public class PlayerDeathEvents {
 
     public static void executeAllowDeath() {
         if (pPlayer != null) {
-            if (pPlayer instanceof ServerPlayerEntity serverPlayer) {
-                if (!(pPlayer.getMainHandStack().isOf(Items.TOTEM_OF_UNDYING) || pPlayer.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING))) {
+            if (pPlayer instanceof ServerPlayer serverPlayer) {
+                boolean flag = TrinketsUtil.checkForItemInTrinkets(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance());
+                boolean flag2 = TrinketsUtil.checkForItemInTrinkets(serverPlayer, "chargedcharms:charged_totem_charm");
+                if (!(pPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || pPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING) || flag || flag2)) {
                     if ((MainConfig.getSpawnOnAnyDeath() ||
                             (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
                             (attackerIsUndead() && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
+                        UniversalGravesUtil.skipGrave(serverPlayer);
+                        PneumonoGravestonesUtil.skipGrave(serverPlayer);
                         ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer);
                     }
                 }
@@ -57,25 +67,36 @@ public class PlayerDeathEvents {
 
     public static void executeAfterDeath() {
         if (pPlayer != null) {
-            if (pPlayer instanceof ServerPlayerEntity serverPlayer) {
+            if (pPlayer instanceof ServerPlayer serverPlayer) {
                 if ((MainConfig.getSpawnOnAnyDeath() ||
                         (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
                         (attackerIsUndead() && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
                     if (MainConfig.getPrintSpawnMessageInChat()) {
-                        serverPlayer.sendMessageToClient(Text.translatable("zombifiedplayer.spawn.message"), false);
+                        serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"), false);
                         if (MainConfig.getPrintSpawnLocationInChat()) {
-                            Text textCoordinates = Texts.bracketed(Text.translatable("chat.coordinates", pPlayer.getBlockPos().getX(), pPlayer.getBlockPos().getY(), pPlayer.getBlockPos().getZ()))
-                                    .styled(
-                                            style -> style.withColor(Formatting.GREEN)
-                                                    .withClickEvent(new ClickEvent.SuggestCommand("/tp @s " + pPlayer.getBlockPos().getX() + " " + pPlayer.getBlockPos().getY() + " " + pPlayer.getBlockPos().getZ()))
-                                                    .withHoverEvent(new HoverEvent.ShowText(Text.translatable("chat.coordinates.tooltip")))
-                                    );
-                            serverPlayer.sendMessageToClient(Text.translatable("zombifiedplayer.location.message", textCoordinates), false);
+                            BlockPos blockpos = serverPlayer.getOnPos();
+                            Component textCoordinates = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", blockpos.getX(), (blockpos.getY() + 1), blockpos.getZ()))
+                                    .withStyle((style) -> {
+                                        return style.withColor(ChatFormatting.GREEN)
+                                                .withClickEvent(new ClickEvent.SuggestCommand("/tp @s " + blockpos.getX() + " " + (blockpos.getY() + 1) + " " + blockpos.getZ()))
+                                                .withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.coordinates.tooltip")));
+                                    });
+                            serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.location.message", textCoordinates), false);
                         }
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Prüft, ob ein ItemStack einem Mod-Item anhand seiner Resource-Location-ID entspricht.
+     * Gibt false zurück, wenn das Item im Registry nicht gefunden wird (Mod nicht geladen).
+     */
+    private static boolean isModItem(net.minecraft.world.item.ItemStack stack, String itemId) {
+        return BuiltInRegistries.ITEM.getOptional(Identifier.parse(itemId))
+                .map(stack::is)
+                .orElse(false);
     }
 
     private static boolean attackerIsUndead() {

@@ -2,20 +2,20 @@ package net.petemc.zombifiedplayer.event;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientEntityEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.entity.Entity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import net.petemc.zombifiedplayer.network.NetworkPayloads;
 
 public class ClientZombifiedPlayerLoadEvent {
 
     private static Entity pEntity = null;
-    private static World pWorld = null;
+    private static Level pLevel = null;
 
     public ClientZombifiedPlayerLoadEvent() {
-        ClientEntityEvents.ENTITY_LOAD.register((entity, world) -> {
+        ClientEntityEvents.ENTITY_LOAD.register((entity, level) -> {
             pEntity = entity;
-            pWorld = world;
+            pLevel = level;
             execute();
         });
     }
@@ -23,7 +23,7 @@ public class ClientZombifiedPlayerLoadEvent {
     public static void execute() {
         if (pEntity != null) {
             if (pEntity instanceof ZombifiedPlayerEntity zombifiedPlayerEntity) {
-                ClientPlayNetworking.send(new NetworkPayloads.RequestGameProfilePayload(zombifiedPlayerEntity.getUuid(), zombifiedPlayerEntity.getId()));
+                ClientPlayNetworking.send(new NetworkPayloads.RequestGameProfilePayload(zombifiedPlayerEntity.getUUID(), zombifiedPlayerEntity.getId()));
             }
         }
     }

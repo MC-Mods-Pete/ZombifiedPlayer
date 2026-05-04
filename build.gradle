@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -15,6 +15,7 @@ modmenu_version = project.modmenu_version
 jade_version = project.jade_version
 contagion_version = project.contagion_version
 undeadnights_version = project.undeadnights_version
+cardinal_components_version = project.cardinal_components_version
 
 base {
 	archivesName = project.archives_base_name
@@ -37,10 +38,27 @@ repositories {
 		}
 	}
 
-    maven {
-        name 'Ladysnake Mods'
-        url 'https://maven.ladysnake.org/releases'
-    }
+	maven {
+		name = 'Ladysnake Mods'
+		url = 'https://maven.ladysnake.org/releases'
+	}
+
+	maven {
+		name = "Nucleoid"
+		url = 'https://maven.nucleoid.xyz/releases'
+	}
+
+	exclusiveContent {
+		forRepository {
+			maven {
+				name = "Modrinth"
+				url = "https://api.modrinth.com/maven"
+			}
+		}
+		filter {
+			includeGroup "maven.modrinth"
+		}
+	}
 }
 
 fabricApi {
@@ -50,27 +68,32 @@ fabricApi {
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
-	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+
+	api("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
 	include "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
 
 	//other dependencies
-	modImplementation "curse.maven:jade-324717:${project.jade_version}"
-	modImplementation "curse.maven:contagion-1027702:${project.contagion_version}"
-	modImplementation "curse.maven:undeadnights-1166914:${project.undeadnights_version}"
+	implementation "curse.maven:jade-324717:${project.jade_version}"
+	implementation "curse.maven:contagion-1027702:${project.contagion_version}"
+	implementation "curse.maven:undeadnights-1166914:${project.undeadnights_version}"
 
     // Trinkets and Cardinal Components API (uncomment if you use them), make sure to set the version in gradle.properties
-    // currently not compatible with Minecraft 1.21.9
-    //modImplementation "curse.maven:trinkets-341284:${trinkets_version}"
-    //modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:6.0.0"
-    //modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:6.0.0"
+	//implementation "maven.modrinth:trinkets-continued:${project.trinkets_continued_version}"
+	implementation "eu.pb4:trinkets:${project.trinkets_version}"
+    implementation "org.ladysnake.cardinal-components-api:cardinal-components-base:${cardinal_components_version}"
+    implementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:${cardinal_components_version}"
+
+	// Both gravestone mods are available for compilation (for their respective util classes)
+	compileOnly "maven.modrinth:pneumono_gravestones:${project.pneumono_gravestones_version}"
+	compileOnly "curse.maven:universal-graves-497175:${project.universal_graves_version}"
 }
 
 processResources {
@@ -96,7 +119,7 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+	it.options.release = 25
 }
 
 java {
@@ -105,8 +128,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {

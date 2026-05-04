@@ -14,7 +14,7 @@ import net.petemc.zombifiedplayer.event.ServerZombifiedPlayerLoadEvent;
 import net.petemc.zombifiedplayer.network.NetworkHandlerServer;
 import net.petemc.zombifiedplayer.network.NetworkPayloads;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
-import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
+//import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class ZombifiedPlayer implements ModInitializer {
 	public static final String MOD_ID = "zombifiedplayer";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	public static StateSaverAndLoader serverState = null;
+	//public static StateSaverAndLoader serverState = null;
 
 	@Override
 	public void onInitialize() {
@@ -35,13 +35,13 @@ public class ZombifiedPlayer implements ModInitializer {
 		ServerStartedEvent.registerEvents();
 		ModCompatibility.init();
 
-		FabricDefaultAttributeRegistry.register(ModEntities.ZOMBIFIED_PLAYER, ZombifiedPlayerEntity.createZombifiedPlayerAttributes());
+		FabricDefaultAttributeRegistry.register(ModEntities.ZOMBIFIED_PLAYER, ZombifiedPlayerEntity.createAttributes());
 
-		PayloadTypeRegistry.playS2C().register(NetworkPayloads.GameProfilePayload.ID, NetworkPayloads.GameProfilePayload.CODEC);
-		PayloadTypeRegistry.playC2S().register(NetworkPayloads.RequestGameProfilePayload.ID, NetworkPayloads.RequestGameProfilePayload.CODEC);
+		PayloadTypeRegistry.clientboundPlay().register(NetworkPayloads.GameProfilePayload.ID, NetworkPayloads.GameProfilePayload.CODEC);
+		PayloadTypeRegistry.serverboundPlay().register(NetworkPayloads.RequestGameProfilePayload.ID, NetworkPayloads.RequestGameProfilePayload.CODEC);
 
 		ServerPlayNetworking.registerGlobalReceiver(NetworkPayloads.RequestGameProfilePayload.ID, (payload, context) -> {
-			Objects.requireNonNull(context.player().getEntityWorld().getServer()).execute(() -> {
+			Objects.requireNonNull(context.player().level().getServer()).execute(() -> {
 				NetworkHandlerServer.processGameProfileRequest(context.player(), payload.entityUUID(), payload.entityID());
 			});
 		});
