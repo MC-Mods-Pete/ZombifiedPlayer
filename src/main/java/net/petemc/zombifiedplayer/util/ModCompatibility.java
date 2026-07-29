@@ -19,6 +19,14 @@ public class ModCompatibility {
         if (TrinketsUtil.isTrinketsLoaded()) {
             ZombifiedPlayer.LOGGER.info("Trinkets API detected. If enabled trinket items will be transferred to the Zombified Player.");
         }
+        if (UniversalGravesUtil.isUniversalGravesLoaded()) {
+            UniversalGravesUtil.registerEvent();
+            ZombifiedPlayer.LOGGER.info("Universal Graves mod detected. Graves will be suppressed when a Zombified Player spawns.");
+        }
+        if (PneumonoGravestonesUtil.isPneumonoGravestonesLoaded()) {
+            PneumonoGravestonesUtil.registerEvent();
+            ZombifiedPlayer.LOGGER.info("Pneumono Gravestones mod detected. Gravestones will be suppressed when a Zombified Player spawns.");
+        }
     }
 
     public static boolean isContagionLoaded() {

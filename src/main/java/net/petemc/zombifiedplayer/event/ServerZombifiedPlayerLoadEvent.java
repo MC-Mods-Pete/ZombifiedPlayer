@@ -27,9 +27,7 @@ public class ServerZombifiedPlayerLoadEvent {
         if (pEntity != null) {
             if (!pWorld.isClient()) {
                 if (pEntity instanceof ZombifiedPlayerEntity zombifiedPlayerEntity) {
-                    //GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(zombifiedPlayerEntity.getUuid(), pWorld);
                     if ((zombifiedPlayerEntity.getGameProfile().getId() != null) && (zombifiedPlayerEntity.getGameProfile().getName() != null)) {
-                        //zombifiedPlayerEntity.gameProfile = new GameProfile(gameProfileState.gameProfileUUID, gameProfileState.gameProfileName);
                         for (ServerPlayerEntity player : PlayerLookup.world((ServerWorld) pWorld)) {
                             ServerPlayNetworking.send(player, new NetworkPayloads.GameProfilePayload(zombifiedPlayerEntity.getUuid(), zombifiedPlayerEntity.getId(), zombifiedPlayerEntity.gameProfile.getId(), zombifiedPlayerEntity.gameProfile.getName()));
                         }

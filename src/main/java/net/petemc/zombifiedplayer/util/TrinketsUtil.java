@@ -9,9 +9,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Pair;
+import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TrinketsUtil {
 
@@ -37,6 +39,28 @@ public class TrinketsUtil {
         }
         
         return trinketsItems;
+    }
+
+    public static boolean checkForItemInTrinkets(PlayerEntity player, ItemStack itemToCheck) {
+        AtomicBoolean foundItem = new AtomicBoolean(false);
+
+        if (!isTrinketsLoaded()) {
+            return foundItem.get();
+        }
+
+        try {
+            TrinketsApi.getTrinketComponent(player).ifPresent(trinketComponent -> {
+                for (Pair<SlotReference, ItemStack> itemStackPair : trinketComponent.getAllEquipped()) {
+                    if (itemStackPair.getRight().isOf(itemToCheck.getItem())) {
+                        ZombifiedPlayer.LOGGER.info("Found " + itemToCheck + " in trinkets!");
+                        foundItem.set(true);
+                    }
+                }
+            });
+        } catch (Exception e) {
+        }
+
+        return foundItem.get();
     }
 
     
