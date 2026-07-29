@@ -154,6 +154,11 @@ dependencies {
     // use when not test Curios (comment out when testing curios)
     compileOnly "curse.maven:curios-309927:${curios_version}"
 
+    compileOnly "curse.maven:accessories-938917:${accessories_version}"
+
+    implementation "curse.maven:corpse-316582:${corpse_version}"
+    implementation "curse.maven:gravestone-mod-238551:${gravestone_version}"
+
     // enable for curios testing, note: minecraft version needs to be switched to 1.21.1, NeoForge to 21.1.60)
     //implementation "curse.maven:curios-309927:${curios_version}"
     //runtimeOnly "curse.maven:sophisticated-backpacks-422301:${sophisticated_backpacks_version}"

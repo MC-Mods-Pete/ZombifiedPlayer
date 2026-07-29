@@ -16,6 +16,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
+import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.slf4j.Logger;
@@ -42,7 +43,7 @@ public class ZombifiedPlayer {
         NeoForge.EVENT_BUS.register(this);
         //modEventBus.addListener(this::addCreative);
 
-        modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC_SERVER);
+        modContainer.registerConfig(ModConfig.Type.SERVER, MainConfig.SPEC_SERVER);
         ModCompatibility.init();
     }
 
