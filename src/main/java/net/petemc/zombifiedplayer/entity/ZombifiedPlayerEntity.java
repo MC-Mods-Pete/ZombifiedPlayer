@@ -1,10 +1,9 @@
 package net.petemc.zombifiedplayer.entity;
 
 import com.mojang.authlib.GameProfile;
-import io.github.jamalam360.utility_belt.UtilityBelt;
-import io.github.jamalam360.utility_belt.content.UtilityBeltItem;
-import io.github.jamalam360.utility_belt.util.UtilityBeltInventory;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.ai.goal.*;
@@ -77,6 +76,14 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     @Override
     public void onSpawnPacket(EntitySpawnS2CPacket packet) {
         super.onSpawnPacket(packet);
+    }
+
+    @Override
+    public float getActiveEyeHeight(EntityPose pose, EntityDimensions dimensions) {
+        if (MainConfig.getUseCustomEyeHeight()) {
+            return MainConfig.getCustomEyeHeight();
+        }
+        return super.getActiveEyeHeight(pose, dimensions);
     }
 
     @Override
@@ -229,7 +236,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         }
 
         if (AccessoriesUtil.isAccessoriesLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
-            List<ItemStack> playerAccessoryItems = AccessoriesUtil.getAccessoryItemsAndClear(playerEntity);
+            List<ItemStack> playerAccessoryItems = AccessoriesUtil.getAccessoriesItemsAndClear(playerEntity);
             this.accessoriesItems.addAll(playerAccessoryItems);
         }
     }
@@ -242,7 +249,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         nbt.put("Inventory", this.writeInventoryToNbt(new NbtList()));
         // Store Trinket items
         nbt.put("TrinketItems", TrinketsUtil.writeTrinketItemsToNbt(this.trinketsItems));
-        nbt.put("AccessoryItems", TrinketsUtil.writeTrinketItemsToNbt(this.accessoriesItems));
+        nbt.put("AccessoriesItems", AccessoriesUtil.writeAccessoriesItemsToNbt(this.accessoriesItems));
     }
 
     @Override
@@ -259,10 +266,10 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             this.trinketsItems.clear();
             this.trinketsItems.addAll(TrinketsUtil.readTrinketItemsFromNbt(curiosNbt));
         }
-        if (nbt.contains("AccessoryItems")) {
-            NbtList curiosNbt = nbt.getList("AccessoryItems", NbtElement.COMPOUND_TYPE);
+        if (nbt.contains("AccessoriesItems")) {
+            NbtList accessoriesNbt = nbt.getList("AccessoriesItems", NbtElement.COMPOUND_TYPE);
             this.accessoriesItems.clear();
-            this.accessoriesItems.addAll(AccessoriesUtil.readAccessoryItemsFromNbt(curiosNbt));
+            this.accessoriesItems.addAll(AccessoriesUtil.readAccessoriesItemsFromNbt(accessoriesNbt));
         }
     }
 

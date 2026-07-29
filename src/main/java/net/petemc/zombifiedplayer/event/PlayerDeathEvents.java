@@ -14,8 +14,10 @@ import net.minecraft.util.Formatting;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
+import net.petemc.zombifiedplayer.util.GravestonesUtil;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
 import net.petemc.zombifiedplayer.util.TrinketsUtil;
+import net.petemc.zombifiedplayer.util.UniversalGravesUtil;
 
 public class PlayerDeathEvents {
 
@@ -50,6 +52,8 @@ public class PlayerDeathEvents {
                     if ((MainConfig.getSpawnOnAnyDeath() ||
                             (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
                             (attackerIsUndead() && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
+                        GravestonesUtil.skipGravestone(serverPlayer);
+                        UniversalGravesUtil.skipGrave(serverPlayer);
                         ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer);
                     }
                 }

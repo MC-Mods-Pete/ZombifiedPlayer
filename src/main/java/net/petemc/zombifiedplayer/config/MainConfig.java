@@ -64,12 +64,24 @@ public class MainConfig implements ConfigData
         return INSTANCE.spawnWhenKilledByInfection;
     }
 
+    public static boolean getGravestoneCompatibility() {
+        return INSTANCE.gravestoneCompatibility;
+    }
+
+    public static boolean getUseCustomEyeHeight() {
+        return INSTANCE.useCustomEyeHeight;
+    }
+
+    public static float getCustomEyeHeight() {
+        return INSTANCE.customEyeHeight;
+    }
+
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, a zombified player will spawn after the player gets killed by an Undead | default: true")
     private boolean spawnZombifiedPlayerAfterDeath = true;
 
     @ConfigEntry.Gui.Tooltip()
-    @Comment("If true, the Main and the Off Hand of the dead player will be transferred to the zombified player | default: true")
+    @Comment("If true, the Main and the Off-Hand of the dead player will be transferred to the zombified player | default: true")
     private boolean transferMainAndOffHandToZombifiedPlayer = true;
 
     @ConfigEntry.Gui.Tooltip()
@@ -97,7 +109,7 @@ public class MainConfig implements ConfigData
     private boolean printSpawnMessageInChat = true;
 
     @ConfigEntry.Gui.Tooltip()
-    @Comment("If true, spawn location of the zombified player will printed out in chat | default: false")
+    @Comment("If true, spawn location of the zombified player will be printed out in chat | default: false")
     private boolean printSpawnLocationInChat = false;
 
     @ConfigEntry.Gui.Tooltip()
@@ -120,4 +132,18 @@ public class MainConfig implements ConfigData
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, spawn zombified player after death by infection (Contagion mod needed!) | default: true")
     private boolean spawnWhenKilledByInfection = true;
+
+    @ConfigEntry.Gui.PrefixText
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, no gravestone will be placed when a zombified player spawns (either Gravestones mod or Universal Graves mod needed!) | default: false")
+    private boolean gravestoneCompatibility = false;
+
+    @ConfigEntry.Gui.PrefixText
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, the zombified player will use a custom eye height | default: false")
+    private boolean useCustomEyeHeight = false;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("The custom eye height of the zombified player (only used if useCustomEyeHeight is true) | default: 1.74")
+    private float customEyeHeight = 1.74f;
 }

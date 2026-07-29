@@ -1,0 +1,13 @@
+{
+    "required": false,
+    "package": "net.petemc.zombifiedplayer.mixin.compat",
+    "compatibilityLevel": "JAVA_17",
+
+    "mixins": [
+        "GravestonesMixin"
+    ],
+    "injectors": {
+        "defaultRequire": 0
+    }
+}
+

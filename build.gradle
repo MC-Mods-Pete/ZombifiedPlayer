@@ -53,12 +53,16 @@ repositories {
         name 'Jamalam'
         url 'https://maven.jamalam.tech/releases/'
     }
-    maven {
+	maven {
         name 'Modrinth'
         url 'https://api.modrinth.com/maven'
         content {
             includeGroup 'maven.modrinth'
         }
+    }
+    // Local libs for Polymer (bundled in Universal Graves but not auto-loaded in dev env)
+    flatDir {
+        dirs 'libs'
     }
 }
 
@@ -88,6 +92,9 @@ dependencies {
     modImplementation "curse.maven:trinkets-341284:${project.trinkets_version}"
 	modImplementation "curse.maven:utility-belt-664053:${project.utility_belt}"
 	modImplementation "maven.modrinth:gravestones:${project.gravestones_version}"
+
+	modImplementation "curse.maven:universal-graves-497175:5706124"
+
 	modImplementation "dev.architectury:architectury-fabric:9.2.14"
 	modImplementation "io.github.jamalam360:jamlib-fabric:1.3.5+1.20.1"
 	modImplementation "curse.maven:accessories-938917:7164886"
@@ -96,6 +103,10 @@ dependencies {
 	modImplementation "io.wispforest.endec:netty:0.1.4"
 	// Sodium needed in dev env to satisfy accessories' optional Sodium mixin
 	modLocalRuntime "maven.modrinth:sodium:OihdIimA"
+
+	// Polymer is bundled as JiJ inside Universal Graves but not auto-extracted in dev env by Loom
+	// All JARs in libs/ are the flattened transitive dependencies of Universal Graves
+	modLocalRuntime fileTree(dir: 'libs', include: '*.jar')
 
     // Adds a dependency on the base cardinal components module (required by every other module)
     // Replace modImplementation with modApi if you expose components in your own API

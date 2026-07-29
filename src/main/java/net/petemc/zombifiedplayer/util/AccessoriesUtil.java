@@ -19,17 +19,17 @@ public class AccessoriesUtil {
         return FabricLoader.getInstance().isModLoaded("accessories");
     }
 
-    public static List<ItemStack> getAccessoryItemsAndClear(PlayerEntity player) {
-        List<ItemStack> accessoryItems = new ArrayList<>();
+    public static List<ItemStack> getAccessoriesItemsAndClear(PlayerEntity player) {
+        List<ItemStack> accessoriesItems = new ArrayList<>();
 
         if (!isAccessoriesLoaded()) {
-            return accessoryItems;
+            return accessoriesItems;
         }
 
         try {
             AccessoriesCapability.getOptionally(player).ifPresent(capability -> {
                 for (SlotEntryReference entry : capability.getAllEquipped()) {
-                    accessoryItems.add(entry.stack().copy());
+                    accessoriesItems.add(entry.stack().copy());
                     entry.reference().setStack(ItemStack.EMPTY);
                 }
             });
@@ -37,7 +37,7 @@ public class AccessoriesUtil {
             ZombifiedPlayer.LOGGER.error("Error getting accessory items from player: " + e.getMessage());
         }
 
-        return accessoryItems;
+        return accessoriesItems;
     }
 
     public static boolean checkForItemInAccessories(PlayerEntity player, ItemStack itemToCheck) {
@@ -63,7 +63,7 @@ public class AccessoriesUtil {
         return foundItem.get();
     }
 
-    public static NbtList writeAccessoryItemsToNbt(List<ItemStack> accessoryItems) {
+    public static NbtList writeAccessoriesItemsToNbt(List<ItemStack> accessoryItems) {
         NbtList nbtList = new NbtList();
 
         for (int i = 0; i < accessoryItems.size(); i++) {
@@ -79,7 +79,7 @@ public class AccessoriesUtil {
         return nbtList;
     }
 
-    public static List<ItemStack> readAccessoryItemsFromNbt(NbtList nbtList) {
+    public static List<ItemStack> readAccessoriesItemsFromNbt(NbtList nbtList) {
         List<ItemStack> accessoryItems = new ArrayList<>();
 
         for (int i = 0; i < nbtList.size(); i++) {

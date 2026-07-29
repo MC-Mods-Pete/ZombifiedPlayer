@@ -5,7 +5,7 @@
   "text.autoconfig.zombifiedplayer.title": "Zombified Player",
   "text.autoconfig.zombifiedplayer.option.spawnZombifiedPlayerAfterDeath": "Spawn a zombified player after death",
   "text.autoconfig.zombifiedplayer.option.spawnZombifiedPlayerAfterDeath.@Tooltip": "If enabled, a zombified player will spawn after the player gets killed by an Undead | default: enabled",
-  "text.autoconfig.zombifiedplayer.option.transferMainAndOffHandToZombifiedPlayer": "Transfer the players Main and Off Hand to the zombified player",
+  "text.autoconfig.zombifiedplayer.option.transferMainAndOffHandToZombifiedPlayer": "Transfer the players Main and Off-Hand to the zombified player",
   "text.autoconfig.zombifiedplayer.option.transferMainAndOffHandToZombifiedPlayer.@Tooltip": "If enabled, the Main and the Off Hand of the dead player will be transferred to the zombified player | default: enabled",
   "text.autoconfig.zombifiedplayer.option.transferArmorToZombifiedPlayer": "Transfer the players Armor to the zombified player",
   "text.autoconfig.zombifiedplayer.option.transferArmorToZombifiedPlayer.@Tooltip": "If enabled, the Armor of the dead player will be transferred to the zombified player | default: enabled",
@@ -15,10 +15,12 @@
   "text.autoconfig.zombifiedplayer.option.transferCuriosOrTrinketItemsToZombifiedPlayer.@Tooltip": "If enabled, all equipped curios items of the dead player will be transferred to the zombified player | default: enabled",
   "text.autoconfig.zombifiedplayer.option.spawnOnAnyDeath": "Spawn zombified player no matter how the player died",
   "text.autoconfig.zombifiedplayer.option.spawnOnAnyDeath.@Tooltip": "If enabled, a zombified player will spawn no matter how the player died | default: disabled",
+  "text.autoconfig.zombifiedplayer.option.displayNameTagForZombifiedPlayer": "Display name tag for the zombified player",
+  "text.autoconfig.zombifiedplayer.option.displayNameTagForZombifiedPlayer.@Tooltip": "If enabled, the zombified player will display the name of the dead player | default: enabled",
   "text.autoconfig.zombifiedplayer.option.printSpawnMessageInChat": "Print spawn messages for the zombified player to the chat",
   "text.autoconfig.zombifiedplayer.option.printSpawnMessageInChat.@Tooltip": "If enabled, a message will be printed out in chat that a zombified player has spawned | default: enabled",
   "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat": "Print spawn location of the zombified player to the chat",
-  "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat.@Tooltip": "If enabled, spawn location of the zombified player will printed out in chat | default: disabled",
+  "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat.@Tooltip": "If enabled, spawn location of the zombified player will be printed out in chat | default: disabled",
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors": "Zombified Players can break doors",
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors.@Tooltip": "If enabled, zombified players can break through doors | default: enabled",
   "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger": "Make Zombified Players stronger",
@@ -27,7 +29,18 @@
   "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersImmuneToFire.@Tooltip": "If enabled, zombified players are immune to lava and fire | default: disabled",
   "text.autoconfig.zombifiedplayer.option.limitSkinFetchTries": "If unsuccessful, stop trying to fetch the player skin",
   "text.autoconfig.zombifiedplayer.option.limitSkinFetchTries.@Tooltip": "If enabled, the mod will stop trying to fetch the player skin after several unsuccessful tries | default: enabled",
+
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection.@PrefixText": "[Please note]\nFor the option below the mod Contagion needs to be installed!",
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection": "Spawn Zombified Player after death by infection",
-  "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection.@Tooltip": "If enabled, spawn Zombified Player if player died from an infection | default: enabled"
+  "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection.@Tooltip": "If enabled, spawn Zombified Player if player died from an infection | default: enabled",
+
+  "text.autoconfig.zombifiedplayer.option.gravestoneCompatibility.@PrefixText": "[Please note]\nFor the option below a gravestone mod (gravestones or universal graves) needs to be installed!",
+  "text.autoconfig.zombifiedplayer.option.gravestoneCompatibility": "Don't create a gravestone when a Zombified Player spawns",
+  "text.autoconfig.zombifiedplayer.option.gravestoneCompatibility.@Tooltip": "If enabled, no gravestone will be placed when a zombified player spawns | default: disabled",
+
+  "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight.@PrefixText": "Custom Eye Height",
+  "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight": "Use custom eye height",
+  "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight.@Tooltip": "If enabled, the zombified player will use a custom eye height | default: disabled",
+  "text.autoconfig.zombifiedplayer.option.customEyeHeight": "Custom eye height",
+  "text.autoconfig.zombifiedplayer.option.customEyeHeight.@Tooltip": "The custom eye height of the zombified player (only used if 'Use custom eye height' is enabled) | default: 1.74"
 }
