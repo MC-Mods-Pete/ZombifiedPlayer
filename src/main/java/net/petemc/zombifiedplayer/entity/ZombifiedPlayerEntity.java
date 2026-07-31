@@ -252,7 +252,7 @@ public class ZombifiedPlayerEntity extends Zombie {
 
     public void saveInventory(ValueOutput.TypedOutputList<ItemStackWithSlot> list) {
         for (int i = 0; i < this.main.size(); ++i) {
-            ItemStack itemstack = (ItemStack)this.main.get(i);
+            ItemStack itemstack = this.main.get(i);
             if (!itemstack.isEmpty()) {
                 list.add(new ItemStackWithSlot(i, itemstack));
             }
@@ -274,7 +274,7 @@ public class ZombifiedPlayerEntity extends Zombie {
             this.main.set(index, stack);
         }
 
-        EquipmentSlot equipmentslot = (EquipmentSlot)EQUIPMENT_SLOT_MAPPING.get(index);
+        EquipmentSlot equipmentslot = EQUIPMENT_SLOT_MAPPING.get(index);
         if (equipmentslot != null) {
             this.equipment.set(equipmentslot, stack);
         }

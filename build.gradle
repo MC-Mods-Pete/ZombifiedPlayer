@@ -94,6 +94,7 @@ dependencies {
 	// Both gravestone mods are available for compilation (for their respective util classes)
 	compileOnly "maven.modrinth:pneumono_gravestones:${project.pneumono_gravestones_version}"
 	compileOnly "curse.maven:universal-graves-497175:${project.universal_graves_version}"
+	compileOnly "curse.maven:hardcore-revival-274036:${project.hardcore_revival_version}"
 }
 
 processResources {

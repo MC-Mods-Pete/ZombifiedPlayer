@@ -3,7 +3,7 @@
 	"package": "net.petemc.zombifiedplayer.mixin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
-
+		"ServerPlayerEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

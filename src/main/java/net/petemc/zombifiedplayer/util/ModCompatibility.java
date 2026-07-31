@@ -27,6 +27,10 @@ public class ModCompatibility {
             PneumonoGravestonesUtil.registerEvent();
             ZombifiedPlayer.LOGGER.info("Pneumono Gravestones mod detected. Gravestones will be suppressed when a Zombified Player spawns.");
         }
+        if (HardcoreRevivalUtil.isHardcoreRevivalLoaded()) {
+            HardcoreRevivalUtil.registerEvents();
+            ZombifiedPlayer.LOGGER.info("Hardcore Revival detected. Timeout deaths inherit the original knockout death cause for Zombified Player checks.");
+        }
     }
 
     public static boolean isContagionLoaded() {
