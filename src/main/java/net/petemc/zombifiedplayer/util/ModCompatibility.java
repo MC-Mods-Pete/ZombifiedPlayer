@@ -3,7 +3,7 @@ package net.petemc.zombifiedplayer.util;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.fml.ModList;
-import net.petemc.contagion.casts.InfectedPlayer;
+import net.petemc.contagion.casts.InfectedEntity;
 import net.petemc.undeadnights.entity.EliteZombieEntity;
 import net.petemc.undeadnights.entity.HordeZombieEntity;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
@@ -41,8 +41,8 @@ public class ModCompatibility {
 
     public static boolean diedFromInfection(ServerPlayer serverPlayer) {
         if (isContagionLoaded()) {
-            if (serverPlayer instanceof InfectedPlayer infectedPlayer) {
-                return infectedPlayer.contagion_playerDiedFromInfection();
+            if (serverPlayer instanceof InfectedEntity infectedEntity) {
+                return infectedEntity.contagion_playerDiedFromInfection();
             }
         }
         return false;

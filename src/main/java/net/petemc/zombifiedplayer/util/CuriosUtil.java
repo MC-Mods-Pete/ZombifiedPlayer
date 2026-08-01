@@ -1,11 +1,15 @@
 package net.petemc.zombifiedplayer.util;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
@@ -44,6 +48,12 @@ public class CuriosUtil {
         }
         
         return curiosItems;
+    }
+
+    public static boolean checkForItemInCurios(Player player, String itemId) {
+        return BuiltInRegistries.ITEM.getHolder(ResourceLocation.parse(itemId))
+                .map(item -> checkForItemInCurios(player, item.value().getDefaultInstance()))
+                .orElse(false);
     }
 
     public static boolean checkForItemInCurios(Player player, ItemStack itemToCheck) {
