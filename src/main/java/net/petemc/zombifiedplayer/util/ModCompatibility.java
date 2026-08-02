@@ -25,6 +25,10 @@ public class ModCompatibility {
         if (isGravestoneLoaded()) {
             ZombifiedPlayer.LOGGER.info("Gravestone mod detected. No gravestone will spawn when a Zombified Player is created.");
         }
+        if (HardcoreRevivalUtil.isHardcoreRevivalLoaded()) {
+            HardcoreRevivalUtil.registerEvents();
+            ZombifiedPlayer.LOGGER.info("Hardcore Revival detected. Timeout deaths inherit the original knockout death cause for Zombified Player checks.");
+        }
     }
 
     public static boolean isGravestoneLoaded() {

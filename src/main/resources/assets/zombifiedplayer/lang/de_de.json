@@ -34,6 +34,10 @@
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection": "Zombifizierten Spieler nach Tod durch Infektion spawnen",
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection.@Tooltip": "Wenn aktiviert, spawnt ein zombifizierter Spieler, wenn der Spieler an einer Infektion gestorben ist | Standard: aktiviert",
 
+  "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@PrefixText": "[Bitte beachten]\nFür die folgende Option muss die Mod Infectious installiert sein!",
+  "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility": "Zombifizierten Spieler spawnen, wenn er von Infectious Zombies getötet wird",
+  "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@Tooltip": "Wenn aktiviert, spawnt ein zombifizierter Spieler, wenn der Spieler von einem Infectious Zombie getötet wird | Standard: deaktiviert",
+
   "text.autoconfig.zombifiedplayer.option.corpseCompatibility.@PrefixText": "[Bitte beachten]\nFür die folgende Option muss die Corpse Mod installiert sein!",
   "text.autoconfig.zombifiedplayer.option.corpseCompatibility": "Keine Leiche erzeugen, wenn ein zombifizierter Spieler spawnt",
   "text.autoconfig.zombifiedplayer.option.corpseCompatibility.@Tooltip": "Wenn aktiviert, wird keine Leiche (Corpse-Mod) erzeugt, wenn ein zombifizierter Spieler spawnt | Standard: deaktiviert",
