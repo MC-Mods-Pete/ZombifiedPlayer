@@ -2,6 +2,7 @@ package net.petemc.zombifiedplayer.util;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.monster.Zombie;
 import net.neoforged.fml.ModList;
 import net.petemc.contagion.casts.InfectedEntity;
 import net.petemc.undeadnights.entity.EliteZombieEntity;
@@ -24,6 +25,10 @@ public class ModCompatibility {
         }
         if (isGravestoneLoaded()) {
             ZombifiedPlayer.LOGGER.info("Gravestone mod detected. No gravestone will spawn when a Zombified Player is created.");
+        }
+        if (HardcoreRevivalUtil.isHardcoreRevivalLoaded()) {
+            HardcoreRevivalUtil.registerEvents();
+            ZombifiedPlayer.LOGGER.info("Hardcore Revival detected. Timeout deaths inherit the original knockout death cause for Zombified Player checks.");
         }
     }
 

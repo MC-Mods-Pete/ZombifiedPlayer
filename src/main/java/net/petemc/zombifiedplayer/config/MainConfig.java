@@ -81,6 +81,10 @@ public class MainConfig
         return customEyeHeight;
     }
 
+    public static boolean getInfectiousModCompatibility() {
+        return infectiousModCompatibility;
+    }
+
     // Server Config
     private static final ModConfigSpec.Builder BUILDER_SERVER = new ModConfigSpec.Builder();
 
@@ -156,6 +160,10 @@ public class MainConfig
             .comment("The custom eye height of the Zombified Player (only used if useCustomEyeHeight is true) | default: 1.74")
             .defineInRange("customEyeHeight", 1.74, 0.0, 10.0);
 
+    private static final ModConfigSpec.BooleanValue INFECTIOUS_MOD_COMPATIBILITY = BUILDER_SERVER
+            .comment("If true, spawn zombified player when killed by Infectious Zombies (Infectious mod needed!) | default: false")
+            .define("infectiousModCompatibility", false);
+
     public static final ModConfigSpec SPEC_SERVER = BUILDER_SERVER.build();
 
 
@@ -183,6 +191,7 @@ public class MainConfig
     private static boolean gravestoneCompatibility = false;
     private static boolean useCustomEyeHeight = false;
     private static float customEyeHeight = 1.74f;
+    private static boolean infectiousModCompatibility = false;
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
@@ -206,6 +215,7 @@ public class MainConfig
             gravestoneCompatibility = GRAVESTONE_COMPATIBILITY.get();
             useCustomEyeHeight = USE_CUSTOM_EYE_HEIGHT.get();
             customEyeHeight = CUSTOM_EYE_HEIGHT.get().floatValue();
+            infectiousModCompatibility = INFECTIOUS_MOD_COMPATIBILITY.get();
         }
         if (SPEC_CLIENT.isLoaded()) {
             // no client config

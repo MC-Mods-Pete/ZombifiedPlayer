@@ -34,6 +34,10 @@
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection": "Spawn Zombified Player after death by infection",
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection.@Tooltip": "If enabled, spawn Zombified Player if player died from an infection | default: enabled",
 
+  "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@PrefixText": "[Please note]\nFor the option below the Infectious mod needs to be installed!",
+  "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility": "Spawn Zombified Player when killed by Infectious Zombies",
+  "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@Tooltip": "If enabled, spawn Zombified Player if player is killed by an Infectious Zombie | default: disabled",
+
   "text.autoconfig.zombifiedplayer.option.corpseCompatibility.@PrefixText": "[Please note]\nFor the option below the Corpse mod needs to be installed!",
   "text.autoconfig.zombifiedplayer.option.corpseCompatibility": "Don't create a corpse when a Zombified Player spawns",
   "text.autoconfig.zombifiedplayer.option.corpseCompatibility.@Tooltip": "If enabled, no corpse (Corpse mod) will spawn when a zombified player spawns | default: disabled",
