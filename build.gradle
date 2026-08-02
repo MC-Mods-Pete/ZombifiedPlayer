@@ -209,13 +209,13 @@ dependencies {
 
     implementation fg.deobf("curse.maven:curios-309927:${curios_version}")
 
-    compileOnly fg.deobf("curse.maven:accessories-938917:7164863")
+    compileOnly fg.deobf("curse.maven:accessories-938917:${accessories_version}")
 
-    implementation fg.deobf("curse.maven:corpse-316582:7018272")
-    implementation fg.deobf("curse.maven:gravestone-mod-238551:7099725")
+    implementation fg.deobf("curse.maven:corpse-316582:${corpse_version}")
+    implementation fg.deobf("curse.maven:gravestone-mod-238551:${gravestone_version}")
 
-    implementation fg.deobf("curse.maven:sophisticated-backpacks-422301:6869024")
-    implementation fg.deobf("curse.maven:sophisticated-core-618298:6850808")
+    implementation fg.deobf("curse.maven:sophisticated-backpacks-422301:${sophisticated_backpacks_version}")
+    implementation fg.deobf("curse.maven:sophisticated-core-618298:${sophisticated_core_version}")
 }
 
 mixin {

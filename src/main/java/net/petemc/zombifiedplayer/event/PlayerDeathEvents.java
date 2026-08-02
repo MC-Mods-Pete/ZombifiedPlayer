@@ -22,7 +22,8 @@ public class PlayerDeathEvents {
             if(!event.getEntity().level().isClientSide()) {
                 if(event.getEntity() instanceof ServerPlayer serverPlayer) {
                     boolean flag = CuriosUtil.checkForItemInCurios(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance());
-                    if (!(serverPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING) || flag)) {
+                    boolean flag2 = CuriosUtil.checkForItemInCurios(serverPlayer, "chargedcharms:charged_totem_charm");
+                    if (!(serverPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING) || flag || flag2)) {
                         if ((MainConfig.getSpawnOnAnyDeath() ||
                                 (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
                                 (attackerIsUndead(event.getSource().getEntity()) && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
