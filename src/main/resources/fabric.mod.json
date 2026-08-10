@@ -13,7 +13,7 @@
 		"issues": "https://github.com/MC-Mods-Pete/ZombifiedPlayer/issues"
 	},
 	"license": "MIT",
-	"icon": "assets/zombifiedplayer/icon.png",
+	"icon": "zombifiedplayer.png",
 	"environment": "*",
 	"entrypoints": {
 		"main": [
