@@ -6,7 +6,6 @@ import eu.pb4.trinkets.api.TrinketsApi;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -16,6 +15,7 @@ import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TrinketsUtil {
 
@@ -37,22 +37,16 @@ public class TrinketsUtil {
         }
 
         try {
-            // Access the attachment directly via the new API
             TrinketAttachment attachment = TrinketsApi.getAttachment(player);
 
-            // getAllEquipped() returns all slots that are NOT empty
-            // We use a copy to avoid ConcurrentModificationException if the attachment
-            // implementation is sensitive to changes during iteration.
-            List<Tuple<TrinketSlotAccess, ItemStack>> equippedItems =
-                    new ArrayList<>(attachment.getAllEquipped());
-
-            for (Tuple<TrinketSlotAccess, ItemStack> pair : equippedItems) {
-                ItemStack stack = pair.getB();
-                if (!stack.isEmpty()) {
-                    trinketsItems.add(stack.copy());
-                    ZombifiedPlayer.LOGGER.info("Found " + stack + " in trinkets, adding to list and clearing slot.");
-                    pair.getB().setCount(0);
-                }
+            if (attachment != null) {
+                attachment.forEach((access, stack) -> {
+                    if (!stack.isEmpty()) {
+                        trinketsItems.add(stack.copy());
+                        ZombifiedPlayer.LOGGER.info("Found " + stack + " in trinkets, adding to list and clearing slot.");
+                        stack.setCount(0);
+                    }
+                });
             }
         } catch (Exception e) {
             ZombifiedPlayer.LOGGER.error("Error accessing Trinkets API during retrieval", e);
@@ -107,20 +101,20 @@ public class TrinketsUtil {
                 .orElse(false);
     }
 
-    public static void saveTrinketItems(ValueOutput.TypedOutputList<ItemStackWithSlot> list, List<ItemStack> curiosItems) {
-        for (int i = 0; i < curiosItems.size(); ++i) {
-            ItemStack itemstack = curiosItems.get(i);
+    public static void saveTrinketItems(ValueOutput.TypedOutputList<ItemStackWithSlot> list, List<ItemStack> trinketItems) {
+        for (int i = 0; i < trinketItems.size(); ++i) {
+            ItemStack itemstack = trinketItems.get(i);
             if (!itemstack.isEmpty()) {
                 list.add(new ItemStackWithSlot(i, itemstack));
             }
         }
     }
 
-    public static void loadTrinketItems(ValueInput.TypedInputList<ItemStackWithSlot> list, List<ItemStack> curiosItems) {
-        curiosItems.clear();
+    public static void loadTrinketItems(ValueInput.TypedInputList<ItemStackWithSlot> list, List<ItemStack> trinketItems) {
+        trinketItems.clear();
 
         for (ItemStackWithSlot itemStackWithSlot : list) {
-            curiosItems.add(itemStackWithSlot.stack());
+            trinketItems.add(itemStackWithSlot.stack());
         }
     }
 }
