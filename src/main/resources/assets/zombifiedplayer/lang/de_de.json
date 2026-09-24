@@ -1,4 +1,6 @@
 {
+  "entity.zombifiedplayer.zombified_player": "Zombifizierter Spieler",
+
   "zombifiedplayer.spawn.message": "Eine zombifizierte Version von dir streift nun durch diese Welt...",
   "zombifiedplayer.location.message": "Sie kann bei %s gefunden werden",
 

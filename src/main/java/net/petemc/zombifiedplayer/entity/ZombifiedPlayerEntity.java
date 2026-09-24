@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
@@ -38,7 +37,6 @@ import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.common.extensions.IEntityExtension;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
-import net.petemc.undeadnights.UndeadNights;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.util.CuriosUtil;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
@@ -302,7 +300,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
 
     public void saveInventory(ValueOutput.TypedOutputList<ItemStackWithSlot> list) {
         for (int i = 0; i < this.main.size(); ++i) {
-            ItemStack itemstack = (ItemStack)this.main.get(i);
+            ItemStack itemstack = this.main.get(i);
             if (!itemstack.isEmpty()) {
                 list.add(new ItemStackWithSlot(i, itemstack));
             }
@@ -324,7 +322,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
             this.main.set(index, stack);
         }
 
-        EquipmentSlot equipmentslot = (EquipmentSlot)EQUIPMENT_SLOT_MAPPING.get(index);
+        EquipmentSlot equipmentslot = EQUIPMENT_SLOT_MAPPING.get(index);
         if (equipmentslot != null) {
             this.equipment.set(equipmentslot, stack);
         }

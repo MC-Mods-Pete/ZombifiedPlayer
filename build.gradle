@@ -151,6 +151,7 @@ dependencies {
 
     implementation "curse.maven:corpse-316582:${corpse_version}"
     implementation "curse.maven:gravestone-mod-238551:${gravestone_version}"
+    compileOnly "curse.maven:hardcore-revival-274036:${project.hardcore_revival_version}"
 
     //runtimeOnly "curse.maven:sophisticated-backpacks-422301:${sophisticated_backpacks_version}"
     //runtimeOnly "curse.maven:sophisticated-core-618298:${sophisticated_core_version}"
