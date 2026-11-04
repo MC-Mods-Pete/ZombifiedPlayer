@@ -38,7 +38,7 @@ public class ZombifiedPlayer {
         NeoForge.EVENT_BUS.register(this);
         modEventBus.addListener(this::addCreative);
 
-        modContainer.registerConfig(ModConfig.Type.SERVER, MainConfig.SPEC_SERVER);
+        modContainer.registerConfig(ModConfig.Type.SYNCED, MainConfig.SPEC_SERVER);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
