@@ -22,7 +22,7 @@ public class Config implements ConfigData
         return INSTANCE.spawnZombifiedPlayerAfterDeath;
     }
 
-    public static boolean getTransferMainandOffHandToZombifiedPlayer() {
+    public static boolean getTransferMainAndOffHandToZombifiedPlayer() {
         return INSTANCE.transferMainandOffHandToZombifiedPlayer;
     }
 

@@ -147,7 +147,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         if (EnchantmentHelper.hasVanishingCurse(playerEntity.getMainHandStack())) {
             playerEntity.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (Config.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setStackInHand(Hand.MAIN_HAND, playerEntity.getMainHandStack().copy());
                 playerEntity.getMainHandStack().setCount(0);
             }
@@ -156,7 +156,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         if (EnchantmentHelper.hasVanishingCurse(playerEntity.getOffHandStack())) {
             playerEntity.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
         } else {
-            if (Config.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (Config.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setStackInHand(Hand.OFF_HAND, playerEntity.getOffHandStack().copy());
                 playerEntity.getOffHandStack().setCount(0);
             }
