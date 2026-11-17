@@ -19,8 +19,6 @@ import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.StackWithSlot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
@@ -34,7 +32,10 @@ import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.config.MainConfig;
+import net.petemc.zombifiedplayer.util.TrinketsUtil;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -43,6 +44,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     public GameProfile gameProfile;
     public final DefaultedList<ItemStack> main = DefaultedList.ofSize(36, ItemStack.EMPTY);
     public static final Int2ObjectMap<EquipmentSlot> EQUIPMENT_SLOTS;
+    public final List<ItemStack> trinketsItems = new ArrayList<>();
 
     public ZombifiedPlayerEntity(EntityType<? extends ZombieEntity> entityType, World world) {
         super(entityType, world);
@@ -172,7 +174,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getMainHandStack(), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
         } else {
-            if (MainConfig.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (MainConfig.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setStackInHand(Hand.MAIN_HAND, playerEntity.getMainHandStack().copyAndEmpty());
             }
         }
@@ -180,7 +182,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getOffHandStack(), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
         } else {
-            if (MainConfig.getTransferMainandOffHandToZombifiedPlayer()) {
+            if (MainConfig.getTransferMainAndOffHandToZombifiedPlayer()) {
                 this.setStackInHand(Hand.OFF_HAND, playerEntity.getOffHandStack().copyAndEmpty());
             }
         }
@@ -206,21 +208,28 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                 }
             }
         }
+
+        if (TrinketsUtil.isTrinketsLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+            List<ItemStack> playerCuriosItems = TrinketsUtil.getTrinketItemsAndClear(playerEntity);
+            this.trinketsItems.addAll(playerCuriosItems);
+        }
     }
 
     @Override
     public void writeCustomData(WriteView view) {
         super.writeCustomData(view);
-        this.writeData(view.getListAppender("Inventory", StackWithSlot.CODEC));
+        this.writeInventoryData(view.getListAppender("Inventory", StackWithSlot.CODEC));
+        TrinketsUtil.saveTrinketItems(view.getListAppender("TrinketItems", StackWithSlot.CODEC), this.trinketsItems);
     }
 
     @Override
     public void readCustomData(ReadView view) {
         super.readCustomData(view);
-        this.readData(view.getTypedListView("Inventory", StackWithSlot.CODEC));
+        this.readInventoryData(view.getTypedListView("Inventory", StackWithSlot.CODEC));
+        TrinketsUtil.loadTrinketItems(view.getTypedListView("TrinketItems", StackWithSlot.CODEC), this.trinketsItems);
     }
 
-    public void writeData(WriteView.ListAppender<StackWithSlot> list) {
+    public void writeInventoryData(WriteView.ListAppender<StackWithSlot> list) {
         for(int i = 0; i < this.main.size(); ++i) {
             ItemStack itemStack = (ItemStack)this.main.get(i);
             if (!itemStack.isEmpty()) {
@@ -230,7 +239,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
 
     }
 
-    public void readData(ReadView.TypedListReadView<StackWithSlot> list) {
+    public void readInventoryData(ReadView.TypedListReadView<StackWithSlot> list) {
         this.main.clear();
 
         for(StackWithSlot stackWithSlot : list) {

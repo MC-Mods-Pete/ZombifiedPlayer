@@ -36,6 +36,11 @@ repositories {
 			includeGroup "curse.maven"
 		}
 	}
+
+    maven {
+        name 'Ladysnake Mods'
+        url 'https://maven.ladysnake.org/releases'
+    }
 }
 
 fabricApi {
@@ -60,6 +65,11 @@ dependencies {
 	modImplementation "curse.maven:jade-324717:${project.jade_version}"
 	modImplementation "curse.maven:contagion-1027702:${project.contagion_version}"
 	modImplementation "curse.maven:undeadnights-1166914:${project.undeadnights_version}"
+
+    modImplementation "curse.maven:trinkets-341284:${trinkets_version}"
+
+    modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:6.0.0"
+    modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:6.0.0"
 }
 
 processResources {
