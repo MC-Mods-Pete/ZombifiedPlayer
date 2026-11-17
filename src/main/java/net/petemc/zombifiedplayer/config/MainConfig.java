@@ -1,14 +1,15 @@
-package net.petemc.zombifiedplayer;
+package net.petemc.zombifiedplayer.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Forge's config APIs
 @Mod.EventBusSubscriber(modid = ZombifiedPlayer.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
-public class Config
+public class MainConfig
 {
     public static boolean getSpawnZombifiedPlayerAfterDeath() {
         return spawnZombifiedPlayerAfterDeath;
@@ -32,6 +33,10 @@ public class Config
 
     public static boolean getSpawnOnAnyDeath() {
         return spawnOnAnyDeath;
+    }
+
+    public static boolean getDisplayNameTagForZombifiedPlayer() {
+        return displayNameTagForZombifiedPlayer;
     }
 
     public static boolean getPrintSpawnMessageInChat() {
@@ -62,6 +67,21 @@ public class Config
         return spawnWhenKilledByInfection;
     }
 
+    public static boolean getCorpseCompatibility() {
+        return corpseCompatibility;
+    }
+
+    public static boolean getGravestoneCompatibility() {
+        return gravestoneCompatibility;
+    }
+
+    public static boolean getUseCustomEyeHeight() {
+        return useCustomEyeHeight;
+    }
+
+    public static float getCustomEyeHeight() {
+        return customEyeHeight;
+    }
 
     // Server Config
     private static final ForgeConfigSpec.Builder BUILDER_SERVER = new ForgeConfigSpec.Builder();
@@ -89,6 +109,10 @@ public class Config
     private static final ForgeConfigSpec.BooleanValue SPAWN_ON_ANY_DEATH = BUILDER_SERVER
             .comment("If true, a zombified player will spawn no matter how the player died | default: false")
             .define("spawnOnAnyDeath", false);
+
+    private static final ForgeConfigSpec.BooleanValue DISPLAY_NAME_TAG_FOR_ZOMBIFIED_PLAYER = BUILDER_SERVER
+            .comment("If true, the name tag will be displayed above the Zombified Player | default: true")
+            .define("displayNameTagForZombifiedPlayer", true);
 
     private static final ForgeConfigSpec.BooleanValue PRINT_SPAWN_MESSAGE_IN_CHAT = BUILDER_SERVER
             .comment("If true, a message will be printed out in chat that a zombified player has spawned | default: true")
@@ -118,13 +142,29 @@ public class Config
             .comment("If true, spawn zombified player after death by infection (Contagion mod needed!) | default: true")
             .define("spawnWhenKilledByInfection", true);
 
-    static final ForgeConfigSpec SPEC_SERVER = BUILDER_SERVER.build();
+    private static final ForgeConfigSpec.BooleanValue CORPSE_COMPATIBILITY = BUILDER_SERVER
+            .comment("If true, no corpse (Corpse mod) will spawn when a Zombified Player is created | default: false")
+            .define("corpseCompatibility", false);
+
+    private static final ForgeConfigSpec.BooleanValue GRAVESTONE_COMPATIBILITY = BUILDER_SERVER
+            .comment("If true, no gravestone (Gravestone mod) will spawn when a Zombified Player is created | default: false")
+            .define("gravestoneCompatibility", false);
+
+    private static final ForgeConfigSpec.BooleanValue USE_CUSTOM_EYE_HEIGHT = BUILDER_SERVER
+            .comment("If true, the custom eye height defined by customEyeHeight will be used for the Zombified Player | default: false")
+            .define("useCustomEyeHeight", false);
+
+    private static final ForgeConfigSpec.DoubleValue CUSTOM_EYE_HEIGHT = BUILDER_SERVER
+            .comment("The custom eye height of the Zombified Player (only used if useCustomEyeHeight is true) | default: 1.74")
+            .defineInRange("customEyeHeight", 1.74, 0.0, 10.0);
+
+    public static final ForgeConfigSpec SPEC_SERVER = BUILDER_SERVER.build();
 
 
     // Client Config
     private static final ForgeConfigSpec.Builder BUILDER_CLIENT = new ForgeConfigSpec.Builder();
     // no client config
-    static final ForgeConfigSpec SPEC_CLIENT = BUILDER_CLIENT.build();
+    public static final ForgeConfigSpec SPEC_CLIENT = BUILDER_CLIENT.build();
 
 
     private static boolean spawnZombifiedPlayerAfterDeath = true;
@@ -133,6 +173,7 @@ public class Config
     private static boolean transferInventoryToZombifiedPlayer = true;
     private static boolean transferCuriosOrTrinketItemsToZombifiedPlayer = true;
     private static boolean spawnOnAnyDeath = false;
+    private static boolean displayNameTagForZombifiedPlayer = true;
     private static boolean printSpawnMessageInChat = true;
     private static boolean printSpawnLocationInChat = false;
     private static boolean zombifiedPlayersCanBreakDoors = true;
@@ -140,6 +181,10 @@ public class Config
     private static boolean makeTheZombifiedPlayersImmuneToFire = false;
     private static boolean limitSkinFetchTries = true;
     private static boolean spawnWhenKilledByInfection = true;
+    private static boolean corpseCompatibility = false;
+    private static boolean gravestoneCompatibility = false;
+    private static boolean useCustomEyeHeight = false;
+    private static float customEyeHeight = 1.74f;
 
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
@@ -151,6 +196,7 @@ public class Config
             transferInventoryToZombifiedPlayer = TRANSFER_INVENTORY_TO_ZOMBIFIED_PLAYER.get();
             transferCuriosOrTrinketItemsToZombifiedPlayer = TRANSFER_CURIOS_TRINKET_ITEMS_TO_ZOMBIFIED_PLAYER.get();
             spawnOnAnyDeath = SPAWN_ON_ANY_DEATH.get();
+            displayNameTagForZombifiedPlayer = DISPLAY_NAME_TAG_FOR_ZOMBIFIED_PLAYER.get();
             printSpawnMessageInChat = PRINT_SPAWN_MESSAGE_IN_CHAT.get();
             printSpawnLocationInChat = PRINT_SPAWN_LOCATION_IN_CHAT.get();
             zombifiedPlayersCanBreakDoors = ZOMBIFIED_PLAYERS_CAN_BREAK_DOORS.get();
@@ -158,6 +204,10 @@ public class Config
             makeTheZombifiedPlayersImmuneToFire = MAKE_THE_ZOMBIFIED_PLAYERS_IMMUNE_TO_FIRE.get();
             limitSkinFetchTries = LIMIT_SKIN_FETCH_TRIES.get();
             spawnWhenKilledByInfection = SPAWN_WHEN_KILLED_BY_INFECTION.get();
+            corpseCompatibility = CORPSE_COMPATIBILITY.get();
+            gravestoneCompatibility = GRAVESTONE_COMPATIBILITY.get();
+            useCustomEyeHeight = USE_CUSTOM_EYE_HEIGHT.get();
+            customEyeHeight = CUSTOM_EYE_HEIGHT.get().floatValue();
         }
         if (SPEC_CLIENT.isLoaded()) {
             // no client config

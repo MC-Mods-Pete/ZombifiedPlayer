@@ -200,29 +200,26 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
     //other dependencies
+    implementation fg.deobf("curse.maven:contagion-1027702:${contagion_version}")
     implementation fg.deobf("curse.maven:undeadnights-1166914:${undeadnights_version}")
 
     runtimeOnly fg.deobf("curse.maven:jade--324717:${jade_version}")
-    implementation fg.deobf("curse.maven:contagion-1027702:${contagion_version}")
+    runtimeOnly fg.deobf("curse.maven:contagion-1027702:${contagion_version}")
     runtimeOnly fg.deobf("curse.maven:undeadnights-1166914:${undeadnights_version}")
 
     implementation fg.deobf("curse.maven:curios-309927:${curios_version}")
 
+    implementation fg.deobf("curse.maven:corpse-316582:${corpse_version}")
+    implementation fg.deobf("curse.maven:gravestone-mod-238551:${gravestone_mod_version}")
+
     implementation fg.deobf("curse.maven:sophisticated-backpacks-422301:${sophisticated_backpacks_version}")
     implementation fg.deobf("curse.maven:sophisticated-core-618298:${sophisticated_core_version}")
-
-
 }
 
 mixin {
     // MixinGradle Settings
     add sourceSets.main, 'zombifiedplayer.refmap.json'
     config 'zombifiedplayer.mixins.json'
-
-
-    add sourceSets.main, "${mod_id}.refmap.json"
-
-    config "${mod_id}.mixins.json"
 }
 
 

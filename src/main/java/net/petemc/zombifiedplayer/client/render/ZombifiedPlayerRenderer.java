@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.petemc.zombifiedplayer.Config;
+import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import org.jetbrains.annotations.NotNull;
@@ -118,7 +118,7 @@ public class ZombifiedPlayerRenderer
                 counter = counterMax;
                 totalTries++;
                 if (totalTries == maxTotalTries - 1) {
-                    if (Config.getLimitSkinFetchTries()) {
+                    if (MainConfig.getLimitSkinFetchTries()) {
                         ZombifiedPlayer.LOGGER.warn("Could not fetch a valid Skin for {}, will stop trying.", profile.getName());
                     } else {
                         totalTries = 0;
