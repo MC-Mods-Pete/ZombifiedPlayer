@@ -80,6 +80,7 @@ public class ZombifiedPlayerSpawnLogic {
      * Tag-based check against zombifiedplayer:zombie_undead — only zombie variants,
      * NOT skeletons, phantoms, withers etc. (those are in minecraft:undead but excluded here).
      * ZombifiedPlayerEntity is included via the tag values directly.
+     * Mutants and Zombies: blister_zombie, zombie_brute, split_head_zombie and mutant_zombie are optional tag entries.
      * Use attacker.getType().is(...) — NOT attacker.typeHolder().is(...) which doesn't compile,
      * and NOT builtInRegistryHolder() which is @Deprecated.
      */
@@ -89,21 +90,8 @@ public class ZombifiedPlayerSpawnLogic {
         boolean hordeMatch = (attacker instanceof LivingEntity living)
                 && ModCompatibility.wasKilledByHordeZombie(living);
         boolean zombieMatch = (attacker instanceof Zombie);
-        boolean mutantsZombiesMatch = hasMutantsZombiesId(attacker);
         boolean infectiousZombieMatch = hasInfectiousZombieId(attacker);
-        return tagMatch || hordeMatch || zombieMatch || mutantsZombiesMatch || infectiousZombieMatch;
-    }
-
-    /**
-     * Check if the entity's mob ID contains mobs from the "mutantszombies" mod.
-     */
-    private static boolean hasMutantsZombiesId(Entity entity) {
-        ResourceLocation mobId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
-        if (mobId == null) return false;
-        String id = mobId.toString().toLowerCase();
-        boolean flag = id.contains("mutantszombies");
-        boolean flag2 = id.contains("blister") || id.contains("brute") || id.contains("split");
-        return flag && flag2;
+        return tagMatch || hordeMatch || zombieMatch || infectiousZombieMatch;
     }
 
     /**
