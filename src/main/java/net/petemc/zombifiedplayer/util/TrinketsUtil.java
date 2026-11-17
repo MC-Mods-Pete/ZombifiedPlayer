@@ -8,6 +8,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
@@ -39,6 +41,18 @@ public class TrinketsUtil {
         }
         
         return trinketsItems;
+    }
+
+
+    public static boolean checkForItemInTrinkets(PlayerEntity player, String itemId) {
+        Identifier identifier = Identifier.tryParse(itemId);
+        if (identifier == null) {
+            return false;
+        }
+
+        return Registries.ITEM.getOrEmpty(identifier)
+                .map(item -> checkForItemInTrinkets(player, item.getDefaultStack()))
+                .orElse(false);
     }
 
     public static boolean checkForItemInTrinkets(PlayerEntity player, ItemStack itemToCheck) {
