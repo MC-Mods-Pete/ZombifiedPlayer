@@ -48,7 +48,8 @@ public class PlayerDeathEvents {
         if (pPlayer != null) {
             if (pPlayer instanceof ServerPlayerEntity serverPlayer) {
                 boolean flag = TrinketsUtil.checkForItemInTrinkets(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultStack());
-                if (!(pPlayer.getMainHandStack().isOf(Items.TOTEM_OF_UNDYING) || pPlayer.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING) || flag)) {
+                boolean flag2 = TrinketsUtil.checkForItemInTrinkets(serverPlayer, "chargedcharms:charged_totem_charm");
+                if (!(serverPlayer.getMainHandStack().isOf(Items.TOTEM_OF_UNDYING) || serverPlayer.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING) || flag || flag2)) {
                     if ((MainConfig.getSpawnOnAnyDeath() ||
                             (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
                             (attackerIsUndead() && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
