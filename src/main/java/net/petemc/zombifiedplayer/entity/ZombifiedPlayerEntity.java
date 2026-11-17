@@ -21,6 +21,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.ai.goal.BreakDoorGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.MoveThroughVillageGoal;
@@ -76,6 +77,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
 
     public ZombifiedPlayerEntity(EntityType<? extends Zombie> entityType, Level level) {
         super(entityType, level);
+        // Covers every way of creating the entity (death, /summon, spawn egg, spawner)
+        this.setCanBreakDoors(true);
     }
 
     /**
@@ -92,9 +95,12 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE);
     }
 
-    /** Door breaking on every difficulty (the vanilla zombie goal only works on hard). Still needs mobGriefing. */
-    private final BreakDoorGoal breakDoorsOnAnyDifficultyGoal = new BreakDoorGoal(this, difficulty -> true);
-    private boolean breakDoorsEnabled = false;
+    /**
+     * Door breaking on hard difficulty like vanilla zombies, with zombifiedPlayersCanAlwaysBreakDoors on every difficulty.
+     * The goal itself still needs the game rule mobGriefing.
+     */
+    private final BreakDoorGoal breakDoorsGoal = new BreakDoorGoal(this, ZombifiedPlayerEntity::canBreakDoorsOnDifficulty);
+    private boolean breakDoorsGoalAdded = false;
 
     /**
      * Applies the config options that belong to the entity. Called when it spawns and when it is loaded,
@@ -110,8 +116,10 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         if (this.getHealth() > this.getMaxHealth()) {
             this.setHealth(this.getMaxHealth());
         }
+    }
 
-        this.setCanBreakDoors(MainConfig.getZombifiedPlayersCanBreakDoors());
+    private static boolean canBreakDoorsOnDifficulty(Difficulty difficulty) {
+        return difficulty == Difficulty.HARD || MainConfig.getZombifiedPlayersCanAlwaysBreakDoors();
     }
 
     private void setBaseValue(Attribute attribute, double value) {
@@ -149,31 +157,32 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         return false;
     }
 
+    /** Whether door breaking is possible right now (difficulty and config, both can change at any time). */
     @Override
     public boolean canBreakDoors()
     {
-        return this.breakDoorsEnabled;
+        return this.breakDoorsGoalAdded && canBreakDoorsOnDifficulty(this.level().getDifficulty());
     }
 
     /**
-     * Replaces the vanilla zombie logic, which adds a door breaking goal that only works on hard difficulty.
-     * Also called by Zombie.readAdditionalSaveData with the saved value.
+     * Replaces the vanilla zombie logic. Vanilla calls this with a random value on spawn (finalizeSpawn, e.g. /summon)
+     * and with the saved value on load. For zombified players only difficulty and config decide,
+     * so the value is ignored and our goal is always present.
      */
     @Override
-    public void setCanBreakDoors(boolean enabled) {
-        if (GoalUtils.hasGroundPathNavigation(this)) {
-            if (this.breakDoorsEnabled != enabled) {
-                this.breakDoorsEnabled = enabled;
-                ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(enabled);
-                if (enabled) {
-                    this.goalSelector.addGoal(1, this.breakDoorsOnAnyDifficultyGoal);
-                } else {
-                    this.goalSelector.removeGoal(this.breakDoorsOnAnyDifficultyGoal);
-                }
-            }
-        } else if (this.breakDoorsEnabled) {
-            this.goalSelector.removeGoal(this.breakDoorsOnAnyDifficultyGoal);
-            this.breakDoorsEnabled = false;
+    public void setCanBreakDoors(boolean ignored) {
+        if (!this.breakDoorsGoalAdded && GoalUtils.hasGroundPathNavigation(this)) {
+            this.goalSelector.addGoal(1, this.breakDoorsGoal);
+            this.breakDoorsGoalAdded = true;
+        }
+    }
+
+    @Override
+    protected void customServerAiStep() {
+        super.customServerAiStep();
+        // Only plan paths through doors while they can be broken, otherwise walk around them like a normal zombie
+        if (this.breakDoorsGoalAdded) {
+            ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(this.canBreakDoors());
         }
     }
 

@@ -47,8 +47,8 @@ public class MainConfig
         return printSpawnLocationInChat;
     }
 
-    public static boolean getZombifiedPlayersCanBreakDoors() {
-        return zombifiedPlayersCanBreakDoors;
+    public static boolean getZombifiedPlayersCanAlwaysBreakDoors() {
+        return zombifiedPlayersCanAlwaysBreakDoors;
     }
 
     public static boolean getMakeTheZombifiedPlayersStronger() {
@@ -126,9 +126,9 @@ public class MainConfig
             .comment("If true, the spawn location of the zombified player will be printed out in chat | default: false")
             .define("printSpawnLocationInChat", false);
 
-    private static final ForgeConfigSpec.BooleanValue ZOMBIFIED_PLAYERS_CAN_BREAK_DOORS = BUILDER_SERVER
-            .comment("If true, zombified players can break through wooden doors on every difficulty (needs the game rule mobGriefing) | default: true")
-            .define("zombifiedPlayersCanBreakDoors", true);
+    private static final ForgeConfigSpec.BooleanValue ZOMBIFIED_PLAYERS_CAN_ALWAYS_BREAK_DOORS = BUILDER_SERVER
+            .comment("If true, zombified players can break through wooden doors on every difficulty. If false, only on hard difficulty like zombies (both need the game rule mobGriefing) | default: false")
+            .define("zombifiedPlayersCanAlwaysBreakDoors", false);
 
     private static final ForgeConfigSpec.BooleanValue MAKE_THE_ZOMBIFIED_PLAYERS_STRONGER = BUILDER_SERVER
             .comment("If true, zombified players are stronger, faster and have more health | default: false")
@@ -184,7 +184,7 @@ public class MainConfig
     private static boolean displayNameTagForZombifiedPlayer = true;
     private static boolean printSpawnMessageInChat = true;
     private static boolean printSpawnLocationInChat = false;
-    private static boolean zombifiedPlayersCanBreakDoors = true;
+    private static boolean zombifiedPlayersCanAlwaysBreakDoors = false;
     private static boolean makeTheZombifiedPlayersStronger = false;
     private static boolean makeTheZombifiedPlayersImmuneToFire = false;
     private static boolean limitSkinFetchTries = true;
@@ -208,7 +208,7 @@ public class MainConfig
             displayNameTagForZombifiedPlayer = DISPLAY_NAME_TAG_FOR_ZOMBIFIED_PLAYER.get();
             printSpawnMessageInChat = PRINT_SPAWN_MESSAGE_IN_CHAT.get();
             printSpawnLocationInChat = PRINT_SPAWN_LOCATION_IN_CHAT.get();
-            zombifiedPlayersCanBreakDoors = ZOMBIFIED_PLAYERS_CAN_BREAK_DOORS.get();
+            zombifiedPlayersCanAlwaysBreakDoors = ZOMBIFIED_PLAYERS_CAN_ALWAYS_BREAK_DOORS.get();
             makeTheZombifiedPlayersStronger = MAKE_THE_ZOMBIFIED_PLAYERS_STRONGER.get();
             makeTheZombifiedPlayersImmuneToFire = MAKE_THE_ZOMBIFIED_PLAYERS_IMMUNE_TO_FIRE.get();
             limitSkinFetchTries = LIMIT_SKIN_FETCH_TRIES.get();
