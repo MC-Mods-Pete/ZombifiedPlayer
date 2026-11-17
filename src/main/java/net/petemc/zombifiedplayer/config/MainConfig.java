@@ -31,6 +31,10 @@ public class MainConfig
         return transferCuriosOrTrinketItemsToZombifiedPlayer;
     }
 
+    public static boolean getIgnoreKeepInventory() {
+        return ignoreKeepInventory;
+    }
+
     public static boolean getSpawnOnAnyDeath() {
         return spawnOnAnyDeath;
     }
@@ -110,6 +114,10 @@ public class MainConfig
             .comment("If true, all equipped curios/trinket items of the dead player will be transferred to the zombified player | default: true")
             .define("transferCuriosOrTrinketItemsToZombifiedPlayer", true);
 
+    private static final ForgeConfigSpec.BooleanValue IGNORE_KEEP_INVENTORY = BUILDER_SERVER
+            .comment("If true, the items are transferred to the zombified player even if the game rule keepInventory is on. If false, the player keeps the items with keepInventory and the zombified player spawns without them | default: false")
+            .define("ignoreKeepInventory", false);
+
     private static final ForgeConfigSpec.BooleanValue SPAWN_ON_ANY_DEATH = BUILDER_SERVER
             .comment("If true, a zombified player will spawn no matter how the player died | default: false")
             .define("spawnOnAnyDeath", false);
@@ -180,6 +188,7 @@ public class MainConfig
     private static boolean transferArmorToZombifiedPlayer = true;
     private static boolean transferInventoryToZombifiedPlayer = true;
     private static boolean transferCuriosOrTrinketItemsToZombifiedPlayer = true;
+    private static boolean ignoreKeepInventory = false;
     private static boolean spawnOnAnyDeath = false;
     private static boolean displayNameTagForZombifiedPlayer = true;
     private static boolean printSpawnMessageInChat = true;
@@ -204,6 +213,7 @@ public class MainConfig
             transferArmorToZombifiedPlayer = TRANSFER_ARMOR_TO_ZOMBIFIED_PLAYER.get();
             transferInventoryToZombifiedPlayer = TRANSFER_INVENTORY_TO_ZOMBIFIED_PLAYER.get();
             transferCuriosOrTrinketItemsToZombifiedPlayer = TRANSFER_CURIOS_TRINKET_ITEMS_TO_ZOMBIFIED_PLAYER.get();
+            ignoreKeepInventory = IGNORE_KEEP_INVENTORY.get();
             spawnOnAnyDeath = SPAWN_ON_ANY_DEATH.get();
             displayNameTagForZombifiedPlayer = DISPLAY_NAME_TAG_FOR_ZOMBIFIED_PLAYER.get();
             printSpawnMessageInChat = PRINT_SPAWN_MESSAGE_IN_CHAT.get();
