@@ -135,20 +135,49 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         this.gameProfile = gameProfile;
     }
 
+    /**
+     * Never in peaceful: the zombified player carries the dead player's items,
+     * despawning would delete them. It cannot attack players in peaceful anyway.
+     */
+    @Override
+    protected boolean shouldDespawnInPeaceful() {
+        return false;
+    }
+
+    /**
+     * Vanilla must never drop the equipment by itself: it only does so by chance and
+     * applies random durability damage to items with a drop chance <= 1.
+     * All items of the player are dropped intact in dropEquipment().
+     */
+    @Override
+    protected float getEquipmentDropChance(@NotNull EquipmentSlot pSlot) {
+        return 0.0F;
+    }
+
     @Override
     protected void dropCustomDeathLoot(@NotNull DamageSource pDamageSource, int pLooting, boolean pHitByPlayer) {
         super.dropCustomDeathLoot(pDamageSource, pLooting, pHitByPlayer);
 
-        // drop rotten flesh
+        // drop rotten flesh (regular mob loot, respects the doMobLoot game rule)
         RandomSource random = this.getRandom();
         ItemStack rottenFleshStack = new ItemStack(Items.ROTTEN_FLESH, random.nextIntBetweenInclusive(1,3));
         this.spawnAtLocation(rottenFleshStack);
+    }
 
-        // drop equipment and inventory
+    /**
+     * The items belong to the player, so they are dropped like a player's inventory:
+     * always, independent of the doMobLoot game rule (dropCustomDeathLoot is skipped when it is false).
+     */
+    @Override
+    protected void dropEquipment() {
+        super.dropEquipment();
+
         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
             ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-            this.spawnAtLocation(itemStack);
-            this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
+            if (!itemStack.isEmpty()) {
+                this.spawnAtLocation(itemStack);
+                this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
+            }
         }
         dropInventory();
     }
@@ -224,7 +253,10 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
                 if (MainConfig.getTransferArmorToZombifiedPlayer()) {
-                    this.equipItemIfPossible(playerEntity.getInventory().armor.get(i).copyAndClear());
+                    // Put the item into the same armor slot directly. equipItemIfPossible() returns EMPTY
+                    // (and the item is lost) when the item is not wearable in that slot.
+                    EquipmentSlot armorSlot = EquipmentSlot.byTypeAndIndex(EquipmentSlot.Type.ARMOR, i);
+                    this.setItemSlot(armorSlot, playerEntity.getInventory().armor.get(i).copyAndClear());
                 }
             }
         }
