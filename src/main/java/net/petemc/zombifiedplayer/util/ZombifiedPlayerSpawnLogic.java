@@ -10,6 +10,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Items;
 import net.petemc.zombifiedplayer.config.MainConfig;
+import net.petemc.zombifiedplayertrinkets.util.TrinketsUtil;
 
 /**
  * Single source of truth for all Zombified Player spawn conditions.
@@ -38,10 +39,14 @@ public class ZombifiedPlayerSpawnLogic {
      */
     public static boolean shouldSpawn(ServerPlayer serverPlayer, DamageSource damageSource) {
         // Totem protection — vanilla hands and Trinkets slots
+        boolean flag1 = false;
+        boolean flag2 = false;
+        if (ModCompatibility.isTrinketsCompatLoaded()) {
+            flag1 = TrinketsUtil.checkForItemInTrinkets(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance());
+            flag2 = TrinketsUtil.checkForItemInTrinkets(serverPlayer, "chargedcharms:charged_totem_charm");
+        }
         if (serverPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING)
-                || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
-                || TrinketsUtil.checkForItemInTrinkets(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance())
-                || TrinketsUtil.checkForItemInTrinkets(serverPlayer, "chargedcharms:charged_totem_charm")) {
+                || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING) || flag1 || flag2) {
             return false;
         }
 

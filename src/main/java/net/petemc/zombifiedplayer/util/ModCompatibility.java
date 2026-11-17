@@ -16,8 +16,11 @@ public class ModCompatibility {
         if (isUndeadNightsLoaded()) {
             ZombifiedPlayer.LOGGER.info("Undead Nights mod detected. Death by a Horde Zombie will spawn a Zombified Players.");
         }
-        if (TrinketsUtil.isTrinketsLoaded()) {
+        if (isTrinketsCompatLoaded()) {
             ZombifiedPlayer.LOGGER.info("Trinkets API detected. If enabled trinket items will be transferred to the Zombified Player.");
+        }
+        if (isAccessoriesLoaded()) {
+            ZombifiedPlayer.LOGGER.info("Accessories mod detected. If enabled accessory items will be transferred to the Zombified Player.");
         }
         if (UniversalGravesUtil.isUniversalGravesLoaded()) {
             UniversalGravesUtil.registerEvent();
@@ -31,6 +34,14 @@ public class ModCompatibility {
             HardcoreRevivalUtil.registerEvents();
             ZombifiedPlayer.LOGGER.info("Hardcore Revival detected. Timeout deaths inherit the original knockout death cause for Zombified Player checks.");
         }
+    }
+
+    public static boolean isTrinketsCompatLoaded() {
+        return FabricLoader.getInstance().isModLoaded("zombifiedplayertrinkets");
+    }
+
+    public static boolean isAccessoriesLoaded() {
+        return FabricLoader.getInstance().isModLoaded("accessories");
     }
 
     public static boolean isContagionLoaded() {

@@ -1,5 +1,4 @@
 package net.petemc.zombifiedplayer.util;
-
 /*
 import io.wispforest.accessories.api.AccessoriesCapability;
 import io.wispforest.accessories.api.slot.SlotEntryReference;
@@ -94,4 +93,3 @@ public class AccessoriesUtil {
 }
 
  */
-

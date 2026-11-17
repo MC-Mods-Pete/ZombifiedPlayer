@@ -35,7 +35,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.petemc.zombifiedplayer.config.MainConfig;
-import net.petemc.zombifiedplayer.util.TrinketsUtil;
+import net.petemc.zombifiedplayer.util.ModCompatibility;
+import net.petemc.zombifiedplayertrinkets.util.TrinketsUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -45,6 +46,7 @@ public class ZombifiedPlayerEntity extends Zombie {
     public GameProfile gameProfile;
     public final NonNullList<ItemStack> main = NonNullList.withSize(36, ItemStack.EMPTY);
     public static final Int2ObjectMap<EquipmentSlot> EQUIPMENT_SLOT_MAPPING;
+    public final List<ItemStack> curiosItems = new ArrayList<>();
     public final List<ItemStack> trinketsItems = new ArrayList<>();
     public final List<ItemStack> accessoriesItems = new ArrayList<>();
 
@@ -206,7 +208,7 @@ public class ZombifiedPlayerEntity extends Zombie {
             }
         }
 
-        if (TrinketsUtil.isTrinketsLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+        if (ModCompatibility.isTrinketsCompatLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
             List<ItemStack> playerCuriosItems = TrinketsUtil.getTrinketItemsAndClear(playerEntity);
             this.trinketsItems.addAll(playerCuriosItems);
         }
@@ -230,11 +232,14 @@ public class ZombifiedPlayerEntity extends Zombie {
         super.addAdditionalSaveData(valueOutput);
         valueOutput.putString("gameProfileUUID", gameProfile.id().toString());
         valueOutput.putString("gameProfileName", gameProfile.name());
+        // Save Zombified Player inventory
         this.saveInventory(valueOutput.list("Inventory", ItemStackWithSlot.CODEC));
-        // Store Trinket items
-        TrinketsUtil.saveTrinketItems(valueOutput.list("TrinketsItems", ItemStackWithSlot.CODEC), this.trinketsItems);
-        // Store Accessories items
-        //AccessoriesUtil.saveAccessoriesItems(valueOutput.list("AccessoriesItems", ItemStackWithSlot.CODEC), this.accessoriesItems);
+        // Save Curios items
+        this.saveListItems(valueOutput.list("CuriosItems", ItemStackWithSlot.CODEC), this.curiosItems);
+        // Save Trinket items
+        this.saveListItems(valueOutput.list("TrinketsItems", ItemStackWithSlot.CODEC), this.trinketsItems);
+        // Save Accessories items
+        this.saveListItems(valueOutput.list("AccessoriesItems", ItemStackWithSlot.CODEC), this.accessoriesItems);
     }
 
     @Override
@@ -243,11 +248,14 @@ public class ZombifiedPlayerEntity extends Zombie {
         UUID gpUUID = UUID.fromString(valueInput.getString("gameProfileUUID").orElse(""));
         String gpName = valueInput.getString("gameProfileName").orElse("");
         gameProfile = new GameProfile(gpUUID, gpName);
+        // Load Zombified Player inventory
         this.loadInventory(valueInput.listOrEmpty("Inventory", ItemStackWithSlot.CODEC));
+        // Load Curios items
+        this.loadListItems(valueInput.listOrEmpty("CuriosItems", ItemStackWithSlot.CODEC), this.curiosItems);
         // Load Trinket items
-        TrinketsUtil.loadTrinketItems(valueInput.listOrEmpty("TrinketsItems", ItemStackWithSlot.CODEC), this.trinketsItems);
+        this.loadListItems(valueInput.listOrEmpty("TrinketsItems", ItemStackWithSlot.CODEC), this.trinketsItems);
         // Load Accessories items
-        //AccessoiresUtil.loadAccessoiresItems(valueInput.listOrEmpty("AccessoiresItems", ItemStackWithSlot.CODEC), this.accessoriesItems);
+        this.loadListItems(valueInput.listOrEmpty("AccessoriesItems", ItemStackWithSlot.CODEC), this.accessoriesItems);
     }
 
     public void saveInventory(ValueOutput.TypedOutputList<ItemStackWithSlot> list) {
@@ -277,6 +285,23 @@ public class ZombifiedPlayerEntity extends Zombie {
         EquipmentSlot equipmentslot = EQUIPMENT_SLOT_MAPPING.get(index);
         if (equipmentslot != null) {
             this.equipment.set(equipmentslot, stack);
+        }
+    }
+
+    public void saveListItems(ValueOutput.TypedOutputList<ItemStackWithSlot> list, List<ItemStack> items) {
+        for(int i = 0; i < items.size(); ++i) {
+            ItemStack itemstack = items.get(i);
+            if (!itemstack.isEmpty()) {
+                list.add(new ItemStackWithSlot(i, itemstack));
+            }
+        }
+    }
+
+    public void loadListItems(ValueInput.TypedInputList<ItemStackWithSlot> list, List<ItemStack> items) {
+        items.clear();
+
+        for(ItemStackWithSlot itemStackWithSlot : list) {
+            items.add(itemStackWithSlot.stack());
         }
     }
 

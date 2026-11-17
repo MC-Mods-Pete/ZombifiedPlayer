@@ -97,8 +97,10 @@ public final class HardcoreRevivalUtil {
         Class<?> eventClass = Class.forName(eventClassName);
         Field eventField = eventClass.getField("EVENT");
         Object eventMapper = eventField.get(null);
-        Method registerMethod = eventMapper.getClass().getMethod("register", Consumer.class);
-        registerMethod.invoke(eventMapper, (Consumer<Object>) handler::accept);
+        
+        // Balm's EventMapperImpl has register(Object), which accepts the Consumer directly
+        Method registerMethod = eventMapper.getClass().getDeclaredMethod("register", Object.class);
+        registerMethod.invoke(eventMapper, handler);
     }
 
     private static Object callGetter(Object instance, String methodName) {
