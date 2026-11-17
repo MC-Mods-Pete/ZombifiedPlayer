@@ -6,6 +6,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
+import java.util.List;
+
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Forge's config APIs
 @Mod.EventBusSubscriber(modid = ZombifiedPlayer.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -41,6 +43,10 @@ public class MainConfig
 
     public static boolean getDisplayNameTagForZombifiedPlayer() {
         return displayNameTagForZombifiedPlayer;
+    }
+
+    public static List<String> getRandomSkinPlayerNames() {
+        return randomSkinPlayerNames;
     }
 
     public static boolean getPrintSpawnMessageInChat() {
@@ -130,6 +136,12 @@ public class MainConfig
             .comment("If true, the name tag will be displayed above the Zombified Player | default: true")
             .define("displayNameTagForZombifiedPlayer", true);
 
+    private static final List<String> DEFAULT_RANDOM_SKIN_PLAYER_NAMES = List.of("jeb_", "Dinnerbone", "XxRexRaptorxX", "McModsPete");
+
+    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> RANDOM_SKIN_PLAYER_NAMES = BUILDER_SERVER
+            .comment("Player names for zombified players that do not come from a player death (/summon, spawn egg, spawner). One name is picked at random, its skin is used. Empty: Steve | default: [\"jeb_\", \"Dinnerbone\", \"XxRexRaptorxX\", \"McModsPete\"]")
+            .defineListAllowEmpty(List.of("randomSkinPlayerNames"), () -> DEFAULT_RANDOM_SKIN_PLAYER_NAMES, MainConfig::isValidPlayerName);
+
     private static final ForgeConfigSpec.BooleanValue PRINT_SPAWN_MESSAGE_IN_CHAT = BUILDER_SERVER
             .comment("If true, a message will be printed out in chat that a zombified player has spawned | default: true")
             .define("printSpawnMessageInChat", true);
@@ -192,6 +204,7 @@ public class MainConfig
 
 
     private static boolean spawnZombifiedPlayerAfterDeath = true;
+    private static List<String> randomSkinPlayerNames = DEFAULT_RANDOM_SKIN_PLAYER_NAMES;
     private static boolean transferMainAndOffHandToZombifiedPlayer = true;
     private static boolean transferArmorToZombifiedPlayer = true;
     private static boolean transferInventoryToZombifiedPlayer = true;
@@ -213,11 +226,16 @@ public class MainConfig
     private static float customEyeHeight = 1.74f;
     private static boolean infectiousModCompatibility = false;
 
+    private static boolean isValidPlayerName(Object value) {
+        return value instanceof String name && name.matches("[A-Za-z0-9_]{1,16}");
+    }
+
     @SubscribeEvent
     static void onLoad(final ModConfigEvent event) {
         ZombifiedPlayer.LOGGER.info("Loading Config");
         if (SPEC_SERVER.isLoaded()) {
             spawnZombifiedPlayerAfterDeath = SPAWN_ZOMBIFIED_PLAYER_AFTER_DEATH.get();
+            randomSkinPlayerNames = List.copyOf(RANDOM_SKIN_PLAYER_NAMES.get());
             transferMainAndOffHandToZombifiedPlayer = TRANSFER_MAIN_AND_OFF_HAND_TO_ZOMBIFIED_PLAYER.get();
             transferArmorToZombifiedPlayer = TRANSFER_ARMOR_TO_ZOMBIFIED_PLAYER.get();
             transferInventoryToZombifiedPlayer = TRANSFER_INVENTORY_TO_ZOMBIFIED_PLAYER.get();
