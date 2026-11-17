@@ -40,7 +40,6 @@
 		"cloth-config": ">=${cloth_config_version}"
 	},
 	"suggests": {
-		"modmenu": ">=${modmenu_version}",
-		"another-mod": "*"
+		"modmenu": ">=${modmenu_version}"
 	}
 }
