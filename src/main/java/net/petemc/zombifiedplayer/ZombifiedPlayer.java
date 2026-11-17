@@ -13,6 +13,7 @@ import net.petemc.zombifiedplayer.event.PlayerDeathEvents;
 import net.petemc.zombifiedplayer.event.ServerZombifiedPlayerLoadEvent;
 import net.petemc.zombifiedplayer.network.NetworkHandlerServer;
 import net.petemc.zombifiedplayer.network.NetworkPayloads;
+import net.petemc.zombifiedplayer.util.ModCompatibility;
 import net.petemc.zombifiedplayer.util.StateSaverAndLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +31,7 @@ public class ZombifiedPlayer implements ModInitializer {
 		PlayerDeathEvents.registerEvent();
 		ServerZombifiedPlayerLoadEvent.registerEvent();
 		ServerStartedEvent.registerEvents();
+		ModCompatibility.init();
 
 		FabricDefaultAttributeRegistry.register(ModEntities.ZOMBIFIED_PLAYER, ZombifiedPlayerEntity.createZombifiedPlayerAttributes());
 
