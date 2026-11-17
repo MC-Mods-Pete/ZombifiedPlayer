@@ -12,6 +12,9 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
@@ -45,6 +48,11 @@ public class ZombifiedPlayer {
 
         modContainer.registerConfig(ModConfig.Type.SERVER, MainConfig.SPEC_SERVER);
         ModCompatibility.init();
+
+        // Register the config screen only on the client
+        if (FMLEnvironment.dist == Dist.CLIENT) {
+            ClientModEvents.registerConfigScreen(modContainer);
+        }
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -71,6 +79,13 @@ public class ZombifiedPlayer {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             EntityRenderers.register(ModEntities.ZOMBIFIED_PLAYER.get(), ZombifiedPlayerRenderer::new);
+        }
+
+        public static void registerConfigScreen(ModContainer container) {
+            container.registerExtensionPoint(
+                    IConfigScreenFactory.class,
+                    ConfigurationScreen::new
+            );
         }
     }
 }

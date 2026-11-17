@@ -2,6 +2,26 @@
   "zombifiedplayer.spawn.message": "Eine zombifizierte Version von dir streift nun durch diese Welt...",
   "zombifiedplayer.location.message": "Sie kann bei %s gefunden werden",
 
+  "zombifiedplayer.configuration.spawnZombifiedPlayerAfterDeath": "Bei Tod spawnen",
+  "zombifiedplayer.configuration.transferMainAndOffHandToZombifiedPlayer": "Haupthand/Nebenhand übertragen",
+  "zombifiedplayer.configuration.transferArmorToZombifiedPlayer": "Rüstung übertragen",
+  "zombifiedplayer.configuration.transferInventoryToZombifiedPlayer": "Inventar übertragen",
+  "zombifiedplayer.configuration.transferCuriosOrTrinketItemsToZombifiedPlayer": "Curios/Trinkets übertragen",
+  "zombifiedplayer.configuration.spawnOnAnyDeath": "Bei jeder Todesursache spawnen",
+  "zombifiedplayer.configuration.displayNameTagForZombifiedPlayer": "Namensschild anzeigen",
+  "zombifiedplayer.configuration.printSpawnMessageInChat": "Spawn-Nachricht im Chat",
+  "zombifiedplayer.configuration.printSpawnLocationInChat": "Spawn-Koordinaten im Chat",
+  "zombifiedplayer.configuration.zombifiedPlayersCanBreakDoors": "Kann Türen aufbrechen",
+  "zombifiedplayer.configuration.makeTheZombifiedPlayersStronger": "Stärke erhöhen",
+  "zombifiedplayer.configuration.makeTheZombifiedPlayersImmuneToFire": "Feuer-/Lava-Immunität",
+  "zombifiedplayer.configuration.limitSkinFetchTries": "Skin-Abfragen begrenzen",
+  "zombifiedplayer.configuration.spawnWhenKilledByInfection": "Spawn bei Infektionstod",
+  "zombifiedplayer.configuration.infectiousModCompatibility": "Infectious Zombies Kompatibilität",
+  "zombifiedplayer.configuration.corpseCompatibility": "Corpse-Mod Kompatibilität",
+  "zombifiedplayer.configuration.gravestoneCompatibility": "Gravestone-Mod Kompatibilität",
+  "zombifiedplayer.configuration.useCustomEyeHeight": "Eigene Augenhöhe nutzen",
+  "zombifiedplayer.configuration.customEyeHeight": "Eigene Augenhöhe",
+
   "text.autoconfig.zombifiedplayer.title": "Zombifizierter Spieler",
   "text.autoconfig.zombifiedplayer.option.spawnZombifiedPlayerAfterDeath": "Zombifizierten Spieler nach dem Tod spawnen",
   "text.autoconfig.zombifiedplayer.option.spawnZombifiedPlayerAfterDeath.@Tooltip": "Wenn aktiviert, spawnt ein zombifizierter Spieler, nachdem der Spieler von einem Untoten getötet wurde | Standard: aktiviert",
@@ -50,6 +70,6 @@
   "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight": "Benutzerdefinierte Augenhöhe verwenden",
   "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight.@Tooltip": "Wenn aktiviert, verwendet der zombifizierte Spieler eine benutzerdefinierte Augenhöhe | Standard: deaktiviert",
   "text.autoconfig.zombifiedplayer.option.customEyeHeight": "Benutzerdefinierte Augenhöhe",
-  "text.autoconfig.zombifiedplayer.option.customEyeHeight.@Tooltip": "Die benutzerdefinierte Augenhöhe des zombifizierten Spielers (nur aktiv, wenn 'Benutzerdefinierte Augenhöhe verwenden' aktiviert ist) | Standard: 1.74"
+  "text.autoconfig.zombifiedplayer.option.customEyeHeight.@Tooltip": "Die benutzerdefinierte Augenhöhe des zombifizierten Spielers (nur aktiv, wenn 'Benutzerdefinierte Augenhöhe verwenden' aktiviert ist) | Standard: 1.74",
 }
 
