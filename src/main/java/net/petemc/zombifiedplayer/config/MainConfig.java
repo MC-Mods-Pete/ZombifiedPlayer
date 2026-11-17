@@ -127,7 +127,7 @@ public class MainConfig
             .define("printSpawnLocationInChat", false);
 
     private static final ForgeConfigSpec.BooleanValue ZOMBIFIED_PLAYERS_CAN_BREAK_DOORS = BUILDER_SERVER
-            .comment("If true, zombified players can break through doors | default: true")
+            .comment("If true, zombified players can break through wooden doors on every difficulty (needs the game rule mobGriefing) | default: true")
             .define("zombifiedPlayersCanBreakDoors", true);
 
     private static final ForgeConfigSpec.BooleanValue MAKE_THE_ZOMBIFIED_PLAYERS_STRONGER = BUILDER_SERVER
