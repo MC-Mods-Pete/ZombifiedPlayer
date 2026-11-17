@@ -17,6 +17,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
+import net.petemc.zombifiedplayer.util.HardcoreRevivalUtil;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.slf4j.Logger;
 
@@ -49,7 +50,8 @@ public class ZombifiedPlayer
 
     private void commonSetup(final FMLCommonSetupEvent event)
     {
-
+        // main thread, all mods are constructed
+        event.enqueueWork(HardcoreRevivalUtil::registerEvents);
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event)

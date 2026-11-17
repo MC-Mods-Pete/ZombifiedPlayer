@@ -171,6 +171,15 @@ repositories {
         }
     }
     maven { url "https://maven.blamejared.com" }
+
+    // no exclusiveContent here: fg.deobf() serves the remapped jars from its own local repo with the same group
+    maven {
+        name = "Modrinth"
+        url "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -216,6 +225,10 @@ dependencies {
 
     implementation fg.deobf("curse.maven:sophisticated-backpacks-422301:${sophisticated_backpacks_version}")
     implementation fg.deobf("curse.maven:sophisticated-core-618298:${sophisticated_core_version}")
+
+    // Hardcore Revival API (Balm events), compile only: the mod stays optional
+    compileOnly fg.deobf("maven.modrinth:hardcore-revival:${hardcore_revival_version}")
+    compileOnly fg.deobf("maven.modrinth:balm:${balm_version}")
 }
 
 mixin {
