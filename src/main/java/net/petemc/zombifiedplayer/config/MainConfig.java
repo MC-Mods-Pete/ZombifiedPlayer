@@ -71,6 +71,10 @@ public class MainConfig
         return spawnWhenKilledByInfection;
     }
 
+    public static boolean getSpawnWhenDiedWhileInfected() {
+        return spawnWhenDiedWhileInfected;
+    }
+
     public static boolean getCorpseCompatibility() {
         return corpseCompatibility;
     }
@@ -154,6 +158,10 @@ public class MainConfig
             .comment("If true, spawn zombified player after death by infection (Contagion mod needed!) | default: true")
             .define("spawnWhenKilledByInfection", true);
 
+    private static final ForgeConfigSpec.BooleanValue SPAWN_WHEN_DIED_WHILE_INFECTED = BUILDER_SERVER
+            .comment("If true, spawn zombified player when the player dies while infected, no matter how (e.g. fall damage), not only from the infection itself (Contagion mod needed!) | default: false")
+            .define("spawnWhenDiedWhileInfected", false);
+
     private static final ForgeConfigSpec.BooleanValue CORPSE_COMPATIBILITY = BUILDER_SERVER
             .comment("If true, no corpse (Corpse mod) will spawn when a Zombified Player is created | default: false")
             .define("corpseCompatibility", false);
@@ -198,6 +206,7 @@ public class MainConfig
     private static boolean makeTheZombifiedPlayersImmuneToFire = false;
     private static boolean limitSkinFetchTries = true;
     private static boolean spawnWhenKilledByInfection = true;
+    private static boolean spawnWhenDiedWhileInfected = false;
     private static boolean corpseCompatibility = false;
     private static boolean gravestoneCompatibility = false;
     private static boolean useCustomEyeHeight = false;
@@ -223,6 +232,7 @@ public class MainConfig
             makeTheZombifiedPlayersImmuneToFire = MAKE_THE_ZOMBIFIED_PLAYERS_IMMUNE_TO_FIRE.get();
             limitSkinFetchTries = LIMIT_SKIN_FETCH_TRIES.get();
             spawnWhenKilledByInfection = SPAWN_WHEN_KILLED_BY_INFECTION.get();
+            spawnWhenDiedWhileInfected = SPAWN_WHEN_DIED_WHILE_INFECTED.get();
             corpseCompatibility = CORPSE_COMPATIBILITY.get();
             gravestoneCompatibility = GRAVESTONE_COMPATIBILITY.get();
             useCustomEyeHeight = USE_CUSTOM_EYE_HEIGHT.get();

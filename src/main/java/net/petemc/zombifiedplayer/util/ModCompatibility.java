@@ -1,8 +1,11 @@
 package net.petemc.zombifiedplayer.util;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.petemc.contagion.casts.InfectedEntity;
 import net.petemc.undeadnights.entity.EliteZombieEntity;
 import net.petemc.undeadnights.entity.HordeZombieEntity;
@@ -50,6 +53,17 @@ public class ModCompatibility {
             }
         }
         return false;
+    }
+
+    private static final ResourceLocation CONTAGION_INFECTION = ResourceLocation.fromNamespaceAndPath("contagion", "infection");
+
+    /** True if the player has Contagion's infection effect, e.g. at the moment of a death by fall damage. */
+    public static boolean isInfected(ServerPlayer serverPlayer) {
+        if (!isContagionLoaded()) {
+            return false;
+        }
+        MobEffect infection = ForgeRegistries.MOB_EFFECTS.getValue(CONTAGION_INFECTION);
+        return infection != null && serverPlayer.hasEffect(infection);
     }
 
     public static boolean isUndeadNightsLoaded() {

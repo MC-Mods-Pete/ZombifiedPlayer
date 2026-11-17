@@ -37,6 +37,9 @@
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection.@PrefixText": "[Please note]\nFor the option below the mod Contagion needs to be installed!",
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection": "Spawn Zombified Player after death by infection",
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection.@Tooltip": "If enabled, spawn Zombified Player if player died from an infection | default: enabled",
+  "text.autoconfig.zombifiedplayer.option.spawnWhenDiedWhileInfected.@PrefixText": "[Please note]\nFor the option below the mod Contagion needs to be installed!",
+  "text.autoconfig.zombifiedplayer.option.spawnWhenDiedWhileInfected": "Spawn Zombified Player when dying while infected",
+  "text.autoconfig.zombifiedplayer.option.spawnWhenDiedWhileInfected.@Tooltip": "If enabled, spawn Zombified Player if the player dies while infected, no matter how (e.g. fall damage), not only from the infection itself | default: disabled",
 
   "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@PrefixText": "[Please note]\nFor the option below the Infectious mod needs to be installed!",
   "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility": "Spawn Zombified Player when killed by Infectious Zombies",
