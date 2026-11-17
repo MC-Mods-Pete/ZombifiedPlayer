@@ -13,6 +13,10 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.Items;
 import net.petemc.zombifiedplayer.config.MainConfig;
 
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Single source of truth for all Zombified Player spawn conditions.
  * Platform-neutral — usable on both NeoForge and Fabric without changes.
@@ -21,15 +25,33 @@ import net.petemc.zombifiedplayer.config.MainConfig;
  *   1. LivingDeathEvent fires       → actual spawn (PlayerDeathEvents / Fabric callback)
  *                                      Inventory is still FULL here — transfer works correctly.
  *   2. dropAllDeathLoot()           → player inventory is dropped (already empty after transfer)
- *   3. broadcastSystemMessage()     → vanilla death message in chat
- *   4. ServerPlayerEntityMixin.die()→ chat notification "You have been zombified"
+ *   3. death message                → vanilla death message in chat (only if showDeathMessages is on)
+ *   4. ServerPlayerEntityMixin.die()→ chat notification "You have been zombified", injected before
+ *                                      removeEntitiesOnShoulder(), which always runs after the death message part
  *
- * Both callers (event + mixin) call shouldSpawn() so the condition is never out of sync.
+ * Only the death event calls shouldSpawn(), the mixin uses the remembered result (setSpawnedThisDeath).
  *
  * Fabric port: replace the NeoForge LivingDeathEvent handler with a Fabric callback
  * (e.g. ServerLivingEntityEvents.ALLOW_DEATH). This class stays unchanged.
  */
 public class ZombifiedPlayerSpawnLogic {
+
+    /** Players for whom a Zombified Player was spawned in the current death (set by the death event, read by the mixin). */
+    private static final Set<UUID> SPAWNED_THIS_DEATH = ConcurrentHashMap.newKeySet();
+
+    /** Called for every death that reaches the death event, so a stale value never survives to the next death. */
+    public static void setSpawnedThisDeath(ServerPlayer serverPlayer, boolean spawned) {
+        if (spawned) {
+            SPAWNED_THIS_DEATH.add(serverPlayer.getUUID());
+        } else {
+            SPAWNED_THIS_DEATH.remove(serverPlayer.getUUID());
+        }
+    }
+
+    /** Returns whether a Zombified Player was spawned for this death and resets the flag. */
+    public static boolean takeSpawnedThisDeath(ServerPlayer serverPlayer) {
+        return SPAWNED_THIS_DEATH.remove(serverPlayer.getUUID());
+    }
 
     /** Only zombie-type undead trigger a spawn — skeletons, phantoms etc. are excluded. */
     private static final TagKey<EntityType<?>> ZOMBIE_UNDEAD = TagKey.create(
