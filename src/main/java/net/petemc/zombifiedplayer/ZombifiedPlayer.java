@@ -17,6 +17,7 @@ import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.entity.ModEntities;
+import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.slf4j.Logger;
 
 import java.util.UUID;
@@ -46,6 +47,7 @@ public class ZombifiedPlayer {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Initializing the {} Mod", MOD_NAME);
+        ModCompatibility.init();
         event.enqueueWork(() -> {
 
         });
@@ -59,7 +61,6 @@ public class ZombifiedPlayer {
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
-        LOGGER.info("Initializing Zombified Player Mod");
     }
 
     // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
