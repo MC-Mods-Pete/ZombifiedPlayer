@@ -34,6 +34,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.config.MainConfig;
+import net.petemc.zombifiedplayer.util.AccessoriesUtil;
 import net.petemc.zombifiedplayer.util.TrinketsUtil;
 
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     public final DefaultedList<ItemStack> main = DefaultedList.ofSize(36, ItemStack.EMPTY);
     public static final Int2ObjectMap<EquipmentSlot> EQUIPMENT_SLOTS;
     public final List<ItemStack> trinketsItems = new ArrayList<>();
+    public final List<ItemStack> accessoriesItems = new ArrayList<>();
 
     public ZombifiedPlayerEntity(EntityType<? extends ZombieEntity> entityType, World world) {
         super(entityType, world);
@@ -162,6 +164,20 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
                 this.main.set(i, ItemStack.EMPTY);
             }
         }
+
+        for (ItemStack curiosItem : this.trinketsItems) {
+            if (!curiosItem.isEmpty()) {
+                this.dropStack(world, curiosItem);
+            }
+        }
+        this.trinketsItems.clear();
+
+        for (ItemStack accessoriesItem : this.accessoriesItems) {
+            if (!accessoriesItem.isEmpty()) {
+                this.dropStack(world, accessoriesItem);
+            }
+        }
+        this.accessoriesItems.clear();
     }
 
     public static ZombifiedPlayerEntity spawnZombifiedPlayer(PlayerEntity player) {
@@ -170,8 +186,10 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER, serverWorld);
             zombifiedPlayer.setGameProfile(player.getGameProfile());
             zombifiedPlayer.storeGameProfile(player.getGameProfile());
-            Text name = Text.of("Zombified " + player.getName().getLiteralString());
-            zombifiedPlayer.setCustomName(name);
+            if (MainConfig.getDisplayNameTagForZombifiedPlayer()) {
+                Text name = Text.of("Zombified " + player.getName().getLiteralString());
+                zombifiedPlayer.setCustomName(name);
+            }
             zombifiedPlayer.setPosition(player.getX(), player.getY(), player.getZ());
             zombifiedPlayer.setPersistent();
             zombifiedPlayer.transferInventory(serverWorld, player);
@@ -219,13 +237,14 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
             }
         }
 
-        // Trinkets are currently not compatible with 1.21.9
-        /*
         if (TrinketsUtil.isTrinketsLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
             List<ItemStack> playerCuriosItems = TrinketsUtil.getTrinketItemsAndClear(playerEntity);
             this.trinketsItems.addAll(playerCuriosItems);
         }
-        */
+        if (AccessoriesUtil.isAccessoriesLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+            List<ItemStack> playerAccessoriesItems = AccessoriesUtil.getAccessoriesItemsAndClear(playerEntity);
+            this.accessoriesItems.addAll(playerAccessoriesItems);
+        }
     }
 
     @Override
@@ -233,6 +252,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         super.writeCustomData(view);
         this.writeInventoryData(view.getListAppender("Inventory", StackWithSlot.CODEC));
         TrinketsUtil.saveTrinketItems(view.getListAppender("TrinketItems", StackWithSlot.CODEC), this.trinketsItems);
+        AccessoriesUtil.saveAccessoriesItems(view.getListAppender("AccessoriesItems", StackWithSlot.CODEC), this.accessoriesItems);
     }
 
     @Override
@@ -240,6 +260,7 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
         super.readCustomData(view);
         this.readInventoryData(view.getTypedListView("Inventory", StackWithSlot.CODEC));
         TrinketsUtil.loadTrinketItems(view.getTypedListView("TrinketItems", StackWithSlot.CODEC), this.trinketsItems);
+        AccessoriesUtil.loadAccessoriesItems(view.getTypedListView("AccessoriesItems", StackWithSlot.CODEC), this.accessoriesItems);
     }
 
     public void writeInventoryData(WriteView.ListAppender<StackWithSlot> list) {

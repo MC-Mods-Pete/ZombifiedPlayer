@@ -8,6 +8,7 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
+import net.petemc.zombifiedplayer.config.MainConfig;
 
 public class ModEntities {
     private static Identifier idZombifiedPlayer = Identifier.of(ZombifiedPlayer.MOD_ID, "zombified_player");
@@ -15,6 +16,6 @@ public class ModEntities {
     public static final EntityType<ZombifiedPlayerEntity> ZOMBIFIED_PLAYER = Registry.register(Registries.ENTITY_TYPE, keyZombifiedPlayer,
             EntityType.Builder.create(ZombifiedPlayerEntity::new, SpawnGroup.MONSTER)
                     .dimensions(0.6f, 1.95f)
-                    .eyeHeight(1.74f)
+                    .eyeHeight(MainConfig.getUseCustomEyeHeight() ? MainConfig.getCustomEyeHeight() : 1.74f)
                     .build(keyZombifiedPlayer));
 }

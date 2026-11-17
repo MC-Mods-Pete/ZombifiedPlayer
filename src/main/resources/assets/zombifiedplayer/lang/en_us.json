@@ -2,6 +2,8 @@
   "zombifiedplayer.spawn.message": "A zombified version of yourself now roams this world...",
   "zombifiedplayer.location.message": "It can be found at %s",
 
+  "entity.zombifiedplayer.zombified_player": "Zombified Player",
+
   "text.autoconfig.zombifiedplayer.title": "Zombified Player",
   "text.autoconfig.zombifiedplayer.option.spawnZombifiedPlayerAfterDeath": "Spawn a zombified player after death",
   "text.autoconfig.zombifiedplayer.option.spawnZombifiedPlayerAfterDeath.@Tooltip": "If enabled, a zombified player will spawn after the player gets killed by an Undead | default: enabled",
@@ -13,6 +15,8 @@
   "text.autoconfig.zombifiedplayer.option.transferInventoryToZombifiedPlayer.@Tooltip": "If enabled, the Inventory of the dead player will be transferred to the zombified player | default: enabled",
   "text.autoconfig.zombifiedplayer.option.spawnOnAnyDeath": "Spawn zombified player no matter how the player died",
   "text.autoconfig.zombifiedplayer.option.spawnOnAnyDeath.@Tooltip": "If enabled, a zombified player will spawn no matter how the player died | default: disabled",
+  "text.autoconfig.zombifiedplayer.option.displayNameTagForZombifiedPlayer": "Display name tag for the zombified player",
+  "text.autoconfig.zombifiedplayer.option.displayNameTagForZombifiedPlayer.@Tooltip": "If enabled, the name tag of the zombified player will be visible | default: enabled",
   "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat": "Print spawn location of the zombified player to the chat",
   "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat.@Tooltip": "If enabled, spawn location of the zombified player will be printed out in chat | default: disabled",
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors": "Zombified Players can break doors",

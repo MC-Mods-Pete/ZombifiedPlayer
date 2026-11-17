@@ -15,6 +15,7 @@ import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
+import net.petemc.zombifiedplayer.util.TrinketsUtil;
 
 public class PlayerDeathEvents {
 
@@ -44,7 +45,8 @@ public class PlayerDeathEvents {
     public static void executeAllowDeath() {
         if (pPlayer != null) {
             if (pPlayer instanceof ServerPlayerEntity serverPlayer) {
-                if (!(pPlayer.getMainHandStack().isOf(Items.TOTEM_OF_UNDYING) || pPlayer.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING))) {
+                boolean flag = TrinketsUtil.checkForItemInTrinkets(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultStack());
+                if (!(pPlayer.getMainHandStack().isOf(Items.TOTEM_OF_UNDYING) || pPlayer.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING) || flag)) {
                     if ((MainConfig.getSpawnOnAnyDeath() ||
                             (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
                             (attackerIsUndead() && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
