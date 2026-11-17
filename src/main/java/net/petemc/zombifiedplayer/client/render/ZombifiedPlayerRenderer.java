@@ -7,7 +7,10 @@ import net.minecraft.client.model.ZombieModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.resources.DefaultPlayerSkin;
+import net.minecraft.client.resources.SkinManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
@@ -16,7 +19,6 @@ import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,20 +26,25 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ZombifiedPlayerRenderer
         extends AbstractZombieRenderer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> {
 
-    private static final ResourceLocation TEXTURE_FALLBACK =
-            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/player/wide/steve.png");
+    private static final ResourceLocation TEXTURE_FALLBACK = DefaultPlayerSkin.getDefaultSkin();
 
-    /** UUIDs for which a fetch is currently running — prevents duplicate fetches. */
-    private static final Set<UUID> FETCHING = ConcurrentHashMap.newKeySet();
+    /** Resolved skin per stored profile UUID (also the fallback once we know the account has no custom skin). */
+    private static final Map<UUID, ResourceLocation> SKINS = new ConcurrentHashMap<>();
+
+    /** Start time (ms) of the running fetch per UUID, prevents duplicate fetches. */
+    private static final Map<UUID, Long> FETCHING = new ConcurrentHashMap<>();
 
     /** Timestamp (ms) after which a retry is allowed, per UUID. */
     private static final Map<UUID, Long> RETRY_AFTER = new ConcurrentHashMap<>();
 
-    /** Number of completed fetch attempts per UUID. */
-    private static final Map<UUID, Integer> RETRY_COUNT = new ConcurrentHashMap<>();
+    /** Number of failed fetch attempts per UUID. */
+    private static final Map<UUID, Integer> FAILED_TRIES = new ConcurrentHashMap<>();
 
     private static final long RETRY_DELAY_MS = 5_000L;
-    private static final int  MAX_RETRIES    = 5;
+    private static final long MAX_RETRY_DELAY_MS = 300_000L;
+    /** A fetch whose callback has not arrived after this time counts as failed. */
+    private static final long FETCH_TIMEOUT_MS = 30_000L;
+    private static final int MAX_TRIES = 5;
 
     public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx) {
         super(ctx,
@@ -50,22 +57,12 @@ public class ZombifiedPlayerRenderer
     @Override
     public @NotNull ResourceLocation getTextureLocation(@NotNull ZombifiedPlayerEntity entity) {
         GameProfile profile = entity.getGameProfile();
-        if (profile == null) return TEXTURE_FALLBACK;
+        if (profile == null || profile.getId() == null) return TEXTURE_FALLBACK;
 
-        UUID uuid = profile.getId();
-
-        // 1. Direct UUID cache hit
-        ResourceLocation cached = ZombifiedPlayer.cachedPlayerSkinsByUUID.get(uuid);
+        ResourceLocation cached = SKINS.get(profile.getId());
         if (cached != null) return cached;
 
-        // 2. UUID remapped (offline-mode mismatch)
-        UUID remapped = ZombifiedPlayer.uuidMissmatches.get(uuid);
-        if (remapped != null) {
-            ResourceLocation remappedSkin = ZombifiedPlayer.cachedPlayerSkinsByUUID.get(remapped);
-            if (remappedSkin != null) return remappedSkin;
-        }
-
-        // 3. Trigger async fetch — never blocks the render thread
+        // Never blocks the render thread
         triggerSkinFetch(profile);
 
         return TEXTURE_FALLBACK;
@@ -73,37 +70,84 @@ public class ZombifiedPlayerRenderer
 
     /**
      * Starts an async skin fetch for the given profile.
-     * Safe to call every frame — no-ops if a fetch is already running for this UUID,
+     * Safe to call every frame: no-op if a fetch is already running for this UUID,
      * the retry delay has not elapsed, or the attempt limit has been reached.
-     * Never blocks the calling (render) thread.
+     *
+     * The profile is looked up by name (like player heads do), so on offline-mode servers,
+     * where the stored UUID does not match the Mojang account, the skin of the account
+     * with that name is used.
      */
     private static void triggerSkinFetch(GameProfile profile) {
         UUID uuid = profile.getId();
-        if (uuid == null || profile.getName() == null) return;
+        String name = profile.getName();
+        if (name == null || name.isEmpty()) {
+            SKINS.put(uuid, TEXTURE_FALLBACK);
+            return;
+        }
 
-        if (FETCHING.contains(uuid)) return;
+        long now = System.currentTimeMillis();
+
+        Long startedAt = FETCHING.get(uuid);
+        if (startedAt != null) {
+            if (now - startedAt < FETCH_TIMEOUT_MS) return;
+            // The callback never arrived (lookup failed in the background)
+            if (FETCHING.remove(uuid, startedAt)) {
+                onFetchFailed(uuid, name, "no response");
+            }
+            return;
+        }
 
         Long notBefore = RETRY_AFTER.get(uuid);
-        if (notBefore != null && System.currentTimeMillis() < notBefore) return;
+        if (notBefore != null && now < notBefore) return;
 
-        int tries = RETRY_COUNT.getOrDefault(uuid, 0);
-        if (MainConfig.getLimitSkinFetchTries() && tries >= MAX_RETRIES) return;
+        int failedTries = FAILED_TRIES.getOrDefault(uuid, 0);
+        if (MainConfig.getLimitSkinFetchTries() && failedTries >= MAX_TRIES) return;
 
-        if (!FETCHING.add(uuid)) return;
+        if (FETCHING.putIfAbsent(uuid, now) != null) return;
 
-        ZombifiedPlayer.LOGGER.info("Fetching skin for {} (UUID: {}, attempt {})",
-                profile.getName(), uuid, tries + 1);
+        ZombifiedPlayer.LOGGER.debug("Fetching skin for {} (UUID: {}, attempt {})", name, uuid, failedTries + 1);
 
-        Minecraft.getInstance().getSkinManager().registerSkins(profile, (type, location, texture) -> {
-            if (type != MinecraftProfileTexture.Type.SKIN) return;
+        // Fresh profile: the lookup must not modify the profile of the entity.
+        // The callback runs on the client main thread.
+        SkullBlockEntity.updateGameprofile(new GameProfile(uuid, name), resolved -> {
+            if (!FETCHING.remove(uuid, now)) return; // timed out meanwhile, a newer attempt owns this UUID
+            onProfileResolved(uuid, name, resolved);
+        });
+    }
 
-            ZombifiedPlayer.cachedPlayerSkinsByUUID.put(uuid, location);
-            ZombifiedPlayer.cachedPlayerSkinsByName.put(profile.getName(), location);
+    private static void onProfileResolved(UUID uuid, String name, GameProfile resolved) {
+        if (resolved == null || !resolved.getProperties().containsKey(SkinManager.PROPERTY_TEXTURES)) {
+            // No account found or Mojang not reachable, try again later
+            onFetchFailed(uuid, name, "profile lookup returned no textures");
+            return;
+        }
 
-            ZombifiedPlayer.LOGGER.info("Skin cached for {} -> {}", profile.getName(), location);
+        try {
+            SkinManager skinManager = Minecraft.getInstance().getSkinManager();
+            MinecraftProfileTexture skin = skinManager.getInsecureSkinInformation(resolved).get(MinecraftProfileTexture.Type.SKIN);
+            // Account without custom skin: keep the default skin and stop fetching
+            ResourceLocation location = skin != null
+                    ? skinManager.registerTexture(skin, MinecraftProfileTexture.Type.SKIN)
+                    : TEXTURE_FALLBACK;
+
+            SKINS.put(uuid, location);
             RETRY_AFTER.remove(uuid);
-            RETRY_COUNT.remove(uuid);
-            FETCHING.remove(uuid);
-        }, true);
+            FAILED_TRIES.remove(uuid);
+            ZombifiedPlayer.LOGGER.debug("Skin cached for {} -> {}", name, location);
+        } catch (RuntimeException e) {
+            onFetchFailed(uuid, name, e.toString());
+        }
+    }
+
+    private static void onFetchFailed(UUID uuid, String name, String reason) {
+        int failedTries = FAILED_TRIES.merge(uuid, 1, Integer::sum);
+        long delay = Math.min(RETRY_DELAY_MS << Math.min(failedTries - 1, 6), MAX_RETRY_DELAY_MS);
+        RETRY_AFTER.put(uuid, System.currentTimeMillis() + delay);
+
+        if (MainConfig.getLimitSkinFetchTries() && failedTries >= MAX_TRIES) {
+            ZombifiedPlayer.LOGGER.info("Giving up fetching the skin for {} after {} tries ({})", name, failedTries, reason);
+        } else {
+            ZombifiedPlayer.LOGGER.debug("Skin fetch for {} failed ({}), retrying in {} s", name, reason, delay / 1000);
+        }
     }
 }
