@@ -14,7 +14,7 @@ public class ModItems {
 
     // Colors: Steve's shirt and rotten green. Forge registers the egg colors and the dispenser behaviour itself.
     public static final RegistryObject<Item> ZOMBIFIED_PLAYER_SPAWN_EGG = ITEMS.register("zombified_player_spawn_egg",
-            () -> new ForgeSpawnEggItem(ModEntities.ZOMBIFIED_PLAYER, 0x00A8A8, 0x4A6B35, new Item.Properties()));
+            () -> new ForgeSpawnEggItem(ModEntities.ZOMBIFIED_PLAYER, 0x00A8A8, 0x2A4220, new Item.Properties()));
 
     public static void register(IEventBus eventBus) {
         ITEMS.register(eventBus);
