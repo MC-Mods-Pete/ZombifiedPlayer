@@ -22,32 +22,6 @@ public class CuriosUtil {
         return ModList.get().isLoaded("curios");
     }
 
-    public static List<ItemStack> getCuriosItemsAndClear(Player player) {
-        List<ItemStack> curiosItems = new ArrayList<>();
-        
-        if (!isCuriosLoaded()) {
-            return curiosItems;
-        }
-        
-        try {
-            CuriosApi.getCuriosInventory(player).ifPresent(curiosInventory -> {
-                for (String identifier : curiosInventory.getCurios().keySet()) {
-                    ICurioStacksHandler stacksHandler = curiosInventory.getCurios().get(identifier);
-                    for (int i = 0; i < stacksHandler.getSlots(); i++) {
-                        ItemStack stack = stacksHandler.getStacks().getStackInSlot(i);
-                        if (!stack.isEmpty()) {
-                            curiosItems.add(stack.copy());
-                            stacksHandler.getStacks().setStackInSlot(i, ItemStack.EMPTY);
-                        }
-                    }
-                }
-            });
-        } catch (Exception e) {
-        }
-        
-        return curiosItems;
-    }
-
     public static boolean checkForItemInCurios(Player player, String itemId) {
         return ForgeRegistries.ITEMS.getDelegate(ResourceLocation.parse(itemId))
                 .map(item -> checkForItemInCurios(player, item.get().getDefaultInstance()))

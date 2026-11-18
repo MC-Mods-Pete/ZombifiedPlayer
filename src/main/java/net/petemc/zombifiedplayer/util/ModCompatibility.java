@@ -21,6 +21,7 @@ public class ModCompatibility {
         }
         if (CuriosUtil.isCuriosLoaded()) {
             ZombifiedPlayer.LOGGER.info("Curios API detected. If enabled curios items will be transferred to the Zombified Player.");
+            CuriosDeathDrops.register();
         }
         if (isCorpseLoaded()) {
             ZombifiedPlayer.LOGGER.info("Corpse mod detected. No corpse will spawn when a Zombified Player is created.");
