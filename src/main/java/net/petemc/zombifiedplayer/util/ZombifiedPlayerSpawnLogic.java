@@ -60,14 +60,16 @@ public class ZombifiedPlayerSpawnLogic {
 
     /**
      * Returns true if a Zombified Player should spawn when this player dies.
-     * Includes totem-of-undying protection check (vanilla hands + Curios slots).
+     * Includes totem-of-undying protection check (vanilla hands, Curios and Accessories slots).
      */
     public static boolean shouldSpawn(ServerPlayer serverPlayer, DamageSource damageSource) {
-        // Totem protection — vanilla hands and Curios slots
+        // Totem protection — vanilla hands, Curios and Accessories slots
         if (serverPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING)
                 || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
                 || CuriosUtil.checkForItemInCurios(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance())
-                || CuriosUtil.checkForItemInCurios(serverPlayer, "chargedcharms:charged_totem_charm")) {
+                || CuriosUtil.checkForItemInCurios(serverPlayer, "chargedcharms:charged_totem_charm")
+                || AccessoriesUtil.checkForItemInAccessories(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance())
+                || AccessoriesUtil.checkForItemInAccessories(serverPlayer, "chargedcharms:charged_totem_charm")) {
             return false;
         }
 

@@ -4,9 +4,11 @@ import io.wispforest.accessories.api.AccessoriesCapability;
 import io.wispforest.accessories.api.slot.SlotEntryReference;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 import java.util.ArrayList;
@@ -38,6 +40,12 @@ public class AccessoriesUtil {
         }
 
         return accessoryItems;
+    }
+
+    public static boolean checkForItemInAccessories(Player player, String itemId) {
+        return ForgeRegistries.ITEMS.getDelegate(ResourceLocation.parse(itemId))
+                .map(item -> checkForItemInAccessories(player, item.get().getDefaultInstance()))
+                .orElse(false);
     }
 
     public static boolean checkForItemInAccessories(Player player, ItemStack itemToCheck) {
