@@ -502,6 +502,11 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             this.accessoriesItems.addAll(AccessoriesUtil.readAccessoriesItemsFromNbt(accessoriesNbt));
         }
         applyConfig();
+        // /summon or spawners with NBT (no finalizeSpawn): without a saved health the entity still has the health
+        // it was created with, before applyConfig raised the max health (makeTheZombifiedPlayersStronger)
+        if (!nbt.contains("Health", Tag.TAG_ANY_NUMERIC)) {
+            this.setHealth(this.getMaxHealth());
+        }
     }
 
     public ListTag writeInventoryToNbt(ListTag nbtList) {
