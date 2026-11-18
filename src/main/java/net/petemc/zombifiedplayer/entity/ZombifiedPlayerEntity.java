@@ -352,6 +352,12 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     }
 
     public static ZombifiedPlayerEntity spawnZombifiedPlayer(Player player) {
+        DamageSource source = player.getLastDamageSource();
+        return spawnZombifiedPlayer(player, source != null ? source : player.damageSources().generic());
+    }
+
+    /** source: the cause of the death (drop rules of accessories can depend on it) */
+    public static ZombifiedPlayerEntity spawnZombifiedPlayer(Player player, DamageSource source) {
         ZombifiedPlayerEntity zombifiedPlayer = null;
         if (player.level() instanceof ServerLevel serverLevel) {
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER.get(), serverLevel);
@@ -370,6 +376,10 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             if (CuriosUtil.isCuriosLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
                 // Curios applies its drop rules when the player drops the loot (also with keepInventory: "always drop" items)
                 CuriosDeathDrops.expectDrops(player, zombifiedPlayer);
+            }
+            if (AccessoriesUtil.isAccessoriesLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+                // also with keepInventory: accessories with the rule DROP go to the zombified player
+                zombifiedPlayer.accessoriesItems.addAll(AccessoriesUtil.takeDroppedAccessories(player, source, playerKeepsInventory(player)));
             }
             serverLevel.addFreshEntity(zombifiedPlayer);
             // Prevent the corpse mod from spawning a corpse for this death
@@ -429,11 +439,6 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
                     this.main.set(i, playerEntity.getInventory().items.get(i).copyAndClear());
                 }
             }
-        }
-
-        if (AccessoriesUtil.isAccessoriesLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
-            List<ItemStack> playerAccessoriesItems = AccessoriesUtil.getAccessoriesItemsAndClear(playerEntity);
-            this.accessoriesItems.addAll(playerAccessoriesItems);
         }
     }
 

@@ -32,7 +32,7 @@ public class PlayerDeathEvents {
                 HardcoreRevivalUtil.clearTrackedCause(serverPlayer);
 
                 boolean spawned = ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, effectiveSource)
-                        && ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer) != null;
+                        && ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer, event.getSource()) != null;
                 // read by ServerPlayerEntityMixin for the chat message later in ServerPlayer.die()
                 ZombifiedPlayerSpawnLogic.setSpawnedThisDeath(serverPlayer, spawned);
             }
