@@ -6,7 +6,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ZombieModel;
 import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
-import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
@@ -25,7 +24,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ZombifiedPlayerRenderer
         extends AbstractZombieRenderer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> {
 
-    private static final ResourceLocation TEXTURE_FALLBACK = DefaultPlayerSkin.getDefaultSkin();
+    // Wide Steve on purpose: DefaultPlayerSkin.getDefaultSkin() is the slim Steve in 1.20.1, and its 3 pixel arms
+    // leave transparent stripes on the 4 pixel arms of the zombie model
+    private static final ResourceLocation TEXTURE_FALLBACK =
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/player/wide/steve.png");
 
     /** Resolved skin per stored profile UUID (also the fallback once we know the account has no custom skin). */
     private static final Map<UUID, ResourceLocation> SKINS = new ConcurrentHashMap<>();
