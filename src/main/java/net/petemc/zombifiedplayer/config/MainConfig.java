@@ -33,6 +33,10 @@ public class MainConfig
         return transferCuriosOrTrinketItemsToZombifiedPlayer;
     }
 
+    public static boolean getUseZombieModelFromResourcePacks() {
+        return useZombieModelFromResourcePacks;
+    }
+
     public static boolean getIgnoreKeepInventory() {
         return ignoreKeepInventory;
     }
@@ -223,7 +227,11 @@ public class MainConfig
 
     // Client Config
     private static final ForgeConfigSpec.Builder BUILDER_CLIENT = new ForgeConfigSpec.Builder();
-    // no client config
+
+    private static final ForgeConfigSpec.BooleanValue USE_ZOMBIE_MODEL_FROM_RESOURCE_PACKS = BUILDER_CLIENT
+            .comment("If true, zombified players use the zombie model, so zombie models from resource packs (Entity Model Features, e.g. Fresh Animations) also change zombified players. Packs with their own zombie models and textures (e.g. Bray's Zombie Overhaul) make the player skin look broken. Applied after reloading resource packs (F3+T) | default: false")
+            .define("useZombieModelFromResourcePacks", false);
+
     public static final ForgeConfigSpec SPEC_CLIENT = BUILDER_CLIENT.build();
 
 
@@ -252,6 +260,7 @@ public class MainConfig
     private static boolean useCustomEyeHeight = false;
     private static float customEyeHeight = 1.74f;
     private static boolean infectiousModCompatibility = false;
+    private static boolean useZombieModelFromResourcePacks = false;
 
     private static boolean isValidPlayerName(Object value) {
         return value instanceof String name && name.matches("[A-Za-z0-9_]{1,16}");
@@ -288,7 +297,7 @@ public class MainConfig
             infectiousModCompatibility = INFECTIOUS_MOD_COMPATIBILITY.get();
         }
         if (SPEC_CLIENT.isLoaded()) {
-            // no client config
+            useZombieModelFromResourcePacks = USE_ZOMBIE_MODEL_FROM_RESOURCE_PACKS.get();
         }
 
     }

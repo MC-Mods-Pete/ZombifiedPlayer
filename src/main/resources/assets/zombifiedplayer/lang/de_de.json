@@ -53,6 +53,8 @@
   "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@PrefixText": "[Bitte beachten]\nFür die folgende Option muss die Mod Infectious installiert sein!",
   "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility": "Zombifizierten Spieler spawnen, wenn er von Infectious Zombies getötet wird",
   "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@Tooltip": "Wenn aktiviert, spawnt ein zombifizierter Spieler, wenn der Spieler von einem Infectious Zombie getötet wird | Standard: deaktiviert",
+  "text.autoconfig.zombifiedplayer.option.useZombieModelFromResourcePacks": "Zombie-Modelle aus Resourcepacks verwenden",
+  "text.autoconfig.zombifiedplayer.option.useZombieModelFromResourcePacks.@Tooltip": "Wenn aktiviert, verändern Zombie-Modelle aus Resourcepacks (Entity Model Features, z.B. Fresh Animations) auch zombifizierte Spieler. Bei Packs mit eigenen Zombie-Modellen und -Texturen (z.B. Bray's Zombie Overhaul) sieht der Spieler-Skin dann kaputt aus. Gilt nach dem Neuladen der Resourcepacks (F3+T) | Standard: deaktiviert",
 
   "text.autoconfig.zombifiedplayer.option.corpseCompatibility.@PrefixText": "[Bitte beachten]\nFür die folgende Option muss die Corpse Mod installiert sein!",
   "text.autoconfig.zombifiedplayer.option.corpseCompatibility": "Keine Leiche erzeugen, wenn ein zombifizierter Spieler spawnt",
