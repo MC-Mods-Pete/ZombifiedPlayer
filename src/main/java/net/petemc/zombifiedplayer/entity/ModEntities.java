@@ -12,7 +12,7 @@ public class ModEntities {
             DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, ZombifiedPlayer.MOD_ID);
 
     public static final RegistryObject<net.minecraft.world.entity.EntityType<ZombifiedPlayerEntity>> ZOMBIFIED_PLAYER =
-            ENTITY_TYPES.register("zombified_player", () -> net.minecraft.world.entity.EntityType.Builder.of(ZombifiedPlayerEntity::new, MobCategory.CREATURE)
+            ENTITY_TYPES.register("zombified_player", () -> net.minecraft.world.entity.EntityType.Builder.of(ZombifiedPlayerEntity::new, MobCategory.MONSTER)
                     .sized(0.6f, 1.95f)
                     .build("zombified_player"));
 

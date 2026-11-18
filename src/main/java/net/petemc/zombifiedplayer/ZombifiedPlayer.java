@@ -2,10 +2,14 @@ package net.petemc.zombifiedplayer;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
+import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -20,6 +24,7 @@ import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.item.ModItems;
 import net.petemc.zombifiedplayer.util.HardcoreRevivalUtil;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
+import net.petemc.zombifiedplayer.world.NaturalSpawnsBiomeModifier;
 import org.slf4j.Logger;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -33,6 +38,8 @@ public class ZombifiedPlayer
         IEventBus modEventBus = context.getModEventBus();
         ModEntities.register(modEventBus);
         ModItems.register(modEventBus);
+        NaturalSpawnsBiomeModifier.register(modEventBus);
+        modEventBus.addListener(this::registerSpawnPlacements);
 
         modEventBus.addListener(this::commonSetup);
 
@@ -47,6 +54,13 @@ public class ZombifiedPlayer
     {
         // main thread, all mods are constructed
         event.enqueueWork(HardcoreRevivalUtil::registerEvents);
+    }
+
+    /** Same spawn rules as zombies: on the ground, in the dark (natural spawning, spawners). */
+    private void registerSpawnPlacements(SpawnPlacementRegisterEvent event)
+    {
+        event.register(ModEntities.ZOMBIFIED_PLAYER.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                Monster::checkMonsterSpawnRules, SpawnPlacementRegisterEvent.Operation.REPLACE);
     }
 
     private void addCreative(BuildCreativeModeTabContentsEvent event)

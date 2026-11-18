@@ -10,6 +10,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
@@ -77,7 +78,19 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         SKIP_GRAVESTONE_PLAYERS.remove(playerUUID);
     }
 
+    /** Extra loot ("pocket finds") of zombified players that do not come from a player death, adjustable by datapack. */
+    public static final ResourceLocation POCKET_LOOT_TABLE = ResourceLocation.fromNamespaceAndPath("zombifiedplayer", "entities/zombified_player_pocket");
+
+    private static final String FROM_PLAYER_DEATH_KEY = "FromPlayerDeath";
+
     public GameProfile gameProfile;
+
+    /**
+     * True for zombified players created by a player death. Only they keep the special rules for the player's items:
+     * everything drops intact, no despawning in peaceful, no pocket loot. Natural spawns, spawn eggs, spawners and
+     * /summon without NBT behave like zombies (finalizeSpawn sets false).
+     */
+    private boolean fromPlayerDeath = false;
     public final NonNullList<ItemStack> main = NonNullList.withSize(36, ItemStack.EMPTY);
     public final List<ItemStack> curiosItems = new ArrayList<>();
     public final List<ItemStack> accessoriesItems = new ArrayList<>();
@@ -212,20 +225,30 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     }
 
     /**
-     * Called for /summon without NBT, spawn eggs and spawners, not for zombified players from a player death.
+     * Called for natural spawns, /summon without NBT, spawn eggs and spawners, not for zombified players from a player death.
      * Without a profile, one of the configured player names is picked so it gets that player's skin.
      */
     @Override
     public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor level, @NotNull DifficultyInstance difficulty, @NotNull MobSpawnType reason,
                                         @Nullable SpawnGroupData spawnData, @Nullable CompoundTag dataTag) {
+        // /summon and spawners load the (otherwise empty) NBT first, which counts as an old save without the marker
+        this.fromPlayerDeath = false;
+        applyConfig();
+        this.setHealth(this.getMaxHealth());
+        // Vanilla zombie: random equipment by local difficulty, can pick up loot, leader bonus etc.
         SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, spawnData, dataTag);
         if (this.gameProfile == null) {
-            assignRandomSkinProfile();
+            boolean natural = reason == MobSpawnType.NATURAL || reason == MobSpawnType.CHUNK_GENERATION;
+            assignRandomSkinProfile(!natural || MainConfig.getDisplayNameTagForNaturalZombifiedPlayers());
         }
         return result;
     }
 
-    private void assignRandomSkinProfile() {
+    public boolean isFromPlayerDeath() {
+        return fromPlayerDeath;
+    }
+
+    private void assignRandomSkinProfile(boolean nameTag) {
         List<String> names = MainConfig.getRandomSkinPlayerNames();
         if (names.isEmpty()) {
             return;
@@ -233,7 +256,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         String name = names.get(this.random.nextInt(names.size()));
         // Offline UUID: the same name always gets the same UUID, the client caches the skin per UUID and looks it up by name
         setGameProfile(new GameProfile(UUIDUtil.createOfflinePlayerUUID(name), name));
-        if (MainConfig.getDisplayNameTagForZombifiedPlayer()) {
+        if (nameTag && MainConfig.getDisplayNameTagForZombifiedPlayer()) {
             setCustomName(Component.literal("Zombified " + name));
         }
     }
@@ -245,22 +268,29 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     }
 
     /**
-     * Never in peaceful: the zombified player carries the dead player's items,
-     * despawning would delete them. It cannot attack players in peaceful anyway.
+     * From a player death never in peaceful: the zombified player carries the dead player's items,
+     * despawning would delete them. It cannot attack players in peaceful anyway. Others like zombies.
      */
     @Override
     protected boolean shouldDespawnInPeaceful() {
-        return false;
+        return !this.fromPlayerDeath;
     }
 
     /**
-     * Vanilla must never drop the equipment by itself: it only does so by chance and
+     * From a player death vanilla must never drop the equipment by itself: it only does so by chance and
      * applies random durability damage to items with a drop chance <= 1.
      * All items of the player are dropped intact in dropEquipment().
+     * Others keep the zombie drop chances (random equipment from finalizeSpawn, picked up items always drop).
      */
     @Override
     protected float getEquipmentDropChance(@NotNull EquipmentSlot pSlot) {
-        return 0.0F;
+        return this.fromPlayerDeath ? 0.0F : super.getEquipmentDropChance(pSlot);
+    }
+
+    /** Pocket finds for zombified players that do not come from a player death (respects doMobLoot like any mob loot). */
+    @Override
+    protected @NotNull ResourceLocation getDefaultLootTable() {
+        return this.fromPlayerDeath ? super.getDefaultLootTable() : POCKET_LOOT_TABLE;
     }
 
     @Override
@@ -280,6 +310,12 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
     @Override
     protected void dropEquipment() {
         super.dropEquipment();
+
+        if (!this.fromPlayerDeath) {
+            // equipment is dropped by chance in dropCustomDeathLoot like for zombies
+            dropInventory();
+            return;
+        }
 
         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
             ItemStack itemStack = this.getItemBySlot(equipmentSlot);
@@ -318,6 +354,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         ZombifiedPlayerEntity zombifiedPlayer = null;
         if (player.level() instanceof ServerLevel serverLevel) {
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER.get(), serverLevel);
+            zombifiedPlayer.fromPlayerDeath = true;
             zombifiedPlayer.setGameProfile(player.getGameProfile());
             //zombifiedPlayer.storeGameProfile(player.getGameProfile());
             if (MainConfig.getDisplayNameTagForZombifiedPlayer()) {
@@ -435,6 +472,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
             nbt.putUUID("gameProfileUUID", gameProfile.getId());
             nbt.putString("gameProfileName", gameProfile.getName());
         }
+        nbt.putBoolean(FROM_PLAYER_DEATH_KEY, this.fromPlayerDeath);
         nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
         // Store Curios items
         nbt.put("CuriosItems", CuriosUtil.writeCuriosItemsToNbt(this.curiosItems));
@@ -448,6 +486,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityAdditionalSp
         if (nbt.hasUUID("gameProfileUUID")) {
             setGameProfile(new GameProfile(nbt.getUUID("gameProfileUUID"), nbt.getString("gameProfileName")));
         }
+        // Saves from before 1.8.0 have no marker: back then every zombified player was treated as one from a player death
+        this.fromPlayerDeath = !nbt.contains(FROM_PLAYER_DEATH_KEY) || nbt.getBoolean(FROM_PLAYER_DEATH_KEY);
         ListTag nbtList = nbt.getList("Inventory", Tag.TAG_COMPOUND);
         this.readInventoryFromNbt(nbtList);
         // Load Curios items

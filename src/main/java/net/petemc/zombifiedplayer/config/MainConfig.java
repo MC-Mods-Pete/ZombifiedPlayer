@@ -49,6 +49,18 @@ public class MainConfig
         return randomSkinPlayerNames;
     }
 
+    public static boolean getNaturalSpawning() {
+        return naturalSpawning;
+    }
+
+    public static int getNaturalSpawnWeight() {
+        return naturalSpawnWeight;
+    }
+
+    public static boolean getDisplayNameTagForNaturalZombifiedPlayers() {
+        return displayNameTagForNaturalZombifiedPlayers;
+    }
+
     public static boolean getPrintSpawnMessageInChat() {
         return printSpawnMessageInChat;
     }
@@ -142,6 +154,18 @@ public class MainConfig
             .comment("Player names for zombified players that do not come from a player death (/summon, spawn egg, spawner). One name is picked at random, its skin is used. Empty: Steve | default: [\"jeb_\", \"Dinnerbone\", \"XxRexRaptorxX\", \"McModsPete\"]")
             .defineListAllowEmpty(List.of("randomSkinPlayerNames"), () -> DEFAULT_RANDOM_SKIN_PLAYER_NAMES, MainConfig::isValidPlayerName);
 
+    private static final ForgeConfigSpec.BooleanValue NATURAL_SPAWNING = BUILDER_SERVER
+            .comment("If true, zombified players also spawn naturally in the dark wherever zombies spawn. They get a skin from randomSkinPlayerNames, drop their equipment only by chance like zombies and despawn like zombies. Only applied when the world is loaded | default: false")
+            .define("naturalSpawning", false);
+
+    private static final ForgeConfigSpec.IntValue NATURAL_SPAWN_WEIGHT = BUILDER_SERVER
+            .comment("Spawn weight of naturally spawning zombified players, compared to zombies (95) and zombie villagers (5) in most biomes. Only applied when the world is loaded | default: 5")
+            .defineInRange("naturalSpawnWeight", 5, 1, 100);
+
+    private static final ForgeConfigSpec.BooleanValue DISPLAY_NAME_TAG_FOR_NATURAL_ZOMBIFIED_PLAYERS = BUILDER_SERVER
+            .comment("If true, naturally spawned zombified players display the name tag \"Zombified <name>\" (needs displayNameTagForZombifiedPlayer) | default: false")
+            .define("displayNameTagForNaturalZombifiedPlayers", false);
+
     private static final ForgeConfigSpec.BooleanValue PRINT_SPAWN_MESSAGE_IN_CHAT = BUILDER_SERVER
             .comment("If true, a message will be printed out in chat that a zombified player has spawned | default: true")
             .define("printSpawnMessageInChat", true);
@@ -212,6 +236,9 @@ public class MainConfig
     private static boolean ignoreKeepInventory = false;
     private static boolean spawnOnAnyDeath = false;
     private static boolean displayNameTagForZombifiedPlayer = true;
+    private static boolean naturalSpawning = false;
+    private static int naturalSpawnWeight = 5;
+    private static boolean displayNameTagForNaturalZombifiedPlayers = false;
     private static boolean printSpawnMessageInChat = true;
     private static boolean printSpawnLocationInChat = false;
     private static boolean zombifiedPlayersCanAlwaysBreakDoors = false;
@@ -243,6 +270,9 @@ public class MainConfig
             ignoreKeepInventory = IGNORE_KEEP_INVENTORY.get();
             spawnOnAnyDeath = SPAWN_ON_ANY_DEATH.get();
             displayNameTagForZombifiedPlayer = DISPLAY_NAME_TAG_FOR_ZOMBIFIED_PLAYER.get();
+            naturalSpawning = NATURAL_SPAWNING.get();
+            naturalSpawnWeight = NATURAL_SPAWN_WEIGHT.get();
+            displayNameTagForNaturalZombifiedPlayers = DISPLAY_NAME_TAG_FOR_NATURAL_ZOMBIFIED_PLAYERS.get();
             printSpawnMessageInChat = PRINT_SPAWN_MESSAGE_IN_CHAT.get();
             printSpawnLocationInChat = PRINT_SPAWN_LOCATION_IN_CHAT.get();
             zombifiedPlayersCanAlwaysBreakDoors = ZOMBIFIED_PLAYERS_CAN_ALWAYS_BREAK_DOORS.get();
