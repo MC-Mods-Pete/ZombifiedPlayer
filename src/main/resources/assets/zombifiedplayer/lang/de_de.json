@@ -72,6 +72,6 @@
   "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight": "Benutzerdefinierte Augenhöhe verwenden",
   "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight.@Tooltip": "Wenn aktiviert, verwendet der zombifizierte Spieler eine benutzerdefinierte Augenhöhe | Standard: deaktiviert",
   "text.autoconfig.zombifiedplayer.option.customEyeHeight": "Benutzerdefinierte Augenhöhe",
-  "text.autoconfig.zombifiedplayer.option.customEyeHeight.@Tooltip": "Die benutzerdefinierte Augenhöhe des zombifizierten Spielers (nur aktiv, wenn 'Benutzerdefinierte Augenhöhe verwenden' aktiviert ist) | Standard: 1.74",
+  "text.autoconfig.zombifiedplayer.option.customEyeHeight.@Tooltip": "Die benutzerdefinierte Augenhöhe des zombifizierten Spielers (nur aktiv, wenn 'Benutzerdefinierte Augenhöhe verwenden' aktiviert ist) | Standard: 1.74"
 }
 
