@@ -294,6 +294,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
 
     @Override
     public void writeSpawnData(@NotNull RegistryFriendlyByteBuf buffer) {
+        buffer.writeBoolean(gameProfile != null);
         if (gameProfile != null) {
             buffer.writeUUID(gameProfile.getId());
             buffer.writeUtf(gameProfile.getName());
@@ -302,19 +303,21 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
 
     @Override
     public void readSpawnData(@NotNull RegistryFriendlyByteBuf additionalData) {
-        try {
+        // without a profile (e.g. /summon without NBT) the renderer falls back to the default skin
+        if (additionalData.readBoolean()) {
             UUID playerUUID = additionalData.readUUID();
             String playerName = additionalData.readUtf();
             gameProfile = new GameProfile(playerUUID, playerName);
-        } catch (Exception ex) {
         }
     }
 
     @Override
     public void addAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
-        nbt.putUUID("gameProfileUUID", gameProfile.getId());
-        nbt.putString("gameProfileName", gameProfile.getName());
+        if (gameProfile != null) {
+            nbt.putUUID("gameProfileUUID", gameProfile.getId());
+            nbt.putString("gameProfileName", gameProfile.getName());
+        }
         nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
         // Store Curios items
         nbt.put("CuriosItems", CuriosUtil.writeCuriosItemsToNbt(this, this.curiosItems, new ListTag()));
@@ -324,9 +327,10 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
-        UUID gpUUID = nbt.getUUID("gameProfileUUID");
-        String gpName = nbt.getString("gameProfileName");
-        gameProfile = new GameProfile(gpUUID, gpName);
+        // optional: /summon without NBT has no profile
+        if (nbt.hasUUID("gameProfileUUID")) {
+            setGameProfile(new GameProfile(nbt.getUUID("gameProfileUUID"), nbt.getString("gameProfileName")));
+        }
         ListTag nbtList = nbt.getList("Inventory", Tag.TAG_COMPOUND);
         this.readInventoryFromNbt(nbtList);
         // Load Curios items

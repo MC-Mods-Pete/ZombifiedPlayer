@@ -10,7 +10,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.petemc.zombifiedplayer.config.MainConfig;
-import net.petemc.zombifiedplayer.util.HardcoreRevivalUtil;
 import net.petemc.zombifiedplayer.util.ZombifiedPlayerSpawnLogic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,14 +23,15 @@ public class ServerPlayerEntityMixin
 {
     @Shadow @Final public MinecraftServer server;
 
-    @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V", shift = At.Shift.AFTER))
+    /**
+     * Injected before removeEntitiesOnShoulder(): runs after the vanilla death message part,
+     * also when there is no broadcast (game rule showDeathMessages off, team death message visibility).
+     */
+    @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;removeEntitiesOnShoulder()V"))
     public void die(DamageSource pCause, CallbackInfo ci)
     {
         ServerPlayer serverPlayer = (ServerPlayer) (Object) this;
-        DamageSource effectiveSource = HardcoreRevivalUtil.resolveEffectiveDeathSource(serverPlayer, pCause);
-        // Final death reached (the spawn already happened in PlayerDeathEvents): drop the tracked knockout cause
-        HardcoreRevivalUtil.clearTrackedCause(serverPlayer);
-        if (ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, effectiveSource)) {
+        if (ZombifiedPlayerSpawnLogic.takeSpawnedThisDeath(serverPlayer)) {
             if (MainConfig.getPrintSpawnMessageInChat()) {
                 serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"));
                 if (MainConfig.getPrintSpawnLocationInChat()) {
