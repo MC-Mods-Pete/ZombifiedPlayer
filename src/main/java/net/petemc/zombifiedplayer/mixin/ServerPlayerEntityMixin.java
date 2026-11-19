@@ -10,6 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.petemc.zombifiedplayer.config.MainConfig;
+import net.petemc.zombifiedplayer.util.HardcoreRevivalUtil;
 import net.petemc.zombifiedplayer.util.ZombifiedPlayerSpawnLogic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -27,7 +28,10 @@ public class ServerPlayerEntityMixin
     public void die(DamageSource pCause, CallbackInfo ci)
     {
         ServerPlayer serverPlayer = (ServerPlayer) (Object) this;
-        if (ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, pCause)) {
+        DamageSource effectiveSource = HardcoreRevivalUtil.resolveEffectiveDeathSource(serverPlayer, pCause);
+        // Final death reached (the spawn already happened in PlayerDeathEvents): drop the tracked knockout cause
+        HardcoreRevivalUtil.clearTrackedCause(serverPlayer);
+        if (ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, effectiveSource)) {
             if (MainConfig.getPrintSpawnMessageInChat()) {
                 serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"));
                 if (MainConfig.getPrintSpawnLocationInChat()) {

@@ -160,6 +160,10 @@ dependencies {
     // a Curios slot (back) for testing
     runtimeOnly "maven.modrinth:sophisticated-backpacks:${sophisticated_backpacks_version}"
     runtimeOnly "maven.modrinth:sophisticated-core:${sophisticated_core_version}"
+
+    // Hardcore Revival API (Balm events), compile only: the mod stays optional
+    compileOnly "maven.modrinth:hardcore-revival:${hardcore_revival_version}"
+    compileOnly "maven.modrinth:balm:${balm_version}"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

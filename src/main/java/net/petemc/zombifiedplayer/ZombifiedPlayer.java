@@ -21,6 +21,7 @@ import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
+import net.petemc.zombifiedplayer.util.HardcoreRevivalUtil;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.slf4j.Logger;
 
@@ -57,9 +58,8 @@ public class ZombifiedPlayer {
 
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("Initializing the {} Mod", MOD_NAME);
-        event.enqueueWork(() -> {
-
-        });
+        // main thread, all mods are constructed
+        event.enqueueWork(HardcoreRevivalUtil::registerEvents);
     }
 
     // Add the example block item to the building blocks tab
