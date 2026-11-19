@@ -20,11 +20,11 @@ repositories {
     mavenLocal()
     maven { url "https://maven.shedaniel.me/"}
 
-    // curse maven
+    // dev dependencies from Modrinth
     maven {
-        url "https://cursemaven.com"
+        url "https://api.modrinth.com/maven"
         content {
-            includeGroup "curse.maven"
+            includeGroup "maven.modrinth"
         }
     }
 }
@@ -144,25 +144,22 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
     //other dependencies
-    implementation "curse.maven:contagion-1027702:${contagion_version}"
-    implementation "curse.maven:undeadnights-1166914:${undeadnights_version}"
+    implementation "maven.modrinth:contagion:${contagion_version}"
+    implementation "maven.modrinth:undead-nights:${undeadnights_version}"
 
-    runtimeOnly "curse.maven:jade--324717:${jade_version}"
-    runtimeOnly "curse.maven:contagion-1027702:${contagion_version}"
-    runtimeOnly "curse.maven:undeadnights-1166914:${undeadnights_version}"
+    runtimeOnly "maven.modrinth:jade:${jade_version}"
 
-    // use when not test Curios (comment out when testing curios)
-    compileOnly "curse.maven:curios-309927:${curios_version}"
+    implementation "maven.modrinth:curios:${curios_version}"
 
-    compileOnly "curse.maven:accessories-938917:${accessories_version}"
+    implementation "maven.modrinth:accessories:${accessories_version}"
+    runtimeOnly "maven.modrinth:owo-lib:${owo_lib_version}"
 
-    implementation "curse.maven:corpse-316582:${corpse_version}"
-    implementation "curse.maven:gravestone-mod-238551:${gravestone_version}"
+    implementation "maven.modrinth:corpse:${corpse_version}"
+    implementation "maven.modrinth:gravestone-mod:${gravestone_version}"
 
-    // enable for curios testing, note: minecraft version needs to be switched to 1.21.1, NeoForge to 21.1.60)
-    //implementation "curse.maven:curios-309927:${curios_version}"
-    //runtimeOnly "curse.maven:sophisticated-backpacks-422301:${sophisticated_backpacks_version}"
-    //runtimeOnly "curse.maven:sophisticated-core-618298:${sophisticated_core_version}"
+    // a Curios slot (back) for testing
+    runtimeOnly "maven.modrinth:sophisticated-backpacks:${sophisticated_backpacks_version}"
+    runtimeOnly "maven.modrinth:sophisticated-core:${sophisticated_core_version}"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
