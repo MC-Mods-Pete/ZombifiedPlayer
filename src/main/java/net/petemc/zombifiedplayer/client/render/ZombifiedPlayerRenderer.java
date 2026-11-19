@@ -5,7 +5,6 @@ import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ZombieModel;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -61,25 +60,17 @@ public class ZombifiedPlayerRenderer
     private final ZombieModel<ZombifiedPlayerEntity> wideModel;
     private final ZombieModel<ZombifiedPlayerEntity> slimModel;
 
-    public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx) {
-        this(ctx, MainConfig.getUseZombieModelFromResourcePacks());
-    }
-
     /**
-     * useZombieModel: vanilla zombie layers (zombie models from resource packs apply, no second skin layer, always wide arms).
-     * Otherwise own layers with the player mesh, wide or slim arms depending on the skin.
+     * Own layers with the player mesh, wide or slim arms depending on the skin (zombie models from resource packs
+     * do not apply, the built-in shambling animation pack animates these layers).
      */
-    private ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx, boolean useZombieModel) {
+    public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx) {
         super(ctx,
-              useZombieModel
-                      ? new ZombieModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE))
-                      : new ZombifiedPlayerModel(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER), false),
-              new ZombieModel<>(ctx.bakeLayer(useZombieModel ? ModelLayers.ZOMBIE_INNER_ARMOR : ModModelLayers.ZOMBIFIED_PLAYER_INNER_ARMOR)),
-              new ZombieModel<>(ctx.bakeLayer(useZombieModel ? ModelLayers.ZOMBIE_OUTER_ARMOR : ModModelLayers.ZOMBIFIED_PLAYER_OUTER_ARMOR)));
+              new ZombifiedPlayerModel(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER), false),
+              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_INNER_ARMOR)),
+              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_OUTER_ARMOR)));
         this.wideModel = this.model;
-        this.slimModel = useZombieModel
-                ? this.model
-                : new ZombifiedPlayerModel(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_SLIM), true);
+        this.slimModel = new ZombifiedPlayerModel(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_SLIM), true);
         this.addLayer(new ZombificationFeatureRenderer(this));
     }
 
@@ -87,25 +78,17 @@ public class ZombifiedPlayerRenderer
     public void render(@NotNull ZombifiedPlayerEntity entity, float entityYaw, float partialTicks, @NotNull PoseStack poseStack,
                        @NotNull MultiBufferSource buffer, int packedLight) {
         // the layers (zombification, held items) use getModel(), so they follow the switch
-        this.model = skinOf(entity, this.hasSlimModel()).slim() ? this.slimModel : this.wideModel;
+        this.model = skinOf(entity).slim() ? this.slimModel : this.wideModel;
         super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
     }
 
     @Override
     public @NotNull ResourceLocation getTextureLocation(@NotNull ZombifiedPlayerEntity entity) {
-        return skinOf(entity, this.hasSlimModel()).texture();
+        return skinOf(entity).texture();
     }
 
-    /** False with useZombieModelFromResourcePacks: the zombie model only has wide arms. */
-    private boolean hasSlimModel() {
-        return this.slimModel != this.wideModel;
-    }
-
-    /**
-     * The loaded skin of the profile, otherwise the fallback skin (and a fetch is started, never blocking).
-     * Without a slim model the fallback is always Steve, Alex would have transparent stripes on wide arms.
-     */
-    private static Skin skinOf(ZombifiedPlayerEntity entity, boolean slimModel) {
+    /** The loaded skin of the profile, otherwise the fallback skin (and a fetch is started, never blocking). */
+    private static Skin skinOf(ZombifiedPlayerEntity entity) {
         GameProfile profile = entity.getGameProfile();
         UUID uuid = profile == null || profile.getId() == null ? entity.getUUID() : profile.getId();
         Skin skin = profile == null || profile.getId() == null ? null : SKINS.get(uuid);
@@ -114,7 +97,7 @@ public class ZombifiedPlayerRenderer
             skin = FALLBACK;
         }
         if (skin == FALLBACK) {
-            return slimModel && Math.floorMod(uuid.hashCode(), 2) == 1 ? ALEX : STEVE;
+            return Math.floorMod(uuid.hashCode(), 2) == 1 ? ALEX : STEVE;
         }
         return skin;
     }

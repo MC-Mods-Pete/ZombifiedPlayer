@@ -53,8 +53,6 @@
   "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@PrefixText": "[Please note]\nFor the option below the Infectious mod needs to be installed!",
   "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility": "Spawn Zombified Player when killed by Infectious Zombies",
   "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@Tooltip": "If enabled, spawn Zombified Player if player is killed by an Infectious Zombie | default: disabled",
-  "text.autoconfig.zombifiedplayer.option.useZombieModelFromResourcePacks": "Use zombie models from resource packs",
-  "text.autoconfig.zombifiedplayer.option.useZombieModelFromResourcePacks.@Tooltip": "If enabled, zombie models from resource packs (Entity Model Features, e.g. Fresh Animations) also change zombified players. Packs with their own zombie models and textures (e.g. Bray's Zombie Overhaul) make the player skin look broken. Applied after reloading resource packs (F3+T) | default: disabled",
   "text.autoconfig.zombifiedplayer.option.shamblingAnimationPackTurnedOn": "Shambling Animation pack turned on",
   "text.autoconfig.zombifiedplayer.option.shamblingAnimationPackTurnedOn.@Tooltip": "Set by the mod after it turned on the built-in resource pack \"Zombified Player: Shambling Animation\" at the first start. Turn the pack on or off under Options > Resource Packs. Disable this to have the pack turned on again at the next start | default: disabled",
 
