@@ -2,7 +2,6 @@ package net.petemc.zombifiedplayer;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -25,9 +24,6 @@ import net.petemc.zombifiedplayer.util.HardcoreRevivalUtil;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.slf4j.Logger;
 
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(ZombifiedPlayer.MOD_ID)
 public class ZombifiedPlayer {
@@ -35,9 +31,6 @@ public class ZombifiedPlayer {
     public static final String MOD_NAME = "ZombifiedPlayer";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public static ConcurrentHashMap<UUID, ResourceLocation> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<String, ResourceLocation> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<UUID, UUID> uuidMissmatches = new ConcurrentHashMap<>();
 
     public ZombifiedPlayer(IEventBus modEventBus, ModContainer modContainer) {
         ModEntities.register(modEventBus);

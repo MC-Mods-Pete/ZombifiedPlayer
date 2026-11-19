@@ -2,6 +2,7 @@
 	"required": true,
 	"minVersion": "0.7",
 	"package": "net.petemc.zombifiedplayer.mixin",
+	"plugin": "net.petemc.zombifiedplayer.mixin.ZombifiedPlayerMixinPlugin",
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"ServerPlayerEntityMixin",
