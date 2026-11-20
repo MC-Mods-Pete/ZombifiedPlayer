@@ -3,17 +3,17 @@ package net.petemc.zombifiedplayer.event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import net.petemc.zombifiedplayer.network.NetworkPayloads;
 
 public class ServerZombifiedPlayerLoadEvent {
 
     private static Entity pEntity = null;
-    private static World pWorld = null;
+    private static Level pWorld = null;
 
     public ServerZombifiedPlayerLoadEvent() {
         ServerEntityEvents.ENTITY_LOAD.register((entity, world) -> {
@@ -25,11 +25,11 @@ public class ServerZombifiedPlayerLoadEvent {
 
     public static void execute() {
         if (pEntity != null) {
-            if (!pWorld.isClient()) {
+            if (!pWorld.isClientSide()) {
                 if (pEntity instanceof ZombifiedPlayerEntity zombifiedPlayerEntity) {
                     if ((zombifiedPlayerEntity.getGameProfile().getId() != null) && (zombifiedPlayerEntity.getGameProfile().getName() != null)) {
-                        for (ServerPlayerEntity player : PlayerLookup.world((ServerWorld) pWorld)) {
-                            ServerPlayNetworking.send(player, new NetworkPayloads.GameProfilePayload(zombifiedPlayerEntity.getUuid(), zombifiedPlayerEntity.getId(), zombifiedPlayerEntity.gameProfile.getId(), zombifiedPlayerEntity.gameProfile.getName()));
+                        for (ServerPlayer player : PlayerLookup.world((ServerLevel) pWorld)) {
+                            ServerPlayNetworking.send(player, new NetworkPayloads.GameProfilePayload(zombifiedPlayerEntity.getUUID(), zombifiedPlayerEntity.getId(), zombifiedPlayerEntity.gameProfile.getId(), zombifiedPlayerEntity.gameProfile.getName()));
                         }
                     }
                 }

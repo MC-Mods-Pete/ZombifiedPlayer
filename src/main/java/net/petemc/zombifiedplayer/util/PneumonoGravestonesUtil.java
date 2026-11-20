@@ -1,7 +1,7 @@
 package net.petemc.zombifiedplayer.util;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.pneumono.gravestones.api.CancelGravestonePlacementCallback;
 import net.petemc.zombifiedplayer.config.MainConfig;
 
@@ -24,7 +24,7 @@ public class PneumonoGravestonesUtil {
      */
     public static void registerEvent() {
         CancelGravestonePlacementCallback.EVENT.register((world, player, damageSource) ->
-                MainConfig.getGravestoneCompatibility() && skipGraveSet.remove(player.getUuid())
+                MainConfig.getGravestoneCompatibility() && skipGraveSet.remove(player.getUUID())
         );
     }
 
@@ -32,9 +32,9 @@ public class PneumonoGravestonesUtil {
      * Marks this player to skip Pneumono Gravestones gravestone creation on next death.
      * Called before a ZombifiedPlayer is spawned.
      */
-    public static void skipGrave(PlayerEntity player) {
+    public static void skipGrave(Player player) {
         if (isPneumonoGravestonesLoaded()) {
-            skipGraveSet.add(player.getUuid());
+            skipGraveSet.add(player.getUUID());
         }
     }
 }

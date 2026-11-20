@@ -1,11 +1,6 @@
 package net.petemc.zombifiedplayer.util;
 
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.PersistentState;
-import net.minecraft.world.PersistentStateManager;
-import net.minecraft.world.World;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 import java.util.HashMap;

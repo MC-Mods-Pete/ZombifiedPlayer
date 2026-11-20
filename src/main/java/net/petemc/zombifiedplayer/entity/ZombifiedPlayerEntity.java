@@ -1,30 +1,37 @@
 package net.petemc.zombifiedplayer.entity;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.component.EnchantmentEffectComponentTypes;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.*;
-import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.ZombieEntity;
-import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
-import net.minecraft.server.network.EntityTrackerEntry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
+import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.MoveThroughVillageGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.ai.goal.ZombieAttackGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.Level;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.util.AccessoriesUtil;
 import net.petemc.zombifiedplayer.util.TrinketsUtil;
@@ -35,53 +42,53 @@ import java.util.Objects;
 import java.util.UUID;
 
 
-public class ZombifiedPlayerEntity extends ZombieEntity {
+public class ZombifiedPlayerEntity extends Zombie {
     public GameProfile gameProfile;
-    public final DefaultedList<ItemStack> main = DefaultedList.ofSize(36, ItemStack.EMPTY);
+    public final NonNullList<ItemStack> main = NonNullList.withSize(36, ItemStack.EMPTY);
     public final List<ItemStack> trinketsItems = new ArrayList<>();
     public final List<ItemStack> accessoriesItems = new ArrayList<>();
 
-    public ZombifiedPlayerEntity(EntityType<? extends ZombieEntity> entityType, World world) {
+    public ZombifiedPlayerEntity(EntityType<? extends Zombie> entityType, Level world) {
         super(entityType, world);
     }
 
-    public static DefaultAttributeContainer.Builder createZombifiedPlayerAttributes() {
-        return HostileEntity.createHostileAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, MainConfig.getMakeTheZombifiedPlayersStronger() ? 40.0 : 20.0)
-                .add(EntityAttributes.GENERIC_FOLLOW_RANGE, MainConfig.getMakeTheZombifiedPlayersStronger() ? 50.0 : 40.0)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, MainConfig.getMakeTheZombifiedPlayersStronger() ? 0.29f : 0.23f)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, MainConfig.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
-                .add(EntityAttributes.GENERIC_ARMOR, MainConfig.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
-                .add(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS);
+    public static AttributeSupplier.Builder createZombifiedPlayerAttributes() {
+        return Monster.createMonsterAttributes()
+                .add(Attributes.MAX_HEALTH, MainConfig.getMakeTheZombifiedPlayersStronger() ? 40.0 : 20.0)
+                .add(Attributes.FOLLOW_RANGE, MainConfig.getMakeTheZombifiedPlayersStronger() ? 50.0 : 40.0)
+                .add(Attributes.MOVEMENT_SPEED, MainConfig.getMakeTheZombifiedPlayersStronger() ? 0.29f : 0.23f)
+                .add(Attributes.ATTACK_DAMAGE, MainConfig.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
+                .add(Attributes.ARMOR, MainConfig.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
+                .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE);
     }
 
     @Override
-    protected void initCustomGoals() {
-        this.goalSelector.add(1, new SwimGoal(this));
-        this.goalSelector.add(2, new ZombieAttackGoal(this, (double)1.0F, false));
-        this.goalSelector.add(6, new MoveThroughVillageGoal(this, (double)1.0F, true, 4, this::canBreakDoors));
-        this.goalSelector.add(7, new WanderAroundFarGoal(this, (double)1.0F));
-        this.targetSelector.add(2, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
-        this.targetSelector.add(3, new ActiveTargetGoal<>(this, IronGolemEntity.class, true));
+    protected void addBehaviourGoals() {
+        this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(2, new ZombieAttackGoal(this, (double)1.0F, false));
+        this.goalSelector.addGoal(6, new MoveThroughVillageGoal(this, (double)1.0F, true, 4, this::canBreakDoors));
+        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, (double)1.0F));
+        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(this, IronGolem.class, true));
     }
 
     @Override
-    public Packet<ClientPlayPacketListener> createSpawnPacket(EntityTrackerEntry entityTrackerEntry) {
-        return new EntitySpawnS2CPacket((Entity) this, entityTrackerEntry);
+    public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity entityTrackerEntry) {
+        return new ClientboundAddEntityPacket((Entity) this, entityTrackerEntry);
     }
 
     @Override
-    public void onSpawnPacket(EntitySpawnS2CPacket packet) {
-        super.onSpawnPacket(packet);
+    public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+        super.recreateFromPacket(packet);
     }
 
     @Override
-    public boolean isFireImmune() {
+    public boolean fireImmune() {
         return MainConfig.getMakeTheZombifiedPlayersImmuneToFire();
     }
 
     @Override
-    protected boolean burnsInDaylight() {
+    protected boolean isSunSensitive() {
         return false;
     }
 
@@ -92,13 +99,13 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     }
 
     @Override
-    protected boolean canConvertInWater() {
+    protected boolean convertsInWater() {
         return false;
     }
 
     @Override
-    protected void initAttributes() {
-        Objects.requireNonNull(this.getAttributeInstance(EntityAttributes.ZOMBIE_SPAWN_REINFORCEMENTS)).setBaseValue(0.0F);
+    protected void randomizeReinforcementsChance() {
+        Objects.requireNonNull(this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)).setBaseValue(0.0F);
     }
 
     public GameProfile getGameProfile() {
@@ -121,100 +128,100 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
  */
 
     @Override
-    protected void dropEquipment(ServerWorld world, DamageSource source, boolean causedByPlayer) {
+    protected void dropCustomDeathLoot(ServerLevel world, DamageSource source, boolean causedByPlayer) {
         //super.dropEquipment(world, source, causedByPlayer);
         for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-            ItemStack itemStack = this.getEquippedStack(equipmentSlot);
-            Object object = source.getAttacker();
+            ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+            Object object = source.getEntity();
             if (object instanceof LivingEntity livingEntity) {
-                object = this.getWorld();
-                if (object instanceof ServerWorld serverWorld) {
-                    EnchantmentHelper.getEquipmentDropChance(serverWorld, livingEntity, source, 1.0f);
+                object = this.level();
+                if (object instanceof ServerLevel serverWorld) {
+                    EnchantmentHelper.processEquipmentDropChance(serverWorld, livingEntity, source, 1.0f);
                 }
             }
-            this.dropStack(itemStack);
-            this.equipStack(equipmentSlot, ItemStack.EMPTY);
+            this.spawnAtLocation(itemStack);
+            this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
         }
-        dropInventory();
+        dropEquipment();
     }
 
-    public void dropInventory() {
-        super.dropInventory();
+    public void dropEquipment() {
+        super.dropEquipment();
         for (int i = 0; i < this.main.size(); i++) {
             if (!this.main.get(i).isEmpty()) {
-                this.dropStack(this.main.get(i));
+                this.spawnAtLocation(this.main.get(i));
                 this.main.set(i, ItemStack.EMPTY);
             }
         }
 
         for (ItemStack curiosItem : this.trinketsItems) {
             if (!curiosItem.isEmpty()) {
-                this.dropStack(curiosItem);
+                this.spawnAtLocation(curiosItem);
             }
         }
         this.trinketsItems.clear();
 
         for (ItemStack accessoriesItem : this.accessoriesItems) {
             if (!accessoriesItem.isEmpty()) {
-                this.dropStack(accessoriesItem);
+                this.spawnAtLocation(accessoriesItem);
             }
         }
         this.accessoriesItems.clear();
     }
 
-    public static ZombifiedPlayerEntity spawnZombifiedPlayer(PlayerEntity player) {
+    public static ZombifiedPlayerEntity spawnZombifiedPlayer(Player player) {
         ZombifiedPlayerEntity zombifiedPlayer = null;
-        if (player.getWorld() instanceof ServerWorld serverWorld) {
+        if (player.level() instanceof ServerLevel serverWorld) {
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER, serverWorld);
             zombifiedPlayer.setGameProfile(player.getGameProfile());
             //zombifiedPlayer.storeGameProfile(player.getGameProfile());
             if (MainConfig.getDisplayNameTagForZombifiedPlayer()) {
-                Text name = Text.of("Zombified " + player.getName().getLiteralString());
+                Component name = Component.nullToEmpty("Zombified " + player.getName().tryCollapseToString());
                 zombifiedPlayer.setCustomName(name);
             }
-            zombifiedPlayer.setPosition(player.getX(), player.getY(), player.getZ());
-            zombifiedPlayer.setPersistent();
+            zombifiedPlayer.setPos(player.getX(), player.getY(), player.getZ());
+            zombifiedPlayer.setPersistenceRequired();
             zombifiedPlayer.transferInventory(player);
-            serverWorld.spawnEntity(zombifiedPlayer);
+            serverWorld.addFreshEntity(zombifiedPlayer);
         }
         return zombifiedPlayer;
     }
 
-    public void transferInventory(PlayerEntity playerEntity) {
-        if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getMainHandStack(), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
-            playerEntity.setStackInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+    public void transferInventory(Player playerEntity) {
+        if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
+            playerEntity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else {
             if (MainConfig.getTransferMainAndOffHandToZombifiedPlayer()) {
-                this.setStackInHand(Hand.MAIN_HAND, playerEntity.getMainHandStack().copyAndEmpty());
+                this.setItemInHand(InteractionHand.MAIN_HAND, playerEntity.getMainHandItem().copyAndClear());
             }
         }
 
-        if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getOffHandStack(), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
-            playerEntity.setStackInHand(Hand.OFF_HAND, ItemStack.EMPTY);
+        if (EnchantmentHelper.has(playerEntity.getOffhandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
+            playerEntity.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         } else {
             if (MainConfig.getTransferMainAndOffHandToZombifiedPlayer()) {
-                this.setStackInHand(Hand.OFF_HAND, playerEntity.getOffHandStack().copyAndEmpty());
+                this.setItemInHand(InteractionHand.OFF_HAND, playerEntity.getOffhandItem().copyAndClear());
             }
         }
 
         for (int i = 0; i < 4; i++) {
-            if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getInventory().armor.get(i), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
+            if (EnchantmentHelper.has(playerEntity.getInventory().armor.get(i), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
                 if (MainConfig.getTransferArmorToZombifiedPlayer()) {
-                    this.tryEquip(playerEntity.getInventory().armor.get(i).copyAndEmpty());
+                    this.equipItemIfPossible(playerEntity.getInventory().armor.get(i).copyAndClear());
                 }
             }
         }
 
-        for (int i = 0; i < playerEntity.getInventory().main.size(); i++) {
-            if (!playerEntity.getInventory().main.get(i).isEmpty()) {
-                if (EnchantmentHelper.hasAnyEnchantmentsWith(playerEntity.getInventory().main.get(i), EnchantmentEffectComponentTypes.PREVENT_EQUIPMENT_DROP)) {
-                    playerEntity.getInventory().main.set(i, ItemStack.EMPTY);
+        for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
+            if (!playerEntity.getInventory().items.get(i).isEmpty()) {
+                if (EnchantmentHelper.has(playerEntity.getInventory().items.get(i), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
+                    playerEntity.getInventory().items.set(i, ItemStack.EMPTY);
                     this.main.set(i, ItemStack.EMPTY);
                 }
                 if (MainConfig.getTransferInventoryToZombifiedPlayer()) {
-                    this.main.set(i, playerEntity.getInventory().main.get(i).copyAndEmpty());
+                    this.main.set(i, playerEntity.getInventory().items.get(i).copyAndClear());
                 }
             }
         }
@@ -231,57 +238,57 @@ public class ZombifiedPlayerEntity extends ZombieEntity {
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
-        nbt.putUuid("gameProfileUUID", gameProfile.getId());
+    public void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
+        nbt.putUUID("gameProfileUUID", gameProfile.getId());
         nbt.putString("gameProfileName", gameProfile.getName());
-        nbt.put("Inventory", this.writeInventoryToNbt(new NbtList()));
+        nbt.put("Inventory", this.writeInventoryToNbt(new ListTag()));
         // Store Trinket items
-        nbt.put("TrinketItems", TrinketsUtil.writeTrinketItemsToNbt(this, this.trinketsItems, new NbtList()));
+        nbt.put("TrinketItems", TrinketsUtil.writeTrinketItemsToNbt(this, this.trinketsItems, new ListTag()));
         // Store Accessories items
-        nbt.put("AccessoriesItems", AccessoriesUtil.writeAccessoriesItemsToNbt(this, this.accessoriesItems, new NbtList()));
+        nbt.put("AccessoriesItems", AccessoriesUtil.writeAccessoriesItemsToNbt(this, this.accessoriesItems, new ListTag()));
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
-        UUID gpUUID = nbt.getUuid("gameProfileUUID");
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
+        UUID gpUUID = nbt.getUUID("gameProfileUUID");
         String gpName = nbt.getString("gameProfileName");
         setGameProfile(new GameProfile(gpUUID, gpName));
-        NbtList nbtList = nbt.getList("Inventory", NbtElement.COMPOUND_TYPE);
+        ListTag nbtList = nbt.getList("Inventory", Tag.TAG_COMPOUND);
         this.readInventoryFromNbt(nbtList);
         // Load Trinket items
         if (nbt.contains("TrinketItems")) {
-            NbtList curiosNbt = nbt.getList("TrinketItems", NbtElement.COMPOUND_TYPE);
+            ListTag curiosNbt = nbt.getList("TrinketItems", Tag.TAG_COMPOUND);
             this.trinketsItems.clear();
             this.trinketsItems.addAll(TrinketsUtil.readTrinketItemsFromNbt(this, curiosNbt));
         }
         // Load Accessories items
         if (nbt.contains("AccessoriesItems")) {
-            NbtList accessoriesNbt = nbt.getList("AccessoriesItems", NbtElement.COMPOUND_TYPE);
+            ListTag accessoriesNbt = nbt.getList("AccessoriesItems", Tag.TAG_COMPOUND);
             this.accessoriesItems.clear();
             this.accessoriesItems.addAll(AccessoriesUtil.readAccessoriesItemsFromNbt(this, accessoriesNbt));
         }
     }
 
-    public NbtList writeInventoryToNbt(NbtList nbtList) {
+    public ListTag writeInventoryToNbt(ListTag nbtList) {
         for(int i = 0; i < this.main.size(); ++i) {
             if (!this.main.get(i).isEmpty()) {
-                NbtCompound nbtCompound = new NbtCompound();
+                CompoundTag nbtCompound = new CompoundTag();
                 nbtCompound.putByte("Slot", (byte)i);
-                nbtList.add(this.main.get(i).encode(this.getRegistryManager(), nbtCompound));
+                nbtList.add(this.main.get(i).save(this.registryAccess(), nbtCompound));
             }
         }
         return nbtList;
     }
 
-    public void readInventoryFromNbt(NbtList nbtList) {
+    public void readInventoryFromNbt(ListTag nbtList) {
         this.main.clear();
 
         for(int i = 0; i < nbtList.size(); ++i) {
-            NbtCompound nbtCompound = nbtList.getCompound(i);
+            CompoundTag nbtCompound = nbtList.getCompound(i);
             int j = nbtCompound.getByte("Slot") & 255;
-            ItemStack itemStack = ItemStack.fromNbt(super.getRegistryManager(), nbtCompound).orElse(ItemStack.EMPTY);
+            ItemStack itemStack = ItemStack.parse(super.registryAccess(), nbtCompound).orElse(ItemStack.EMPTY);
             if (j < this.main.size()) {
                 this.main.set(j, itemStack);
             }
