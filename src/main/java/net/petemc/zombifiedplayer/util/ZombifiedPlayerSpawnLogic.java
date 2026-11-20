@@ -75,6 +75,7 @@ public class ZombifiedPlayerSpawnLogic {
 
         return MainConfig.getSpawnOnAnyDeath()
                 || (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection())
+                || (MainConfig.getSpawnWhenDiedWhileInfected() && ModCompatibility.isInfected(serverPlayer))
                 || (isUndeadAttacker(damageSource.getEntity()) && MainConfig.getSpawnZombifiedPlayerAfterDeath());
     }
 

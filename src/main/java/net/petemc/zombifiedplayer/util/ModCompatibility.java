@@ -1,5 +1,7 @@
 package net.petemc.zombifiedplayer.util;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Zombie;
@@ -52,6 +54,18 @@ public class ModCompatibility {
             }
         }
         return false;
+    }
+
+    private static final ResourceLocation CONTAGION_INFECTION = ResourceLocation.fromNamespaceAndPath("contagion", "infection");
+
+    /** True if the player has Contagion's infection effect, e.g. at the moment of a death by fall damage. */
+    public static boolean isInfected(ServerPlayer serverPlayer) {
+        if (!isContagionLoaded()) {
+            return false;
+        }
+        return BuiltInRegistries.MOB_EFFECT.getHolder(CONTAGION_INFECTION)
+                .map(serverPlayer::hasEffect)
+                .orElse(false);
     }
 
     public static boolean isUndeadNightsLoaded() {

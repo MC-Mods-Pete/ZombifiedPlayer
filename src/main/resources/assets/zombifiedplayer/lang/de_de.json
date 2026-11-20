@@ -19,6 +19,7 @@
   "zombifiedplayer.configuration.makeTheZombifiedPlayersImmuneToFire": "Feuer-/Lava-Immunität",
   "zombifiedplayer.configuration.limitSkinFetchTries": "Skin-Abfragen begrenzen",
   "zombifiedplayer.configuration.spawnWhenKilledByInfection": "Spawn bei Infektionstod",
+  "zombifiedplayer.configuration.spawnWhenDiedWhileInfected": "Spawn bei Tod mit Infektion",
   "zombifiedplayer.configuration.infectiousModCompatibility": "Infectious Zombies Kompatibilität",
   "zombifiedplayer.configuration.corpseCompatibility": "Corpse-Mod Kompatibilität",
   "zombifiedplayer.configuration.gravestoneCompatibility": "Gravestone-Mod Kompatibilität",
@@ -58,6 +59,9 @@
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection.@PrefixText": "[Bitte beachten]\nFür die folgende Option muss die Mod Contagion installiert sein!",
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection": "Zombifizierten Spieler nach Tod durch Infektion spawnen",
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection.@Tooltip": "Wenn aktiviert, spawnt ein zombifizierter Spieler, wenn der Spieler an einer Infektion gestorben ist | Standard: aktiviert",
+  "text.autoconfig.zombifiedplayer.option.spawnWhenDiedWhileInfected.@PrefixText": "[Bitte beachten]\nFür die folgende Option muss die Mod Contagion installiert sein!",
+  "text.autoconfig.zombifiedplayer.option.spawnWhenDiedWhileInfected": "Zombifizierten Spieler bei Tod mit Infektion spawnen",
+  "text.autoconfig.zombifiedplayer.option.spawnWhenDiedWhileInfected.@Tooltip": "Wenn aktiviert, spawnt ein zombifizierter Spieler, wenn der Spieler mit einer Infektion stirbt, egal woran (z.B. Fallschaden), nicht nur an der Infektion selbst | Standard: deaktiviert",
 
   "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@PrefixText": "[Bitte beachten]\nFür die folgende Option muss die Mod Infectious installiert sein!",
   "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility": "Zombifizierten Spieler spawnen, wenn er von Infectious Zombies getötet wird",
