@@ -5,6 +5,9 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -39,6 +42,7 @@ import net.petemc.zombifiedplayer.util.TrinketsUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 
@@ -108,25 +112,41 @@ public class ZombifiedPlayerEntity extends Zombie {
         Objects.requireNonNull(this.getAttribute(Attributes.SPAWN_REINFORCEMENTS_CHANCE)).setBaseValue(0.0F);
     }
 
+    /** Profile of the dead player, synced to the clients for the skin (also for zombified players already in the world). */
+    private static final EntityDataAccessor<Optional<UUID>> DATA_PROFILE_ID =
+            SynchedEntityData.defineId(ZombifiedPlayerEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<String> DATA_PROFILE_NAME =
+            SynchedEntityData.defineId(ZombifiedPlayerEntity.class, EntityDataSerializers.STRING);
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_PROFILE_ID, Optional.empty());
+        builder.define(DATA_PROFILE_NAME, "");
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (this.level().isClientSide() && (DATA_PROFILE_ID.equals(key) || DATA_PROFILE_NAME.equals(key))) {
+            // without a profile (e.g. /summon without NBT) the renderer falls back to the default skin
+            this.gameProfile = this.entityData.get(DATA_PROFILE_ID)
+                    .map(id -> new GameProfile(id, this.entityData.get(DATA_PROFILE_NAME)))
+                    .orElse(null);
+        }
+    }
+
     public GameProfile getGameProfile() {
         return gameProfile;
     }
 
     public void setGameProfile(GameProfile gameProfile) {
         this.gameProfile = gameProfile;
-    }
-/*
-    public void storeGameProfile(GameProfile gameProfile) {
-        if (!this.getWorld().isClient) {
-            GameProfileData gameProfileState = StateSaverAndLoader.getGameProfileState(this.getUuid(), this.getWorld());
-            gameProfileState.gameProfileUUID = gameProfile.getId();
-            gameProfileState.gameProfileName = gameProfile.getName();
-            ZombifiedPlayer.LOGGER.info("Storing GameProfile info for {}, {}, {}",this.getUuid().toString(),gameProfileState.gameProfileUUID.toString(),gameProfileState.gameProfileName);
+        if (!this.level().isClientSide()) {
+            this.entityData.set(DATA_PROFILE_NAME, gameProfile == null || gameProfile.getName() == null ? "" : gameProfile.getName());
+            this.entityData.set(DATA_PROFILE_ID, gameProfile == null ? Optional.empty() : Optional.ofNullable(gameProfile.getId()));
         }
     }
-
- */
-
     /**
      * Never in peaceful: the zombified player carries the dead player's items,
      * despawning would delete them. It cannot attack players in peaceful anyway.
