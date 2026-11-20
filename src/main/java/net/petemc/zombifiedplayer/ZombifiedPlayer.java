@@ -2,6 +2,7 @@ package net.petemc.zombifiedplayer;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -20,6 +21,7 @@ import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
+import net.petemc.zombifiedplayer.item.ModItems;
 import net.petemc.zombifiedplayer.util.HardcoreRevivalUtil;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.slf4j.Logger;
@@ -34,11 +36,12 @@ public class ZombifiedPlayer {
 
     public ZombifiedPlayer(IEventBus modEventBus, ModContainer modContainer) {
         ModEntities.register(modEventBus);
+        ModItems.register(modEventBus);
 
         modEventBus.addListener(this::commonSetup);
 
         NeoForge.EVENT_BUS.register(this);
-        //modEventBus.addListener(this::addCreative);
+        modEventBus.addListener(this::addCreative);
 
         modContainer.registerConfig(ModConfig.Type.SERVER, MainConfig.SPEC_SERVER);
         ModCompatibility.init();
@@ -55,9 +58,10 @@ public class ZombifiedPlayer {
         event.enqueueWork(HardcoreRevivalUtil::registerEvents);
     }
 
-    // Add the example block item to the building blocks tab
     private void addCreative(BuildCreativeModeTabContentsEvent event) {
-
+        if (event.getTabKey() == CreativeModeTabs.SPAWN_EGGS) {
+            event.accept(ModItems.ZOMBIFIED_PLAYER_SPAWN_EGG);
+        }
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

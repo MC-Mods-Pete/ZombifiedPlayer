@@ -2,6 +2,7 @@ package net.petemc.zombifiedplayer.entity;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -15,7 +16,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -41,6 +45,7 @@ import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.neoforged.neoforge.common.extensions.IEntityExtension;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import net.petemc.zombifiedplayer.config.MainConfig;
@@ -49,6 +54,7 @@ import net.petemc.zombifiedplayer.util.CuriosDeathDrops;
 import net.petemc.zombifiedplayer.util.CuriosUtil;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -198,6 +204,39 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
 
     public void setGameProfile(GameProfile gameProfile) {
         this.gameProfile = gameProfile;
+    }
+
+    /**
+     * Called for /summon without NBT, spawn eggs and spawners, not for zombified players from a player death.
+     * Without a profile, one of the configured player names is picked so it gets that player's skin.
+     */
+    @Override
+    public SpawnGroupData finalizeSpawn(@NotNull ServerLevelAccessor level, @NotNull DifficultyInstance difficulty, @NotNull MobSpawnType reason,
+                                        @Nullable SpawnGroupData spawnData) {
+        SpawnGroupData result = super.finalizeSpawn(level, difficulty, reason, spawnData);
+        if (this.gameProfile == null) {
+            assignRandomSkinProfile();
+        }
+        return result;
+    }
+
+    private void assignRandomSkinProfile() {
+        List<String> names = MainConfig.getRandomSkinPlayerNames();
+        if (names.isEmpty()) {
+            return;
+        }
+        String name = names.get(this.random.nextInt(names.size()));
+        // Offline UUID: the same name always gets the same UUID, the client caches the skin per UUID and looks it up by name
+        setGameProfile(new GameProfile(UUIDUtil.createOfflinePlayerUUID(name), name));
+        if (MainConfig.getDisplayNameTagForZombifiedPlayer()) {
+            setCustomName(Component.literal("Zombified " + name));
+        }
+    }
+
+    /** Zombified players are always adults (vanilla makes some spawned zombies babies). */
+    @Override
+    public void setBaby(boolean baby) {
+        super.setBaby(false);
     }
 
     /**

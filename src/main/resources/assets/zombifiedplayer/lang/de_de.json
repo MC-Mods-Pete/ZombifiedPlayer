@@ -1,5 +1,6 @@
 {
   "entity.zombifiedplayer.zombified_player": "Zombifizierter Spieler",
+  "item.zombifiedplayer.zombified_player_spawn_egg": "Zombifizierter-Spieler-Spawn-Ei",
 
   "zombifiedplayer.spawn.message": "Eine zombifizierte Version von dir streift nun durch diese Welt...",
   "zombifiedplayer.location.message": "Sie kann bei %s gefunden werden",
@@ -12,6 +13,7 @@
   "zombifiedplayer.configuration.ignoreKeepInventory": "keepInventory ignorieren",
   "zombifiedplayer.configuration.spawnOnAnyDeath": "Bei jeder Todesursache spawnen",
   "zombifiedplayer.configuration.displayNameTagForZombifiedPlayer": "Namensschild anzeigen",
+  "zombifiedplayer.configuration.randomSkinPlayerNames": "Zufällige Skins (Spielernamen)",
   "zombifiedplayer.configuration.printSpawnMessageInChat": "Spawn-Nachricht im Chat",
   "zombifiedplayer.configuration.printSpawnLocationInChat": "Spawn-Koordinaten im Chat",
   "zombifiedplayer.configuration.zombifiedPlayersCanAlwaysBreakDoors": "Kann immer Türen aufbrechen",
@@ -43,6 +45,8 @@
   "text.autoconfig.zombifiedplayer.option.spawnOnAnyDeath.@Tooltip": "Wenn aktiviert, spawnt ein zombifizierter Spieler unabhängig davon, wie der Spieler gestorben ist | Standard: deaktiviert",
   "text.autoconfig.zombifiedplayer.option.displayNameTagForZombifiedPlayer": "Namensschild für den zombifizierten Spieler anzeigen",
   "text.autoconfig.zombifiedplayer.option.displayNameTagForZombifiedPlayer.@Tooltip": "Wenn aktiviert, zeigt der zombifizierte Spieler den Namen des toten Spielers an | Standard: aktiviert",
+  "text.autoconfig.zombifiedplayer.option.randomSkinPlayerNames": "Zufällige Skins (Spielernamen)",
+  "text.autoconfig.zombifiedplayer.option.randomSkinPlayerNames.@Tooltip": "Spielernamen für zombifizierte Spieler, die nicht durch den Tod eines Spielers entstehen (/summon, Spawn-Ei, Spawner). Ein Name wird zufällig gewählt und dessen Skin verwendet. Leer: Steve | Standard: jeb_, Dinnerbone, XxRexRaptorxX, McModsPete",
   "text.autoconfig.zombifiedplayer.option.printSpawnMessageInChat": "Spawn-Nachricht für den zombifizierten Spieler im Chat ausgeben",
   "text.autoconfig.zombifiedplayer.option.printSpawnMessageInChat.@Tooltip": "Wenn aktiviert, wird im Chat eine Nachricht ausgegeben, dass ein zombifizierter Spieler gespawnt ist | Standard: aktiviert",
   "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat": "Spawn-Position des zombifizierten Spielers im Chat ausgeben",
