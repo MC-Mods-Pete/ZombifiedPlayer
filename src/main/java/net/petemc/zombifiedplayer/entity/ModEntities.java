@@ -15,7 +15,7 @@ public class ModEntities {
             DeferredRegister.create(Registries.ENTITY_TYPE, ZombifiedPlayer.MOD_ID);
 
     public static final Supplier<EntityType<ZombifiedPlayerEntity>> ZOMBIFIED_PLAYER =
-            ENTITY_TYPES.register("zombified_player", () -> net.minecraft.world.entity.EntityType.Builder.of(ZombifiedPlayerEntity::new, MobCategory.CREATURE)
+            ENTITY_TYPES.register("zombified_player", () -> net.minecraft.world.entity.EntityType.Builder.of(ZombifiedPlayerEntity::new, MobCategory.MONSTER)
                     .sized(0.6f, 1.95f)
                     .eyeHeight(MainConfig.getUseCustomEyeHeight() ? MainConfig.getCustomEyeHeight() : 1.74f)
                     .build("zombified_player"));
