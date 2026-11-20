@@ -45,6 +45,7 @@ import net.neoforged.neoforge.common.extensions.IEntityExtension;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.util.AccessoriesUtil;
+import net.petemc.zombifiedplayer.util.CuriosDeathDrops;
 import net.petemc.zombifiedplayer.util.CuriosUtil;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.jetbrains.annotations.NotNull;
@@ -285,6 +286,10 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
             zombifiedPlayer.setHealth(zombifiedPlayer.getMaxHealth());
             zombifiedPlayer.setPersistenceRequired();
             zombifiedPlayer.transferInventory(player);
+            if (CuriosUtil.isCuriosLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+                // Curios applies its drop rules when the player drops the loot (also with keepInventory: "always drop" items)
+                CuriosDeathDrops.expectDrops(player, zombifiedPlayer);
+            }
             serverLevel.addFreshEntity(zombifiedPlayer);
             // Prevent the corpse mod from spawning a corpse for this death
             if (ModCompatibility.isCorpseLoaded() && MainConfig.getCorpseCompatibility()) {
@@ -342,11 +347,6 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
                     this.main.set(i, playerEntity.getInventory().items.get(i).copyAndClear());
                 }
             }
-        }
-
-        if (CuriosUtil.isCuriosLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
-            List<ItemStack> playerCuriosItems = CuriosUtil.getCuriosItemsAndClear(playerEntity);
-            this.curiosItems.addAll(playerCuriosItems);
         }
 
         if (AccessoriesUtil.isAccessoriesLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
