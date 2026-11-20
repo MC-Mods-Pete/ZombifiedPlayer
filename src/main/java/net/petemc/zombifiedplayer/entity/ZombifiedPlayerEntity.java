@@ -17,13 +17,19 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.core.Holder;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.BreakDoorGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.MoveThroughVillageGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.ZombieAttackGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
+import net.minecraft.world.entity.ai.util.GoalUtils;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.Zombie;
@@ -74,14 +80,47 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         super(entityType, level);
     }
 
+    /**
+     * Registered once at mod loading, before the server config is loaded: always the normal values.
+     * The config option makeTheZombifiedPlayersStronger is applied per entity in applyConfig().
+     */
     public static AttributeSupplier.@NotNull Builder createAttributes() {
         return Monster.createMonsterAttributes()
-                .add(Attributes.MAX_HEALTH, MainConfig.getMakeTheZombifiedPlayersStronger() ? 40.0 : 20.0)
-                .add(Attributes.FOLLOW_RANGE, MainConfig.getMakeTheZombifiedPlayersStronger() ? 50.0 : 40.0)
-                .add(Attributes.MOVEMENT_SPEED, MainConfig.getMakeTheZombifiedPlayersStronger() ? 0.29f : 0.23f)
-                .add(Attributes.ATTACK_DAMAGE, MainConfig.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
-                .add(Attributes.ARMOR, MainConfig.getMakeTheZombifiedPlayersStronger() ? 4.0 : 2.0)
+                .add(Attributes.MAX_HEALTH, 20.0)
+                .add(Attributes.FOLLOW_RANGE, 40.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.23f)
+                .add(Attributes.ATTACK_DAMAGE, 2.0)
+                .add(Attributes.ARMOR, 2.0)
                 .add(Attributes.SPAWN_REINFORCEMENTS_CHANCE);
+    }
+
+    /** Door breaking on every difficulty (the vanilla zombie goal only works on hard). Still needs mobGriefing. */
+    private final BreakDoorGoal breakDoorsOnAnyDifficultyGoal = new BreakDoorGoal(this, difficulty -> true);
+    private boolean breakDoorsEnabled = false;
+
+    /**
+     * Applies the config options that belong to the entity. Called when it spawns and when it is loaded,
+     * so changed options also apply to zombified players that already exist.
+     */
+    private void applyConfig() {
+        boolean stronger = MainConfig.getMakeTheZombifiedPlayersStronger();
+        setBaseValue(Attributes.MAX_HEALTH, stronger ? 40.0 : 20.0);
+        setBaseValue(Attributes.FOLLOW_RANGE, stronger ? 50.0 : 40.0);
+        setBaseValue(Attributes.MOVEMENT_SPEED, stronger ? 0.29f : 0.23f);
+        setBaseValue(Attributes.ATTACK_DAMAGE, stronger ? 4.0 : 2.0);
+        setBaseValue(Attributes.ARMOR, stronger ? 4.0 : 2.0);
+        if (this.getHealth() > this.getMaxHealth()) {
+            this.setHealth(this.getMaxHealth());
+        }
+
+        this.setCanBreakDoors(MainConfig.getZombifiedPlayersCanBreakDoors());
+    }
+
+    private void setBaseValue(Holder<Attribute> attribute, double value) {
+        AttributeInstance instance = this.getAttribute(attribute);
+        if (instance != null) {
+            instance.setBaseValue(value);
+        }
     }
 
     @Override
@@ -107,7 +146,29 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
     @Override
     public boolean canBreakDoors()
     {
-        return MainConfig.getZombifiedPlayersCanBreakDoors();
+        return this.breakDoorsEnabled;
+    }
+
+    /**
+     * Replaces the vanilla zombie logic, which adds a door breaking goal that only works on hard difficulty.
+     * Also called by Zombie.readAdditionalSaveData with the saved value.
+     */
+    @Override
+    public void setCanBreakDoors(boolean enabled) {
+        if (GoalUtils.hasGroundPathNavigation(this)) {
+            if (this.breakDoorsEnabled != enabled) {
+                this.breakDoorsEnabled = enabled;
+                ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(enabled);
+                if (enabled) {
+                    this.goalSelector.addGoal(1, this.breakDoorsOnAnyDifficultyGoal);
+                } else {
+                    this.goalSelector.removeGoal(this.breakDoorsOnAnyDifficultyGoal);
+                }
+            }
+        } else if (this.breakDoorsEnabled) {
+            this.goalSelector.removeGoal(this.breakDoorsOnAnyDifficultyGoal);
+            this.breakDoorsEnabled = false;
+        }
     }
 
     @Override
@@ -210,6 +271,8 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
                 zombifiedPlayer.setCustomName(name);
             }
             zombifiedPlayer.setPos(player.getX(), player.getY(), player.getZ());
+            zombifiedPlayer.applyConfig();
+            zombifiedPlayer.setHealth(zombifiedPlayer.getMaxHealth());
             zombifiedPlayer.setPersistenceRequired();
             zombifiedPlayer.transferInventory(player);
             serverLevel.addFreshEntity(zombifiedPlayer);
@@ -344,6 +407,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
             this.accessoriesItems.clear();
             this.accessoriesItems.addAll(AccessoriesUtil.readAccessoriesItemsFromNbt(this, accessoriesNbt));
         }
+        applyConfig();
     }
 
     public ListTag writeInventoryToNbt(ListTag nbtList) {

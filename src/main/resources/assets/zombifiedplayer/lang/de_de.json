@@ -44,7 +44,7 @@
   "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat": "Spawn-Position des zombifizierten Spielers im Chat ausgeben",
   "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat.@Tooltip": "Wenn aktiviert, wird die Spawn-Position des zombifizierten Spielers im Chat ausgegeben | Standard: deaktiviert",
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors": "Zombifizierte Spieler können Türen einbrechen",
-  "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors.@Tooltip": "Wenn aktiviert, können zombifizierte Spieler Türen einbrechen | Standard: aktiviert",
+  "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors.@Tooltip": "Wenn aktiviert, können zombifizierte Spieler auf jeder Schwierigkeit Holztüren einbrechen (Spielregel mobGriefing muss an sein) | Standard: aktiviert",
   "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger": "Zombifizierte Spieler stärker machen",
   "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger.@Tooltip": "Wenn aktiviert, sind zombifizierte Spieler stärker, schneller und haben mehr Gesundheit | Standard: deaktiviert",
   "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersImmuneToFire": "Zombifizierte Spieler gegen Lava und Feuer immun machen",
