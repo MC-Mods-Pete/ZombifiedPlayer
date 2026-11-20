@@ -24,7 +24,19 @@ public class ZombificationFeatureRenderer
     @Override
     public void render(@NotNull PoseStack pPoseStack, @NotNull MultiBufferSource pBuffer, int pPackedLight, @NotNull ZombifiedPlayerEntity pLivingEntity, float pLimbSwing, float pLimbSwingAmount, float pPartialTick, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
         renderColoredCutoutModel(this.getParentModel(), this.getTextureLocation(pLivingEntity), pPoseStack, pBuffer, pPackedLight, pLivingEntity,0xFF99FF99);
-        renderColoredCutoutModel(this.getParentModel(), TEXTURE, pPoseStack, pBuffer, pPackedLight, pLivingEntity,-1);
+        // The player mesh reads the own marks of the left arm and leg from zombify.png,
+        // the zombie model mirrors the right ones (legacy 64x32 layout).
+        if (this.getParentModel() instanceof ZombifiedPlayerModel playerModel) {
+            // marks only on the body itself: on the second skin layer they would float above the body wherever the skin has no clothing
+            boolean[] previous = playerModel.hideSecondLayer();
+            try {
+                renderColoredCutoutModel(playerModel, TEXTURE, pPoseStack, pBuffer, pPackedLight, pLivingEntity, -1);
+            } finally {
+                playerModel.restoreSecondLayer(previous);
+            }
+        } else {
+            renderColoredCutoutModel(this.getParentModel(), TEXTURE, pPoseStack, pBuffer, pPackedLight, pLivingEntity, -1);
+        }
     }
 }
 
