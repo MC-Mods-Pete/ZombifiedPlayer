@@ -34,13 +34,6 @@ repositories {
 	}
 	maven { url "https://maven.terraformersmc.com/releases/"}
 
-	// curse maven
-	maven {
-		url "https://cursemaven.com"
-		content {
-			includeGroup "curse.maven"
-		}
-	}
 
 	maven {
 		name 'Ladysnake Mods'
@@ -65,14 +58,27 @@ repositories {
 			includeGroup 'maven.modrinth'
 		}
 	}
-	// Local libs for Polymer (bundled in Universal Graves but not auto-loaded in dev env)
-	flatDir {
-		dirs 'libs'
+	maven {
+		name 'Nucleoid'
+		url 'https://maven.nucleoid.xyz/'
 	}
 }
 
 fabricApi {
 	configureDataGeneration()
+}
+
+loom {
+	runs {
+		// headless GameTest server: runs the tests registered under the entrypoint "fabric-gametest", then exits
+		gametest {
+			inherit server
+			name "Game Test"
+			vmArg "-Dfabric-api.gametest"
+			vmArg "-Dfabric-api.gametest.report-file=${project.layout.buildDirectory.get()}/junit.xml"
+			runDir "run"
+		}
+	}
 }
 
 dependencies {
@@ -93,17 +99,20 @@ dependencies {
 	include "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
 
 	//other dependencies
-	modImplementation "curse.maven:jade-324717:${project.jade_version}"
-	modImplementation "curse.maven:contagion-1027702:${project.contagion_version}"
-	modImplementation "curse.maven:undeadnights-1166914:${project.undeadnights_version}"
+	modImplementation "maven.modrinth:jade:${project.jade_version}"
+	modImplementation "maven.modrinth:contagion:${project.contagion_version}"
+	// compile only: Undead Nights 2.1.1 has an own method setDirty() that calls the vanilla one (method_80); under Mojang
+	// names both are setDirty, so in the dev environment it calls itself (StackOverflowError on the first server tick).
+	// The released jar (intermediary names) is not affected.
+	modCompileOnly "maven.modrinth:undead-nights:${project.undeadnights_version}"
 
-    modImplementation "curse.maven:trinkets-341284:${trinkets_version}"
+	modImplementation "maven.modrinth:trinkets:${project.trinkets_version}"
 
 	modImplementation "maven.modrinth:pneumono_core:${project.pneumono_core_version}"
 
 	// Both gravestone mods are available for compilation (for their respective util classes)
 	modCompileOnly "maven.modrinth:pneumono_gravestones:${project.pneumono_gravestones_version}"
-	modCompileOnly "curse.maven:universal-graves-497175:${project.universal_graves_version}"
+	modCompileOnly "maven.modrinth:universal-graves:${project.universal_graves_version}"
 
 	// Control which mod is active during runClient via gradle.properties:
 	//   active_graves_mod=universal_graves       → load Universal Graves
@@ -112,22 +121,35 @@ dependencies {
 		modLocalRuntime "maven.modrinth:pneumono_gravestones:${project.pneumono_gravestones_version}"
 		logger.lifecycle("[ZombifiedPlayer] Active graves mod: pneumono_gravestones")
 	} else {
-		modLocalRuntime "curse.maven:universal-graves-497175:${project.universal_graves_version}"
+		modLocalRuntime "maven.modrinth:universal-graves:${project.universal_graves_version}"
 		logger.lifecycle("[ZombifiedPlayer] Active graves mod: universal_graves")
 	}
 
-	modImplementation "dev.architectury:architectury-fabric:13.0.6"
-	modImplementation "io.github.jamalam360:jamlib-fabric:1.3.5+1.21.1"
-	modImplementation "maven.modrinth:accessories:nDjQ9Zvd"
-	modImplementation "io.wispforest:endec:0.1.8"
-	modImplementation "io.wispforest.endec:gson:0.1.5"
-	modImplementation "io.wispforest.endec:netty:0.1.4"
+	modImplementation "maven.modrinth:accessories:${project.accessories_version}"
+	modImplementation "maven.modrinth:owo-lib:${project.owo_lib_version}"
+	// endec is jar-in-jar in owo-lib, Loom does not load nested jars in the dev environment: the versions owo-lib bundles
+	modImplementation "io.wispforest:endec:0.1.5.1"
+	modImplementation "io.wispforest.endec:gson:0.1.3.1"
+	modImplementation "io.wispforest.endec:netty:0.1.2"
+	modLocalRuntime "io.wispforest.endec:jankson:0.1.3.1"
 	// Sodium needed in dev env to satisfy accessories' optional Sodium mixin
 	modLocalRuntime "maven.modrinth:sodium:u1OEbNKx"
 
-	// Polymer is bundled as JiJ inside Universal Graves but not auto-extracted in dev env by Loom
-	// All JARs in libs/ are the flattened transitive dependencies of Universal Graves
-	modLocalRuntime fileTree(dir: 'libs', include: '*.jar')
+	// Universal Graves bundles Polymer and friends as jar-in-jar, Loom does not load nested jars in the dev environment:
+	// the same libraries from the Nucleoid maven (were local jars in libs/ before)
+	modLocalRuntime "eu.pb4:polymer-core:0.9.14+1.21.1"
+	modLocalRuntime "eu.pb4:polymer-common:0.9.14+1.21.1"
+	modLocalRuntime "eu.pb4:polymer-networking:0.9.14+1.21.1"
+	modLocalRuntime "eu.pb4:polymer-reg-sync-manipulator:0.9.14+1.21.1"
+	modLocalRuntime "eu.pb4:polymer-resource-pack:0.9.14+1.21.1"
+	modLocalRuntime "eu.pb4:polymer-virtual-entity:0.9.14+1.21.1"
+	modLocalRuntime "eu.pb4:placeholder-api:2.4.1+1.21"
+	modLocalRuntime "eu.pb4:sgui:1.6.0+1.21"
+	modLocalRuntime "eu.pb4:predicate-api:0.5.1+1.21"
+	modLocalRuntime "eu.pb4:common-protection-api:1.0.0"
+	modLocalRuntime "xyz.nucleoid:server-translations-api:2.3.1+1.21-pre2"
+	modLocalRuntime "xyz.nucleoid:packet-tweaker:0.5.5+1.21"
+	modLocalRuntime "maven.modrinth:fabric-permissions-api:62DUD085"
 
     modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-base:${cardinal_components_version}"
     modImplementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:${cardinal_components_version}"
