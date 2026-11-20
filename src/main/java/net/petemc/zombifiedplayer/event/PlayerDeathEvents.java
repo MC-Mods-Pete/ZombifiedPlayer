@@ -8,15 +8,11 @@ import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Items;
 import net.petemc.zombifiedplayer.config.MainConfig;
-import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
-import net.petemc.zombifiedplayer.util.ModCompatibility;
-import net.petemc.zombifiedplayer.util.TrinketsUtil;
 import net.petemc.zombifiedplayer.util.UniversalGravesUtil;
+import net.petemc.zombifiedplayer.util.ZombifiedPlayerSpawnLogic;
 import net.petemc.zombifiedplayer.util.PneumonoGravestonesUtil;
 
 public class PlayerDeathEvents {
@@ -45,60 +41,28 @@ public class PlayerDeathEvents {
     }
 
     public static void executeAllowDeath() {
-        if (pPlayer != null) {
-            if (pPlayer instanceof ServerPlayer serverPlayer) {
-                boolean flag = TrinketsUtil.checkForItemInTrinkets(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance());
-                boolean flag2 = TrinketsUtil.checkForItemInTrinkets(serverPlayer, "chargedcharms:charged_totem_charm");
-                if (!(pPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || pPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING) || flag || flag2)) {
-                    if ((MainConfig.getSpawnOnAnyDeath() ||
-                            (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
-                            (attackerIsUndead() && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
-                        UniversalGravesUtil.skipGrave(serverPlayer);
-                        PneumonoGravestonesUtil.skipGrave(serverPlayer);
-                        ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer);
-                    }
-                }
-            }
+        if (pPlayer instanceof ServerPlayer serverPlayer && ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, pSource)) {
+            UniversalGravesUtil.skipGrave(serverPlayer);
+            PneumonoGravestonesUtil.skipGrave(serverPlayer);
+            ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer);
         }
     }
 
     public static void executeAfterDeath() {
-        if (pPlayer != null) {
-            if (pPlayer instanceof ServerPlayer serverPlayer) {
-                if ((MainConfig.getSpawnOnAnyDeath() ||
-                        (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
-                        (attackerIsUndead() && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
-                    if (MainConfig.getPrintSpawnMessageInChat()) {
-                        serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"), false);
-                        if (MainConfig.getPrintSpawnLocationInChat()) {
-                            Component textCoordinates = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", pPlayer.blockPosition().getX(), pPlayer.blockPosition().getY(), pPlayer.blockPosition().getZ()))
-                                    .withStyle(
-                                            style -> style.withColor(ChatFormatting.GREEN)
-                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + pPlayer.blockPosition().getX() + " " + pPlayer.blockPosition().getY() + " " + pPlayer.blockPosition().getZ()))
-                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")))
-                                    );
-                            serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.location.message", textCoordinates), false);
-                        }
-                    }
+        if (pPlayer instanceof ServerPlayer serverPlayer && ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, pSource)) {
+            if (MainConfig.getPrintSpawnMessageInChat()) {
+                serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"), false);
+                if (MainConfig.getPrintSpawnLocationInChat()) {
+                    Component textCoordinates = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", pPlayer.blockPosition().getX(), pPlayer.blockPosition().getY(), pPlayer.blockPosition().getZ()))
+                            .withStyle(
+                                    style -> style.withColor(ChatFormatting.GREEN)
+                                            .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + pPlayer.blockPosition().getX() + " " + pPlayer.blockPosition().getY() + " " + pPlayer.blockPosition().getZ()))
+                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")))
+                            );
+                    serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.location.message", textCoordinates), false);
                 }
             }
         }
-    }
-
-    private static boolean attackerIsUndead() {
-        boolean attackerIsUndead = false;
-        if (pAttacker != null) {
-            attackerIsUndead =
-                   ((pAttacker.getType() == EntityType.ZOMBIE) ||
-                    (pAttacker.getType() == EntityType.HUSK) ||
-                    (pAttacker.getType() == EntityType.ZOMBIFIED_PIGLIN) ||
-                    (pAttacker.getType() == EntityType.DROWNED) ||
-                    (pAttacker.getType() == EntityType.ZOMBIE_VILLAGER) ||
-                    (pAttacker.getType() == EntityType.ZOGLIN) ||
-                    (pAttacker.getType() == ModEntities.ZOMBIFIED_PLAYER));
-        }
-        attackerIsUndead = attackerIsUndead || ModCompatibility.wasKilledByHordeZombie(pAttacker);
-        return attackerIsUndead;
     }
 
     public static void registerEvent() {
