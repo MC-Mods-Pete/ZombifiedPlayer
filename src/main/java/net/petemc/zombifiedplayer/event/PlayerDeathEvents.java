@@ -1,71 +1,51 @@
 package net.petemc.zombifiedplayer.event;
 
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.LivingEntity;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
+import net.petemc.zombifiedplayer.util.PneumonoGravestonesUtil;
 import net.petemc.zombifiedplayer.util.UniversalGravesUtil;
 import net.petemc.zombifiedplayer.util.ZombifiedPlayerSpawnLogic;
-import net.petemc.zombifiedplayer.util.PneumonoGravestonesUtil;
 
+/**
+ * Called by ServerPlayerEntityMixin from ServerPlayer.die(): first the spawn (inventory still full),
+ * later the chat message.
+ */
 public class PlayerDeathEvents {
 
-    private static LivingEntity pPlayer = null;
-    private static LivingEntity pAttacker = null;
-    private static DamageSource pSource = null;
-    private static float pAmount = 0.0f;
-
-    public PlayerDeathEvents() {
-        ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, amount) -> {
-            pPlayer = entity;
-            pAttacker = damageSource.getEntity() instanceof LivingEntity ? ((LivingEntity) damageSource.getEntity()) : null;
-            pSource = damageSource;
-            pAmount = amount;
-            executeAllowDeath();
-            return true;
-        });
-
-        ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
-            pPlayer = entity;
-            pAttacker = damageSource.getEntity() instanceof LivingEntity ? ((LivingEntity) damageSource.getEntity()) : null;
-            pSource = damageSource;
-            executeAfterDeath();
-        });
-    }
-
-    public static void executeAllowDeath() {
-        if (pPlayer instanceof ServerPlayer serverPlayer && ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, pSource)) {
+    public static void onPlayerDeath(ServerPlayer serverPlayer, DamageSource source) {
+        if (serverPlayer.level().isClientSide()) {
+            return;
+        }
+        boolean spawn = ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, source);
+        if (spawn) {
             UniversalGravesUtil.skipGrave(serverPlayer);
             PneumonoGravestonesUtil.skipGrave(serverPlayer);
-            ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer);
         }
+        boolean spawned = spawn && ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer) != null;
+        // read for the chat message later in ServerPlayer.die()
+        ZombifiedPlayerSpawnLogic.setSpawnedThisDeath(serverPlayer, spawned);
     }
 
-    public static void executeAfterDeath() {
-        if (pPlayer instanceof ServerPlayer serverPlayer && ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, pSource)) {
-            if (MainConfig.getPrintSpawnMessageInChat()) {
-                serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"), false);
-                if (MainConfig.getPrintSpawnLocationInChat()) {
-                    Component textCoordinates = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", pPlayer.blockPosition().getX(), pPlayer.blockPosition().getY(), pPlayer.blockPosition().getZ()))
-                            .withStyle(
-                                    style -> style.withColor(ChatFormatting.GREEN)
-                                            .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + pPlayer.blockPosition().getX() + " " + pPlayer.blockPosition().getY() + " " + pPlayer.blockPosition().getZ()))
-                                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")))
-                            );
-                    serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.location.message", textCoordinates), false);
-                }
-            }
+    public static void sendSpawnMessage(ServerPlayer serverPlayer) {
+        if (!ZombifiedPlayerSpawnLogic.takeSpawnedThisDeath(serverPlayer) || !MainConfig.getPrintSpawnMessageInChat()) {
+            return;
         }
-    }
-
-    public static void registerEvent() {
-        new PlayerDeathEvents();
+        serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"), false);
+        if (MainConfig.getPrintSpawnLocationInChat()) {
+            BlockPos pos = serverPlayer.blockPosition();
+            Component textCoordinates = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", pos.getX(), pos.getY(), pos.getZ()))
+                    .withStyle(style -> style.withColor(ChatFormatting.GREEN)
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + pos.getX() + " " + pos.getY() + " " + pos.getZ()))
+                            .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip"))));
+            serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.location.message", textCoordinates), false);
+        }
     }
 }

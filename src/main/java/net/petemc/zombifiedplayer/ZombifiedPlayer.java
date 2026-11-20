@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
-import net.petemc.zombifiedplayer.event.PlayerDeathEvents;
 import net.petemc.zombifiedplayer.event.ServerZombifiedPlayerLoadEvent;
 import net.petemc.zombifiedplayer.network.NetworkHandlerServer;
 import net.petemc.zombifiedplayer.network.NetworkPayloads;
@@ -24,7 +23,6 @@ public class ZombifiedPlayer implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("Initializing Zombified Player Mod");
 		MainConfig.init();
-		PlayerDeathEvents.registerEvent();
 		ModCompatibility.init();
 		ServerZombifiedPlayerLoadEvent.registerEvent();
 

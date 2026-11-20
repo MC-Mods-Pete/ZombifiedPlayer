@@ -11,7 +11,7 @@ public class NetworkHandlerServer {
     public static void processGameProfileRequest(ServerPlayer serverPlayer, UUID zombifiedPlayerUuid, Integer zombifiedPlayerId) {
         Entity zombifiedPlayer = serverPlayer.level().getEntity(zombifiedPlayerId);
 
-        if (zombifiedPlayer instanceof ZombifiedPlayerEntity zombifiedPlayerEntity) {
+        if (zombifiedPlayer instanceof ZombifiedPlayerEntity zombifiedPlayerEntity && zombifiedPlayerEntity.getGameProfile() != null) {
             ServerPlayNetworking.send(serverPlayer, new NetworkPayloads.GameProfilePayload(zombifiedPlayerEntity.getUUID(), zombifiedPlayerEntity.getId(), zombifiedPlayerEntity.getGameProfile().getId(), zombifiedPlayerEntity.getGameProfile().getName()));
         }
     }

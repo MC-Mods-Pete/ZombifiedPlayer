@@ -12,11 +12,32 @@ import net.minecraft.world.entity.monster.Zombie;
 import net.minecraft.world.item.Items;
 import net.petemc.zombifiedplayer.config.MainConfig;
 
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * Single source of truth for all Zombified Player spawn conditions (same as in the Forge/NeoForge branches).
- * Both the spawn and the chat message use shouldSpawn(), so the condition is never out of sync.
+ * Only the spawn calls shouldSpawn(), the chat message uses the remembered result (setSpawnedThisDeath).
  */
 public class ZombifiedPlayerSpawnLogic {
+
+    /** Players for whom a Zombified Player was spawned in the current death (set at the start of die(), read for the chat message). */
+    private static final Set<UUID> SPAWNED_THIS_DEATH = ConcurrentHashMap.newKeySet();
+
+    /** Called for every death, so a stale value never survives to the next death. */
+    public static void setSpawnedThisDeath(ServerPlayer serverPlayer, boolean spawned) {
+        if (spawned) {
+            SPAWNED_THIS_DEATH.add(serverPlayer.getUUID());
+        } else {
+            SPAWNED_THIS_DEATH.remove(serverPlayer.getUUID());
+        }
+    }
+
+    /** Returns whether a Zombified Player was spawned for this death and resets the flag. */
+    public static boolean takeSpawnedThisDeath(ServerPlayer serverPlayer) {
+        return SPAWNED_THIS_DEATH.remove(serverPlayer.getUUID());
+    }
 
     /** Only zombie-type undead trigger a spawn — skeletons, phantoms etc. are excluded. */
     private static final TagKey<EntityType<?>> ZOMBIE_UNDEAD = TagKey.create(
