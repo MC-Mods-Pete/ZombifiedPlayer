@@ -127,26 +127,45 @@ public class ZombifiedPlayerEntity extends Zombie {
 
  */
 
+    /**
+     * Never in peaceful: the zombified player carries the dead player's items,
+     * despawning would delete them. It cannot attack players in peaceful anyway.
+     */
     @Override
-    protected void dropCustomDeathLoot(ServerLevel world, DamageSource source, boolean causedByPlayer) {
-        //super.dropEquipment(world, source, causedByPlayer);
-        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
-            ItemStack itemStack = this.getItemBySlot(equipmentSlot);
-            Object object = source.getEntity();
-            if (object instanceof LivingEntity livingEntity) {
-                object = this.level();
-                if (object instanceof ServerLevel serverWorld) {
-                    EnchantmentHelper.processEquipmentDropChance(serverWorld, livingEntity, source, 1.0f);
-                }
-            }
-            this.spawnAtLocation(itemStack);
-            this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
-        }
-        dropEquipment();
+    protected boolean shouldDespawnInPeaceful() {
+        return false;
     }
 
-    public void dropEquipment() {
+    /**
+     * Vanilla must never drop the equipment by itself: it only does so by chance and
+     * applies random durability damage to items with a drop chance <= 1.
+     * All items of the player are dropped intact in dropEquipment().
+     */
+    @Override
+    protected float getEquipmentDropChance(EquipmentSlot pSlot) {
+        return 0.0F;
+    }
+
+    /**
+     * The items belong to the player, so they are dropped like a player's inventory:
+     * always, independent of the doMobLoot game rule (dropCustomDeathLoot is skipped when it is false).
+     * The rotten flesh comes from the loot table (regular mob loot, respects doMobLoot).
+     */
+    @Override
+    protected void dropEquipment() {
         super.dropEquipment();
+
+        for (EquipmentSlot equipmentSlot : EquipmentSlot.values()) {
+            ItemStack itemStack = this.getItemBySlot(equipmentSlot);
+            if (!itemStack.isEmpty()) {
+                this.spawnAtLocation(itemStack);
+                this.setItemSlot(equipmentSlot, ItemStack.EMPTY);
+            }
+        }
+        dropInventory();
+    }
+
+    public void dropInventory() {
         for (int i = 0; i < this.main.size(); i++) {
             if (!this.main.get(i).isEmpty()) {
                 this.spawnAtLocation(this.main.get(i));
@@ -209,7 +228,9 @@ public class ZombifiedPlayerEntity extends Zombie {
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
                 if (MainConfig.getTransferArmorToZombifiedPlayer()) {
-                    this.equipItemIfPossible(playerEntity.getInventory().armor.get(i).copyAndClear());
+                    // Put the item into the same armor slot directly. equipItemIfPossible() returns EMPTY
+                    // (and the item is lost) when the item is not wearable in that slot.
+                    this.setItemSlot(armorSlot(i), playerEntity.getInventory().armor.get(i).copyAndClear());
                 }
             }
         }
@@ -235,6 +256,16 @@ public class ZombifiedPlayerEntity extends Zombie {
             List<ItemStack> playerAccessoriesItems = AccessoriesUtil.getAccessoriesItemsAndClear(playerEntity);
             this.accessoriesItems.addAll(playerAccessoriesItems);
         }
+    }
+
+    /** Armor slot for an index of the player's armor list (0 = feet ... 3 = head). */
+    private static EquipmentSlot armorSlot(int index) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR && slot.getIndex() == index) {
+                return slot;
+            }
+        }
+        throw new IllegalArgumentException("No armor slot with index " + index);
     }
 
     @Override
