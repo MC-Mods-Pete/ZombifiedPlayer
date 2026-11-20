@@ -92,5 +92,9 @@
   "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight": "Use custom eye height",
   "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight.@Tooltip": "If enabled, the zombified player will use a custom eye height | default: disabled",
   "text.autoconfig.zombifiedplayer.option.customEyeHeight": "Custom eye height",
-  "text.autoconfig.zombifiedplayer.option.customEyeHeight.@Tooltip": "The custom eye height of the zombified player (only used if 'Use custom eye height' is enabled) | default: 1.74"
+  "text.autoconfig.zombifiedplayer.option.customEyeHeight.@Tooltip": "The custom eye height of the zombified player (only used if 'Use custom eye height' is enabled) | default: 1.74",
+  "pack.zombifiedplayer.shambling_animation": "Zombified Player: Shambling Animation",
+  "zombifiedplayer.configuration.shamblingAnimationPackTurnedOn": "Shambling Animation pack turned on",
+  "text.autoconfig.zombifiedplayer.option.shamblingAnimationPackTurnedOn": "Shambling Animation pack turned on",
+  "text.autoconfig.zombifiedplayer.option.shamblingAnimationPackTurnedOn.@Tooltip": "Set by the mod after it turned on the built-in resource pack \"Zombified Player: Shambling Animation\" at the first start. Turn the pack on or off under Options > Resource Packs. Disable this to have the pack turned on again at the next start | default: disabled"
 }

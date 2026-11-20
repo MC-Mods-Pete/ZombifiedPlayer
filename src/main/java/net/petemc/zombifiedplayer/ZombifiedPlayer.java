@@ -20,9 +20,11 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.petemc.zombifiedplayer.client.BuiltinPacks;
 import net.petemc.zombifiedplayer.client.render.ModModelLayers;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.config.MainConfig;
@@ -53,6 +55,7 @@ public class ZombifiedPlayer {
         modEventBus.addListener(this::addCreative);
 
         modContainer.registerConfig(ModConfig.Type.SERVER, MainConfig.SPEC_SERVER);
+        modContainer.registerConfig(ModConfig.Type.CLIENT, MainConfig.SPEC_CLIENT);
         ModCompatibility.init();
 
         // Register the config screen only on the client
@@ -91,6 +94,12 @@ public class ZombifiedPlayer {
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event) {
             EntityRenderers.register(ModEntities.ZOMBIFIED_PLAYER.get(), ZombifiedPlayerRenderer::new);
+            NeoForge.EVENT_BUS.addListener(BuiltinPacks::onClientTick);
+        }
+
+        @SubscribeEvent
+        public static void onAddPackFinders(AddPackFindersEvent event) {
+            BuiltinPacks.register(event);
         }
 
         @SubscribeEvent

@@ -92,6 +92,9 @@
   "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight": "Benutzerdefinierte Augenhöhe verwenden",
   "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight.@Tooltip": "Wenn aktiviert, verwendet der zombifizierte Spieler eine benutzerdefinierte Augenhöhe | Standard: deaktiviert",
   "text.autoconfig.zombifiedplayer.option.customEyeHeight": "Benutzerdefinierte Augenhöhe",
-  "text.autoconfig.zombifiedplayer.option.customEyeHeight.@Tooltip": "Die benutzerdefinierte Augenhöhe des zombifizierten Spielers (nur aktiv, wenn 'Benutzerdefinierte Augenhöhe verwenden' aktiviert ist) | Standard: 1.74"
+  "text.autoconfig.zombifiedplayer.option.customEyeHeight.@Tooltip": "Die benutzerdefinierte Augenhöhe des zombifizierten Spielers (nur aktiv, wenn 'Benutzerdefinierte Augenhöhe verwenden' aktiviert ist) | Standard: 1.74",
+  "pack.zombifiedplayer.shambling_animation": "Zombified Player: Schlurf-Animation",
+  "zombifiedplayer.configuration.shamblingAnimationPackTurnedOn": "Schlurf-Animation-Paket eingeschaltet",
+  "text.autoconfig.zombifiedplayer.option.shamblingAnimationPackTurnedOn": "Schlurf-Animation-Paket eingeschaltet",
+  "text.autoconfig.zombifiedplayer.option.shamblingAnimationPackTurnedOn.@Tooltip": "Setzt die Mod, nachdem sie das eingebaute Resourcepack \"Zombified Player: Schlurf-Animation\" beim ersten Start eingeschaltet hat. Ein- und ausschalten unter Optionen > Ressourcenpakete. Deaktivieren, damit das Paket beim nächsten Start wieder eingeschaltet wird | Standard: deaktiviert"
 }
-
