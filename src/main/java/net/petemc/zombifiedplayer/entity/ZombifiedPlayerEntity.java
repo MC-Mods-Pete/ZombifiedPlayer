@@ -312,7 +312,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
             }
         }
 
-        if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
+        if (EnchantmentHelper.has(playerEntity.getOffhandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
         } else {
             if (MainConfig.getTransferMainAndOffHandToZombifiedPlayer()) {
@@ -321,7 +321,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
         }
 
         for (int i = 0; i < 4; i++) {
-            if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
+            if (EnchantmentHelper.has(playerEntity.getInventory().armor.get(i), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
                 playerEntity.getInventory().armor.set(i, ItemStack.EMPTY);
             } else {
                 if (MainConfig.getTransferArmorToZombifiedPlayer()) {
@@ -334,7 +334,7 @@ public class ZombifiedPlayerEntity extends Zombie implements IEntityExtension, I
 
         for (int i = 0; i < playerEntity.getInventory().items.size(); i++) {
             if (!playerEntity.getInventory().items.get(i).isEmpty()) {
-                if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
+                if (EnchantmentHelper.has(playerEntity.getInventory().items.get(i), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
                     playerEntity.getInventory().items.set(i, ItemStack.EMPTY);
                     this.main.set(i, ItemStack.EMPTY);
                 }
