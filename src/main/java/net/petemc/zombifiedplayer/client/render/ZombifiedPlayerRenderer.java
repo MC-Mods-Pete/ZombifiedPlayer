@@ -30,8 +30,14 @@ public class ZombifiedPlayerRenderer
     private record Skin(ResourceLocation texture, boolean slim) {
     }
 
-    private static final Skin FALLBACK = new Skin(
+    // Fallback skins with the matching arm width
+    private static final Skin STEVE = new Skin(
             ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/player/wide/steve.png"), false);
+    private static final Skin ALEX = new Skin(
+            ResourceLocation.fromNamespaceAndPath("minecraft", "textures/entity/player/slim/alex.png"), true);
+
+    /** Marker for "no own skin": skinOf picks Steve or Alex, fixed per UUID (like vanilla does for players without a skin). */
+    private static final Skin FALLBACK = new Skin(STEVE.texture(), false);
 
     /** Resolved skin per stored profile UUID (also the fallback once we know the account has no custom skin). */
     private static final Map<UUID, Skin> SKINS = new ConcurrentHashMap<>();
@@ -81,13 +87,16 @@ public class ZombifiedPlayerRenderer
     /** The loaded skin of the profile, otherwise the fallback skin (and a fetch is started, never blocking). */
     private static Skin skinOf(ZombifiedPlayerEntity entity) {
         GameProfile profile = entity.getGameProfile();
-        if (profile == null || profile.getId() == null) return FALLBACK;
-
-        Skin cached = SKINS.get(profile.getId());
-        if (cached != null) return cached;
-
-        triggerSkinFetch(profile);
-        return FALLBACK;
+        UUID uuid = profile == null || profile.getId() == null ? entity.getUUID() : profile.getId();
+        Skin skin = profile == null || profile.getId() == null ? null : SKINS.get(uuid);
+        if (skin == null) {
+            if (profile != null && profile.getId() != null) triggerSkinFetch(profile);
+            skin = FALLBACK;
+        }
+        if (skin == FALLBACK) {
+            return Math.floorMod(uuid.hashCode(), 2) == 1 ? ALEX : STEVE;
+        }
+        return skin;
     }
 
     /**
