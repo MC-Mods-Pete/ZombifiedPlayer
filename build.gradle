@@ -91,7 +91,6 @@ dependencies {
     implementation "org.ladysnake.cardinal-components-api:cardinal-components-base:${cardinal_components_version}"
     implementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:${cardinal_components_version}"
 	implementation "curse.maven:jade-324717:${project.jade_version}"
-	implementation "curse.maven:zombified-player-trinkets-1648632:${project.zombified_player_trinkets}"
 
 	// Both gravestone mods are available for compilation (for their respective util classes)
 	compileOnly "maven.modrinth:pneumono_gravestones:${project.pneumono_gravestones_version}"

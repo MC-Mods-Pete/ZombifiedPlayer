@@ -35,8 +35,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.petemc.zombifiedplayer.config.MainConfig;
-import net.petemc.zombifiedplayer.util.ModCompatibility;
-import net.petemc.zombifiedplayertrinkets.util.TrinketsUtil;
+import net.petemc.zombifiedplayer.util.TrinketsUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -208,7 +207,7 @@ public class ZombifiedPlayerEntity extends Zombie {
             }
         }
 
-        if (ModCompatibility.isTrinketsCompatLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+        if (TrinketsUtil.isTrinketsLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
             List<ItemStack> playerCuriosItems = TrinketsUtil.getTrinketItemsAndClear(playerEntity);
             this.trinketsItems.addAll(playerCuriosItems);
         }
