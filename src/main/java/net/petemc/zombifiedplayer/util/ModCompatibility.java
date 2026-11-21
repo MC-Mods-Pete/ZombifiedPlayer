@@ -19,6 +19,10 @@ public class ModCompatibility {
         if (TrinketsUtil.isTrinketsLoaded()) {
             ZombifiedPlayer.LOGGER.info("Trinkets API detected. If enabled trinket items will be transferred to the Zombified Player.");
         }
+        if (HardcoreRevivalUtil.isHardcoreRevivalLoaded()) {
+            HardcoreRevivalUtil.registerEvents();
+            ZombifiedPlayer.LOGGER.info("Hardcore Revival detected. Timeout deaths inherit the original knockout death cause for Zombified Player checks.");
+        }
         if (UniversalGravesUtil.isUniversalGravesLoaded()) {
             UniversalGravesUtil.registerEvent();
             ZombifiedPlayer.LOGGER.info("Universal Graves mod detected. Graves will be suppressed when a Zombified Player spawns.");

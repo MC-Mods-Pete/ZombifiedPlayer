@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
+import net.petemc.zombifiedplayer.util.HardcoreRevivalUtil;
 import net.petemc.zombifiedplayer.util.PneumonoGravestonesUtil;
 import net.petemc.zombifiedplayer.util.UniversalGravesUtil;
 import net.petemc.zombifiedplayer.util.ZombifiedPlayerSpawnLogic;
@@ -24,7 +25,11 @@ public class PlayerDeathEvents {
         if (serverPlayer.level().isClientSide()) {
             return;
         }
-        boolean spawn = ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, source);
+        // Hardcore Revival: a timeout death counts with the cause of the knockout
+        DamageSource effectiveSource = HardcoreRevivalUtil.resolveEffectiveDeathSource(serverPlayer, source);
+        // Final death reached: the tracked knockout cause is not needed anymore
+        HardcoreRevivalUtil.clearTrackedCause(serverPlayer);
+        boolean spawn = ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, effectiveSource);
         if (spawn) {
             UniversalGravesUtil.skipGrave(serverPlayer);
             PneumonoGravestonesUtil.skipGrave(serverPlayer);

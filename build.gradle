@@ -108,6 +108,10 @@ dependencies {
 
 	modImplementation "maven.modrinth:trinkets:${project.trinkets_version}"
 
+	// Hardcore Revival API (Balm events), compile only: the mod stays optional
+	modCompileOnly "maven.modrinth:hardcore-revival:${project.hardcore_revival_version}"
+	modCompileOnly "maven.modrinth:balm:${project.balm_version}"
+
 	modImplementation "maven.modrinth:pneumono_core:${project.pneumono_core_version}"
 
 	// Both gravestone mods are available for compilation (for their respective util classes)
