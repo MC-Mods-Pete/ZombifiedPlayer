@@ -7,6 +7,9 @@ import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @me.shedaniel.autoconfig.annotation.Config(name = ZombifiedPlayer.MOD_ID)
 public class MainConfig implements ConfigData
 {
@@ -41,6 +44,15 @@ public class MainConfig implements ConfigData
     }
 
     public static boolean getDisplayNameTagForZombifiedPlayer() { return INSTANCE.displayNameTagForZombifiedPlayer; }
+
+    /** Only valid player names (letters, digits, underscore, 1 to 16 characters), others are ignored. */
+    public static List<String> getRandomSkinPlayerNames() {
+        return INSTANCE.randomSkinPlayerNames.stream().filter(MainConfig::isValidPlayerName).toList();
+    }
+
+    private static boolean isValidPlayerName(String name) {
+        return name != null && name.matches("[A-Za-z0-9_]{1,16}");
+    }
 
     public static boolean getPrintSpawnMessageInChat() {
         return INSTANCE.printSpawnMessageInChat;
@@ -119,6 +131,10 @@ public class MainConfig implements ConfigData
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, the zombified player will display the name of the dead player | default: true")
     private boolean displayNameTagForZombifiedPlayer = true;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("Player names for zombified players that do not come from a player death (/summon, spawn egg, spawner). One name is picked at random, its skin is used. Empty: Steve | default: [\"jeb_\", \"Dinnerbone\", \"XxRexRaptorxX\", \"McModsPete\"]")
+    private List<String> randomSkinPlayerNames = new ArrayList<>(List.of("jeb_", "Dinnerbone", "XxRexRaptorxX", "McModsPete"));
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, a message will be printed out in chat that a zombified player has spawned | default: true")

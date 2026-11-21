@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRe
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
+import net.petemc.zombifiedplayer.item.ModItems;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ public class ZombifiedPlayer implements ModInitializer {
 		LOGGER.info("Initializing Zombified Player Mod");
 		MainConfig.init();
 		ModCompatibility.init();
+		ModItems.register();
 
 		FabricDefaultAttributeRegistry.register(ModEntities.ZOMBIFIED_PLAYER, ZombifiedPlayerEntity.createZombifiedPlayerAttributes());
 	}
