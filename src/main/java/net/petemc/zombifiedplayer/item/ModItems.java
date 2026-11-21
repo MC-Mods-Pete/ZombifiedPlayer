@@ -17,7 +17,7 @@ public class ModItems {
     // Colors: Steve's shirt and rotten green. The client takes the egg colors from SpawnEggItem itself.
     public static final Item ZOMBIFIED_PLAYER_SPAWN_EGG = Registry.register(BuiltInRegistries.ITEM,
             ResourceLocation.fromNamespaceAndPath(ZombifiedPlayer.MOD_ID, "zombified_player_spawn_egg"),
-            new SpawnEggItem(ModEntities.ZOMBIFIED_PLAYER, 0x00A8A8, 0x4A6B35, new Item.Properties()));
+            new SpawnEggItem(ModEntities.ZOMBIFIED_PLAYER, 0x00A8A8, 0x2A4220, new Item.Properties()));
 
     public static void register() {
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.SPAWN_EGGS).register(entries -> entries.accept(ZOMBIFIED_PLAYER_SPAWN_EGG));
