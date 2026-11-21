@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "zombifiedplayer:item/zombified_player_spawn_egg"
+  }
+}
