@@ -113,7 +113,7 @@ public class MainConfig implements ConfigData
     private boolean printSpawnLocationInChat = false;
 
     @ConfigEntry.Gui.Tooltip()
-    @Comment("If true, zombified players can break through doors | default: true")
+    @Comment("If true, zombified players can break through wooden doors on every difficulty (needs the game rule mobGriefing) | default: true")
     private boolean zombifiedPlayersCanBreakDoors = true;
 
     @ConfigEntry.Gui.Tooltip()

@@ -24,7 +24,7 @@
   "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat": "Print spawn location of the zombified player to the chat",
   "text.autoconfig.zombifiedplayer.option.printSpawnLocationInChat.@Tooltip": "If enabled, spawn location of the zombified player will be printed out in chat | default: disabled",
   "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors": "Zombified Players can break doors",
-  "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors.@Tooltip": "If enabled, zombified players can break through doors | default: enabled",
+  "text.autoconfig.zombifiedplayer.option.zombifiedPlayersCanBreakDoors.@Tooltip": "If enabled, zombified players can break through wooden doors on every difficulty (needs the game rule mobGriefing) | default: enabled",
   "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger": "Make Zombified Players stronger",
   "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersStronger.@Tooltip": "If enabled, zombified players are stronger, faster and have more health | default: disabled",
   "text.autoconfig.zombifiedplayer.option.makeTheZombifiedPlayersImmuneToFire": "Make Zombified Players immune to lava and fire",
