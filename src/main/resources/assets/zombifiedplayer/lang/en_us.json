@@ -38,6 +38,10 @@
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection": "Spawn Zombified Player after death by infection",
   "text.autoconfig.zombifiedplayer.option.spawnWhenKilledByInfection.@Tooltip": "If enabled, spawn Zombified Player if player died from an infection | default: enabled",
 
+  "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@PrefixText": "[Please note]\nFor the option below the Infectious mod needs to be installed!",
+  "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility": "Spawn Zombified Player when killed by Infectious Zombies",
+  "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@Tooltip": "If enabled, spawn Zombified Player if player is killed by an Infectious Zombie | default: disabled",
+
   "text.autoconfig.zombifiedplayer.option.gravestoneCompatibility.@PrefixText": "[Please note]\nFor the option below a gravestone mod (gravestones or universal graves) needs to be installed!",
   "text.autoconfig.zombifiedplayer.option.gravestoneCompatibility": "Don't create a gravestone when a Zombified Player spawns",
   "text.autoconfig.zombifiedplayer.option.gravestoneCompatibility.@Tooltip": "If enabled, no gravestone will be placed when a zombified player spawns | default: disabled",

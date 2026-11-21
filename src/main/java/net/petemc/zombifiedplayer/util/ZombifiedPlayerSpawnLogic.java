@@ -1,5 +1,6 @@
 package net.petemc.zombifiedplayer.util;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -76,6 +77,18 @@ public class ZombifiedPlayerSpawnLogic {
         boolean hordeMatch = (attacker instanceof LivingEntity living)
                 && ModCompatibility.wasKilledByHordeZombie(living);
         boolean zombieMatch = (attacker instanceof Zombie);
-        return tagMatch || hordeMatch || zombieMatch;
+        boolean infectiousZombieMatch = hasInfectiousZombieId(attacker);
+        return tagMatch || hordeMatch || zombieMatch || infectiousZombieMatch;
+    }
+
+    /**
+     * Check if the entity's mob ID contains both "infectious" and "zombie".
+     * Only returns true if infectiousModCompatibility is enabled in the config.
+     */
+    private static boolean hasInfectiousZombieId(Entity entity) {
+        if (!MainConfig.getInfectiousModCompatibility()) return false;
+        ResourceLocation mobId = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
+        String id = mobId.toString().toLowerCase();
+        return id.contains("infectious") && id.contains("zombie");
     }
 }

@@ -68,6 +68,10 @@ public class MainConfig implements ConfigData
         return INSTANCE.spawnWhenKilledByInfection;
     }
 
+    public static boolean getInfectiousModCompatibility() {
+        return INSTANCE.infectiousModCompatibility;
+    }
+
     public static boolean getGravestoneCompatibility() {
         return INSTANCE.gravestoneCompatibility;
     }
@@ -140,6 +144,11 @@ public class MainConfig implements ConfigData
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, spawn zombified player after death by infection (Contagion mod needed!) | default: true")
     private boolean spawnWhenKilledByInfection = true;
+
+    @ConfigEntry.Gui.PrefixText
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, spawn zombified player when killed by Infectious Zombies (Infectious mod needed!) | default: false")
+    private boolean infectiousModCompatibility = false;
 
     @ConfigEntry.Gui.PrefixText
     @ConfigEntry.Gui.Tooltip()
