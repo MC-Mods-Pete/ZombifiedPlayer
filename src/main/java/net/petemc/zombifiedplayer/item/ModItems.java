@@ -18,7 +18,8 @@ import net.petemc.zombifiedplayer.entity.ModEntities;
 public class ModItems {
     private static final ResourceKey<Item> SPAWN_EGG_KEY = ResourceKey.create(Registries.ITEM,
             Identifier.fromNamespaceAndPath(ZombifiedPlayer.MOD_ID, "zombified_player_spawn_egg"));
-    // Since 1.21.5 spawn eggs have their own texture (textures/item/zombified_player_spawn_egg.png) instead of two colors
+    // Since 1.21.5 spawn eggs have their own texture instead of two colors: textures/item/zombified_player_spawn_egg.png,
+    // the vanilla zombie spawn egg with red spots like the zombify overlay
     public static final Item ZOMBIFIED_PLAYER_SPAWN_EGG = Registry.register(BuiltInRegistries.ITEM, SPAWN_EGG_KEY,
             new SpawnEggItem(new Item.Properties().setId(SPAWN_EGG_KEY).spawnEgg(ModEntities.ZOMBIFIED_PLAYER)));
 
