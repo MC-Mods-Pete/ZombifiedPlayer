@@ -32,6 +32,10 @@ public class MainConfig implements ConfigData
 
     public static boolean getTransferCuriosOrTrinketItemsToZombifiedPlayer() { return INSTANCE.transferCuriosOrTrinketItemsToZombifiedPlayer; }
 
+    public static boolean getIgnoreKeepInventory() {
+        return INSTANCE.ignoreKeepInventory;
+    }
+
     public static boolean getSpawnOnAnyDeath() {
         return INSTANCE.spawnOnAnyDeath;
     }
@@ -95,6 +99,10 @@ public class MainConfig implements ConfigData
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, the inventory of the dead player will be transferred to the zombified player | default: true")
     private boolean transferCuriosOrTrinketItemsToZombifiedPlayer = true;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, the items are transferred to the zombified player even if the game rule keepInventory is on. If false, the player keeps the items with keepInventory and the zombified player spawns without them | default: false")
+    private boolean ignoreKeepInventory = false;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, a zombified player will spawn no matter how the player died | default: false")

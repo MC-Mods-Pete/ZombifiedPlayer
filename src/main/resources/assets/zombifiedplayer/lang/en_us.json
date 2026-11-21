@@ -15,6 +15,8 @@
   "text.autoconfig.zombifiedplayer.option.transferInventoryToZombifiedPlayer.@Tooltip": "If enabled, the Inventory of the dead player will be transferred to the zombified player | default: enabled",
   "text.autoconfig.zombifiedplayer.option.transferCuriosOrTrinketItemsToZombifiedPlayer": "Transfer the players curios items to the zombified player",
   "text.autoconfig.zombifiedplayer.option.transferCuriosOrTrinketItemsToZombifiedPlayer.@Tooltip": "If enabled, all equipped curios items of the dead player will be transferred to the zombified player | default: enabled",
+  "text.autoconfig.zombifiedplayer.option.ignoreKeepInventory": "Ignore the game rule keepInventory",
+  "text.autoconfig.zombifiedplayer.option.ignoreKeepInventory.@Tooltip": "If enabled, the items are transferred to the zombified player even with keepInventory. If disabled, the player keeps the items with keepInventory and the zombified player spawns without them | default: disabled",
   "text.autoconfig.zombifiedplayer.option.spawnOnAnyDeath": "Spawn zombified player no matter how the player died",
   "text.autoconfig.zombifiedplayer.option.spawnOnAnyDeath.@Tooltip": "If enabled, a zombified player will spawn no matter how the player died | default: disabled",
   "text.autoconfig.zombifiedplayer.option.displayNameTagForZombifiedPlayer": "Display name tag for the zombified player",

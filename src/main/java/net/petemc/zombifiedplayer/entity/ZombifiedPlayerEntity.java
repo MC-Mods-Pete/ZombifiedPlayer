@@ -41,6 +41,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.util.AccessoriesUtil;
@@ -299,6 +300,11 @@ public class ZombifiedPlayerEntity extends Zombie {
     }
 
     public void transferInventory(Player playerEntity) {
+        if (playerKeepsInventory(playerEntity)) {
+            // Like vanilla keepInventory: the player keeps everything, including items with Curse of Vanishing
+            return;
+        }
+
         if (EnchantmentHelper.has(playerEntity.getMainHandItem(), EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
             playerEntity.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         } else {
@@ -348,6 +354,10 @@ public class ZombifiedPlayerEntity extends Zombie {
             List<ItemStack> playerAccessoriesItems = AccessoriesUtil.getAccessoriesItemsAndClear(playerEntity);
             this.accessoriesItems.addAll(playerAccessoriesItems);
         }
+    }
+
+    private static boolean playerKeepsInventory(Player player) {
+        return player.level().getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !MainConfig.getIgnoreKeepInventory();
     }
 
     /** Armor slot for an index of the player's armor list (0 = feet ... 3 = head). */
