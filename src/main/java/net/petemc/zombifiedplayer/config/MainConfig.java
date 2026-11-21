@@ -46,8 +46,8 @@ public class MainConfig implements ConfigData
         return INSTANCE.printSpawnLocationInChat;
     }
 
-    public static boolean getZombifiedPlayersCanBreakDoors() {
-        return INSTANCE.zombifiedPlayersCanBreakDoors;
+    public static boolean getZombifiedPlayersCanAlwaysBreakDoors() {
+        return INSTANCE.zombifiedPlayersCanAlwaysBreakDoors;
     }
 
     public static boolean getMakeTheZombifiedPlayersStronger() {
@@ -113,8 +113,8 @@ public class MainConfig implements ConfigData
     private boolean printSpawnLocationInChat = false;
 
     @ConfigEntry.Gui.Tooltip()
-    @Comment("If true, zombified players can break through wooden doors on every difficulty (needs the game rule mobGriefing) | default: true")
-    private boolean zombifiedPlayersCanBreakDoors = true;
+    @Comment("If true, zombified players can break through wooden doors on every difficulty. If false, only on hard difficulty like zombies (both need the game rule mobGriefing) | default: false")
+    private boolean zombifiedPlayersCanAlwaysBreakDoors = false;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, zombified players are stronger, faster and have more health | default: false")
