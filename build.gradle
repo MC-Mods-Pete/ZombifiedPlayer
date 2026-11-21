@@ -30,14 +30,6 @@ repositories {
 	maven { url "https://maven.shedaniel.me/"}
 	maven { url "https://maven.terraformersmc.com/releases/"}
 
-	// curse maven
-	maven {
-		url "https://cursemaven.com"
-		content {
-			includeGroup "curse.maven"
-		}
-	}
-
 	maven {
 		name = 'Ladysnake Mods'
 		url = 'https://maven.ladysnake.org/releases'
@@ -65,6 +57,19 @@ fabricApi {
 	configureDataGeneration()
 }
 
+loom {
+	runs {
+		// headless GameTest server: runs the tests registered under the entrypoint "fabric-gametest", then exits
+		gametest {
+			inherit server
+			name "Game Test"
+			vmArg "-Dfabric-api.gametest"
+			vmArg "-Dfabric-api.gametest.report-file=${project.layout.buildDirectory.get()}/junit.xml"
+			runDir "run"
+		}
+	}
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -80,22 +85,22 @@ dependencies {
 	}
 	include "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
 
-	//other dependencies
-	implementation "curse.maven:jade-324717:${project.jade_version}"
-	implementation "curse.maven:contagion-1027702:${project.contagion_version}"
-	implementation "curse.maven:undeadnights-1166914:${project.undeadnights_version}"
+	//other dependencies (dev environment only, see gradle.properties)
+	implementation "maven.modrinth:jade:${project.jade_version}"
+	implementation "maven.modrinth:contagion:${project.contagion_version}"
+	implementation "maven.modrinth:undead-nights:${project.undeadnights_version}"
 
-    // Trinkets and Cardinal Components API (uncomment if you use them), make sure to set the version in gradle.properties
-	//implementation "maven.modrinth:trinkets-continued:${project.trinkets_continued_version}"
 	implementation "eu.pb4:trinkets:${project.trinkets_version}"
-    implementation "org.ladysnake.cardinal-components-api:cardinal-components-base:${cardinal_components_version}"
-    implementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:${cardinal_components_version}"
-	implementation "curse.maven:jade-324717:${project.jade_version}"
+	implementation "org.ladysnake.cardinal-components-api:cardinal-components-base:${cardinal_components_version}"
+	implementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:${cardinal_components_version}"
 
 	// Both gravestone mods are available for compilation (for their respective util classes)
 	compileOnly "maven.modrinth:pneumono_gravestones:${project.pneumono_gravestones_version}"
-	compileOnly "curse.maven:universal-graves-497175:${project.universal_graves_version}"
-	compileOnly "curse.maven:hardcore-revival-274036:${project.hardcore_revival_version}"
+	compileOnly "maven.modrinth:universal-graves:${project.universal_graves_version}"
+
+	// Hardcore Revival API (Balm events), compile only: the mod stays optional
+	compileOnly "maven.modrinth:hardcore-revival:${project.hardcore_revival_version}"
+	compileOnly "maven.modrinth:balm:${project.balm_version}"
 }
 
 processResources {
