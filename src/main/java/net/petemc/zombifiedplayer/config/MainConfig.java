@@ -16,9 +16,27 @@ public class MainConfig implements ConfigData
     @ConfigEntry.Gui.Excluded
     public static MainConfig INSTANCE;
 
+    @ConfigEntry.Gui.Excluded
+    private static final List<String> DEFAULT_RANDOM_SKIN_PLAYER_NAMES = List.of("jeb_", "Dinnerbone", "XxRexRaptorxX", "McModsPete");
+
     public static void init() {
-        AutoConfig.register(MainConfig.class, JanksonConfigSerializer::new);
+        AutoConfig.register(MainConfig.class, (definition, configClass) -> new JanksonConfigSerializer<>(definition, configClass) {
+            // New file, reset button and defaults of the config screen
+            @Override
+            public MainConfig createDefault() {
+                MainConfig config = super.createDefault();
+                config.applyDefaultLists();
+                return config;
+            }
+        });
         INSTANCE = AutoConfig.getConfigHolder(MainConfig.class).getConfig();
+    }
+
+    /** Lists missing in the file (or a new config) get their default values. */
+    private void applyDefaultLists() {
+        if (randomSkinPlayerNames == null) {
+            randomSkinPlayerNames = new ArrayList<>(DEFAULT_RANDOM_SKIN_PLAYER_NAMES);
+        }
     }
 
     public static boolean getSpawnZombifiedPlayerAfterDeath() {
@@ -66,9 +84,10 @@ public class MainConfig implements ConfigData
         return INSTANCE.displayNameTagForNaturalZombifiedPlayers;
     }
 
-    /** Values edited by hand in the file: weight back into its range. */
+    /** Lists missing in the file get their defaults. Values edited by hand in the file: weight back into its range. */
     @Override
     public void validatePostLoad() {
+        applyDefaultLists();
         naturalSpawnWeight = Math.max(1, Math.min(100, naturalSpawnWeight));
     }
 
@@ -152,7 +171,9 @@ public class MainConfig implements ConfigData
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("Player names for zombified players that do not come from a player death (/summon, spawn egg, spawner). One name is picked at random, its skin is used. Empty: Steve | default: [\"jeb_\", \"Dinnerbone\", \"XxRexRaptorxX\", \"McModsPete\"]")
-    private List<String> randomSkinPlayerNames = new ArrayList<>(List.of("jeb_", "Dinnerbone", "XxRexRaptorxX", "McModsPete"));
+    // No default list here: Jankson (in Cloth Config) adds the names from the file to a list that already exists
+    // instead of replacing it, the defaults would be added again on every start. applyDefaultLists sets them.
+    private List<String> randomSkinPlayerNames = null;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, zombified players also spawn naturally in the dark wherever zombies spawn. They get a skin from randomSkinPlayerNames, drop their equipment only by chance like zombies and despawn like zombies. Only applied when the world is loaded | default: false")
