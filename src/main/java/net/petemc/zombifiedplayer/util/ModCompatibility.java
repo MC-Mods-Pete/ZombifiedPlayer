@@ -1,6 +1,8 @@
 package net.petemc.zombifiedplayer.util;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.petemc.contagion.casts.InfectedEntity;
@@ -14,7 +16,7 @@ public class ModCompatibility {
             ZombifiedPlayer.LOGGER.info("Contagion detected. Death by Infection can spawn Zombified Players.");
         }
         if (isUndeadNightsLoaded()) {
-            ZombifiedPlayer.LOGGER.info("Undead Nights mod detected. Death by a Horde Zombie will spawn a Zombified Players.");
+            ZombifiedPlayer.LOGGER.info("Undead Nights mod detected. Death by a Horde Zombie will spawn a Zombified Player.");
         }
         if (TrinketsUtil.isTrinketsLoaded()) {
             ZombifiedPlayer.LOGGER.info("Trinkets API detected. If enabled trinket items will be transferred to the Zombified Player.");
@@ -51,6 +53,18 @@ public class ModCompatibility {
             }
         }
         return false;
+    }
+
+    private static final Identifier CONTAGION_INFECTION = Identifier.fromNamespaceAndPath("contagion", "infection");
+
+    /** True if the player has Contagion's infection effect, e.g. at the moment of a death by fall damage. */
+    public static boolean isInfected(ServerPlayer serverPlayer) {
+        if (!isContagionLoaded()) {
+            return false;
+        }
+        return BuiltInRegistries.MOB_EFFECT.get(CONTAGION_INFECTION)
+                .map(serverPlayer::hasEffect)
+                .orElse(false);
     }
 
     public static boolean isUndeadNightsLoaded() {
