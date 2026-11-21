@@ -68,6 +68,7 @@ public class ZombifiedPlayerSpawnLogic {
      * Tag-based check against zombifiedplayer:zombie_undead — only zombie variants,
      * NOT skeletons, phantoms, withers etc. (those are in minecraft:undead but excluded here).
      * ZombifiedPlayerEntity is included via the tag values directly. Undead Nights horde zombies count as well.
+     * Mutants and Zombies: blister_zombie, zombie_brute, split_head_zombie and mutant_zombie are optional tag entries.
      */
     public static boolean isUndeadAttacker(Entity attacker) {
         if (attacker == null) return false;
