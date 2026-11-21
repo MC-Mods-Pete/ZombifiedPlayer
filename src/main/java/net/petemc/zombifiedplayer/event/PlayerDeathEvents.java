@@ -29,7 +29,7 @@ public class PlayerDeathEvents {
             UniversalGravesUtil.skipGrave(serverPlayer);
             PneumonoGravestonesUtil.skipGrave(serverPlayer);
         }
-        boolean spawned = spawn && ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer) != null;
+        boolean spawned = spawn && ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer, source) != null;
         // read for the chat message later in ServerPlayer.die()
         ZombifiedPlayerSpawnLogic.setSpawnedThisDeath(serverPlayer, spawned);
     }

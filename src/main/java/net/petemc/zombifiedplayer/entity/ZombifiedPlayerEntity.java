@@ -280,6 +280,12 @@ public class ZombifiedPlayerEntity extends Zombie {
     }
 
     public static ZombifiedPlayerEntity spawnZombifiedPlayer(Player player) {
+        DamageSource source = player.getLastDamageSource();
+        return spawnZombifiedPlayer(player, source != null ? source : player.damageSources().generic());
+    }
+
+    /** source: the cause of the death (drop rules of accessories can depend on it) */
+    public static ZombifiedPlayerEntity spawnZombifiedPlayer(Player player, DamageSource source) {
         ZombifiedPlayerEntity zombifiedPlayer = null;
         if (player.level() instanceof ServerLevel serverWorld) {
             zombifiedPlayer = new ZombifiedPlayerEntity(ModEntities.ZOMBIFIED_PLAYER, serverWorld);
@@ -297,6 +303,10 @@ public class ZombifiedPlayerEntity extends Zombie {
             if (TrinketsUtil.isTrinketsLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
                 // also with keepInventory: trinkets with the rule DROP go to the zombified player
                 zombifiedPlayer.trinketsItems.addAll(TrinketsUtil.takeDroppedTrinkets(player, playerKeepsInventory(player)));
+            }
+            if (AccessoriesUtil.isAccessoriesLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+                // also with keepInventory: accessories with the rule DROP go to the zombified player
+                zombifiedPlayer.accessoriesItems.addAll(AccessoriesUtil.takeDroppedAccessories(player, source, playerKeepsInventory(player)));
             }
             serverWorld.addFreshEntity(zombifiedPlayer);
         }
@@ -347,11 +357,6 @@ public class ZombifiedPlayerEntity extends Zombie {
                     this.main.set(i, playerEntity.getInventory().items.get(i).copyAndClear());
                 }
             }
-        }
-
-        if (AccessoriesUtil.isAccessoriesLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
-            List<ItemStack> playerAccessoriesItems = AccessoriesUtil.getAccessoriesItemsAndClear(playerEntity);
-            this.accessoriesItems.addAll(playerAccessoriesItems);
         }
     }
 
