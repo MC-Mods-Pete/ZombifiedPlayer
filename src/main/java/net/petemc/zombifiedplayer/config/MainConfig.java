@@ -54,6 +54,24 @@ public class MainConfig implements ConfigData
         return name != null && name.matches("[A-Za-z0-9_]{1,16}");
     }
 
+    public static boolean getNaturalSpawning() {
+        return INSTANCE.naturalSpawning;
+    }
+
+    public static int getNaturalSpawnWeight() {
+        return INSTANCE.naturalSpawnWeight;
+    }
+
+    public static boolean getDisplayNameTagForNaturalZombifiedPlayers() {
+        return INSTANCE.displayNameTagForNaturalZombifiedPlayers;
+    }
+
+    /** Values edited by hand in the file: weight back into its range. */
+    @Override
+    public void validatePostLoad() {
+        naturalSpawnWeight = Math.max(1, Math.min(100, naturalSpawnWeight));
+    }
+
     public static boolean getPrintSpawnMessageInChat() {
         return INSTANCE.printSpawnMessageInChat;
     }
@@ -135,6 +153,19 @@ public class MainConfig implements ConfigData
     @ConfigEntry.Gui.Tooltip()
     @Comment("Player names for zombified players that do not come from a player death (/summon, spawn egg, spawner). One name is picked at random, its skin is used. Empty: Steve | default: [\"jeb_\", \"Dinnerbone\", \"XxRexRaptorxX\", \"McModsPete\"]")
     private List<String> randomSkinPlayerNames = new ArrayList<>(List.of("jeb_", "Dinnerbone", "XxRexRaptorxX", "McModsPete"));
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, zombified players also spawn naturally in the dark wherever zombies spawn. They get a skin from randomSkinPlayerNames, drop their equipment only by chance like zombies and despawn like zombies. Only applied when the world is loaded | default: false")
+    private boolean naturalSpawning = false;
+
+    @ConfigEntry.Gui.Tooltip()
+    @ConfigEntry.BoundedDiscrete(min = 1, max = 100)
+    @Comment("Spawn weight of naturally spawning zombified players, compared to zombies (95) and zombie villagers (5) in most biomes. Only applied when the world is loaded | default: 5")
+    private int naturalSpawnWeight = 5;
+
+    @ConfigEntry.Gui.Tooltip()
+    @Comment("If true, naturally spawned zombified players display the name tag \"Zombified <name>\" (needs displayNameTagForZombifiedPlayer) | default: false")
+    private boolean displayNameTagForNaturalZombifiedPlayers = false;
 
     @ConfigEntry.Gui.Tooltip()
     @Comment("If true, a message will be printed out in chat that a zombified player has spawned | default: true")
