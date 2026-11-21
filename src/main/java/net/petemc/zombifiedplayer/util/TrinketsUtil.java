@@ -1,7 +1,10 @@
 package net.petemc.zombifiedplayer.util;
 
 import dev.emi.trinkets.api.SlotReference;
+import dev.emi.trinkets.api.TrinketEnums.DropRule;
+import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
+import dev.emi.trinkets.api.event.TrinketDropCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -11,6 +14,8 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 import java.util.ArrayList;
@@ -23,23 +28,46 @@ public class TrinketsUtil {
         return FabricLoader.getInstance().isModLoaded("trinkets");
     }
 
-    public static List<ItemStack> getTrinketItemsAndClear(Player player) {
+    /**
+     * Takes the trinkets that go to the zombified player, following the drop rules of Trinkets in the same order as
+     * Trinkets on death: item rule, changed by other mods ({@code TrinketDropCallback}), then the rule of the slot type.
+     * KEEP and DESTROY stay in the slot, Trinkets applies them itself. DROP goes to the zombified player, also with
+     * keepInventory. DEFAULT: the player keeps it with keepInventory (unless ignoreKeepInventory), otherwise it goes to
+     * the zombified player, with Curse of Vanishing it is destroyed.
+     */
+    public static List<ItemStack> takeDroppedTrinkets(Player player, boolean playerKeepsInventory) {
         List<ItemStack> trinketsItems = new ArrayList<>();
-        
+
         if (!isTrinketsLoaded()) {
             return trinketsItems;
         }
 
         try {
-            TrinketsApi.getTrinketComponent(player).ifPresent(trinketComponent -> {
-                for (Tuple<SlotReference, ItemStack> itemStackPair : trinketComponent.getAllEquipped()) {
-                        trinketsItems.add(itemStackPair.getB().copy());
-                        itemStackPair.getB().setCount(0);
+            TrinketsApi.getTrinketComponent(player).ifPresent(trinketComponent -> trinketComponent.forEach((reference, stack) -> {
+                if (stack.isEmpty()) return;
+                DropRule rule = TrinketsApi.getTrinket(stack.getItem()).getDropRule(stack, reference, player);
+                rule = TrinketDropCallback.EVENT.invoker().drop(rule, stack, reference, player);
+                TrinketInventory inventory = reference.inventory();
+                if (rule == DropRule.DEFAULT) {
+                    rule = inventory.getSlotType().getDropRule();
                 }
-            });
+                if (rule == DropRule.DEFAULT) {
+                    if (playerKeepsInventory) return;
+                    if (EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP)) {
+                        inventory.setItem(reference.index(), ItemStack.EMPTY);
+                        return;
+                    }
+                    rule = DropRule.DROP;
+                }
+                if (rule == DropRule.DROP) {
+                    trinketsItems.add(stack.copy());
+                    inventory.setItem(reference.index(), ItemStack.EMPTY);
+                }
+            }));
         } catch (Exception e) {
+            ZombifiedPlayer.LOGGER.error("Error getting trinket items from player: " + e.getMessage());
         }
-        
+
         return trinketsItems;
     }
 

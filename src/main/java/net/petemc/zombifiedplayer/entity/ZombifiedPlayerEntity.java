@@ -294,6 +294,10 @@ public class ZombifiedPlayerEntity extends Zombie {
             zombifiedPlayer.setHealth(zombifiedPlayer.getMaxHealth());
             zombifiedPlayer.setPersistenceRequired();
             zombifiedPlayer.transferInventory(player);
+            if (TrinketsUtil.isTrinketsLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
+                // also with keepInventory: trinkets with the rule DROP go to the zombified player
+                zombifiedPlayer.trinketsItems.addAll(TrinketsUtil.takeDroppedTrinkets(player, playerKeepsInventory(player)));
+            }
             serverWorld.addFreshEntity(zombifiedPlayer);
         }
         return zombifiedPlayer;
@@ -343,11 +347,6 @@ public class ZombifiedPlayerEntity extends Zombie {
                     this.main.set(i, playerEntity.getInventory().items.get(i).copyAndClear());
                 }
             }
-        }
-
-        if (TrinketsUtil.isTrinketsLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
-            List<ItemStack> playerTrinketItems = TrinketsUtil.getTrinketItemsAndClear(playerEntity);
-            this.trinketsItems.addAll(playerTrinketItems);
         }
 
         if (AccessoriesUtil.isAccessoriesLoaded() && MainConfig.getTransferCuriosOrTrinketItemsToZombifiedPlayer()) {
