@@ -3,8 +3,10 @@ package net.petemc.zombifiedplayer.util;
 import io.wispforest.accessories.api.AccessoriesCapability;
 import io.wispforest.accessories.api.slot.SlotEntryReference;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -39,6 +41,17 @@ public class AccessoriesUtil {
         }
 
         return accessoriesItems;
+    }
+
+    public static boolean checkForItemInAccessories(Player player, String itemId) {
+        ResourceLocation identifier = ResourceLocation.tryParse(itemId);
+        if (identifier == null) {
+            return false;
+        }
+
+        return BuiltInRegistries.ITEM.getOptional(identifier)
+                .map(item -> checkForItemInAccessories(player, item.getDefaultInstance()))
+                .orElse(false);
     }
 
     public static boolean checkForItemInAccessories(Player player, ItemStack itemToCheck) {

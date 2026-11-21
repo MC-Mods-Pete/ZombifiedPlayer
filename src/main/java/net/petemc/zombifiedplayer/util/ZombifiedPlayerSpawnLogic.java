@@ -46,14 +46,16 @@ public class ZombifiedPlayerSpawnLogic {
 
     /**
      * Returns true if a Zombified Player should spawn when this player dies.
-     * Includes totem-of-undying protection check (vanilla hands + Trinkets slots).
+     * Includes totem-of-undying protection check (vanilla hands, Trinkets and Accessories slots).
      */
     public static boolean shouldSpawn(ServerPlayer serverPlayer, DamageSource damageSource) {
-        // Totem protection — vanilla hands and Trinkets slots
+        // Totem protection — vanilla hands, Trinkets and Accessories slots
         if (serverPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING)
                 || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING)
                 || TrinketsUtil.checkForItemInTrinkets(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance())
-                || TrinketsUtil.checkForItemInTrinkets(serverPlayer, "chargedcharms:charged_totem_charm")) {
+                || TrinketsUtil.checkForItemInTrinkets(serverPlayer, "chargedcharms:charged_totem_charm")
+                || AccessoriesUtil.checkForItemInAccessories(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance())
+                || AccessoriesUtil.checkForItemInAccessories(serverPlayer, "chargedcharms:charged_totem_charm")) {
             return false;
         }
 
