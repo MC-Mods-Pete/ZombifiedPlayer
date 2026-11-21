@@ -24,8 +24,23 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TrinketsUtil {
 
+    /** Set when the installed Trinkets has a different API than the one this mod was built against. */
+    private static volatile boolean apiIncompatible = false;
+
     public static boolean isTrinketsLoaded() {
-        return FabricLoader.getInstance().isModLoaded("trinkets");
+        return !apiIncompatible && FabricLoader.getInstance().isModLoaded("trinkets");
+    }
+
+    /**
+     * The installed Trinkets version has a different API (missing class or method): log once and stop using it,
+     * instead of crashing in the middle of the player's death. Trinkets then handles its slots on death itself.
+     */
+    private static void disableIncompatibleApi(LinkageError e) {
+        if (!apiIncompatible) {
+            apiIncompatible = true;
+            ZombifiedPlayer.LOGGER.error("The installed Trinkets version is not compatible with this version of Zombified Player, "
+                    + "trinkets are no longer transferred to zombified players and do not count for the totem check", e);
+        }
     }
 
     /**
@@ -66,6 +81,8 @@ public class TrinketsUtil {
             }));
         } catch (Exception e) {
             ZombifiedPlayer.LOGGER.error("Error getting trinket items from player: " + e.getMessage());
+        } catch (LinkageError e) {
+            disableIncompatibleApi(e);
         }
 
         return trinketsItems;
@@ -100,6 +117,8 @@ public class TrinketsUtil {
                 }
             });
         } catch (Exception e) {
+        } catch (LinkageError e) {
+            disableIncompatibleApi(e);
         }
 
         return foundItem.get();
