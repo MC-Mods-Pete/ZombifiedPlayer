@@ -1,39 +1,56 @@
 package net.petemc.zombifiedplayer.event;
 
-import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
+import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import net.petemc.zombifiedplayer.util.HardcoreRevivalUtil;
 import net.petemc.zombifiedplayer.util.PneumonoGravestonesUtil;
 import net.petemc.zombifiedplayer.util.UniversalGravesUtil;
 import net.petemc.zombifiedplayer.util.ZombifiedPlayerSpawnLogic;
 
+/**
+ * Called by ServerPlayerEntityMixin from ServerPlayer.die(): first the spawn (inventory still full),
+ * later the chat message.
+ */
 public class PlayerDeathEvents {
 
-    public PlayerDeathEvents() {
-        // Spawn happens here — before dropAllDeathLoot() — so the inventory is still full.
-        // Chat notification is handled by ServerPlayerEntityMixin (after broadcastSystemMessage).
-        ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, amount) -> {
-            if (!entity.level().isClientSide()
-                    && entity instanceof ServerPlayer serverPlayer) {
-                DamageSource effectiveDamageSource = HardcoreRevivalUtil.resolveEffectiveDeathSource(serverPlayer, damageSource);
-                boolean shouldSpawn = ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, effectiveDamageSource);
-
-                // Final death reached: stale knockout sources must be dropped either way.
-                HardcoreRevivalUtil.clearTrackedCause(serverPlayer);
-
-                if (shouldSpawn) {
-                    UniversalGravesUtil.skipGrave(serverPlayer);
-                    PneumonoGravestonesUtil.skipGrave(serverPlayer);
-                    ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer);
-                }
-            }
-            return true;
-        });
+    public static void onPlayerDeath(ServerPlayer serverPlayer, DamageSource source) {
+        if (serverPlayer.level().isClientSide()) {
+            return;
+        }
+        // Hardcore Revival: a timeout death counts with the cause of the knockout
+        DamageSource effectiveSource = HardcoreRevivalUtil.resolveEffectiveDeathSource(serverPlayer, source);
+        // Final death reached: the tracked knockout cause is not needed anymore
+        HardcoreRevivalUtil.clearTrackedCause(serverPlayer);
+        boolean spawn = ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, effectiveSource);
+        if (spawn) {
+            UniversalGravesUtil.skipGrave(serverPlayer);
+            PneumonoGravestonesUtil.skipGrave(serverPlayer);
+        }
+        boolean spawned = spawn && ZombifiedPlayerEntity.spawnZombifiedPlayer(serverPlayer, source) != null;
+        // read for the chat message later in ServerPlayer.die()
+        ZombifiedPlayerSpawnLogic.setSpawnedThisDeath(serverPlayer, spawned);
     }
 
-    public static void registerEvent() {
-        new PlayerDeathEvents();
+    public static void sendSpawnMessage(ServerPlayer serverPlayer) {
+        if (!ZombifiedPlayerSpawnLogic.takeSpawnedThisDeath(serverPlayer) || !MainConfig.getPrintSpawnMessageInChat()) {
+            return;
+        }
+        serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"), false);
+        if (MainConfig.getPrintSpawnLocationInChat()) {
+            BlockPos pos = serverPlayer.blockPosition();
+            Component textCoordinates = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", pos.getX(), pos.getY(), pos.getZ()))
+                    .withStyle(style -> style.withColor(ChatFormatting.GREEN)
+                            .withClickEvent(new ClickEvent.SuggestCommand("/tp @s " + pos.getX() + " " + pos.getY() + " " + pos.getZ()))
+                            .withHoverEvent(new HoverEvent.ShowText(Component.translatable("chat.coordinates.tooltip"))));
+            serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.location.message", textCoordinates), false);
+        }
     }
 }
