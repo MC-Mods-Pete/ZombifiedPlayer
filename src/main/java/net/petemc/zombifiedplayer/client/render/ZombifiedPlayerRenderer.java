@@ -3,7 +3,6 @@ package net.petemc.zombifiedplayer.client.render;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ZombieModel;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
@@ -47,9 +46,9 @@ public class ZombifiedPlayerRenderer
 
     public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx) {
         super(ctx,
-              new ZombieModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE)),
-              new ZombieModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE_INNER_ARMOR)),
-              new ZombieModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE_OUTER_ARMOR)));
+              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER)),
+              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_INNER_ARMOR)),
+              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_OUTER_ARMOR)));
         this.addLayer(new ZombificationFeatureRenderer(this));
     }
 
