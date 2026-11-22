@@ -1,11 +1,16 @@
 package net.petemc.zombifiedplayer.config;
 
+import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.toml.TomlFormat;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.config.ModConfigEvent;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 @EventBusSubscriber(modid = ZombifiedPlayer.MOD_ID)
@@ -221,8 +226,49 @@ public class MainConfig
 
     // Client Config
     private static final ModConfigSpec.Builder BUILDER_CLIENT = new ModConfigSpec.Builder();
-    // no client config
+
+    /** Default file name of the client config (ModConfig of type CLIENT without an own name). */
+    public static final String CLIENT_CONFIG_FILE = ZombifiedPlayer.MOD_ID + "-client.toml";
+    public static final String SHAMBLING_ANIMATION_PACK_TURNED_ON_KEY = "shamblingAnimationPackTurnedOn";
+
+    private static final ModConfigSpec.BooleanValue SHAMBLING_ANIMATION_PACK_TURNED_ON = BUILDER_CLIENT
+            .comment("Set by the mod after it turned on the built-in resource pack 'Zombified Player: Shambling Animation' (needs Entity Model Features) at the first start. Turn the pack on or off under Options > Resource Packs. Set this to false to have the pack turned on again at the next start | default: false")
+            .define(SHAMBLING_ANIMATION_PACK_TURNED_ON_KEY, false);
+
     public static final ModConfigSpec SPEC_CLIENT = BUILDER_CLIENT.build();
+
+    /** Whether the built-in shambling animation pack was already turned on once. */
+    public static boolean getShamblingAnimationPackTurnedOn() {
+        if (SPEC_CLIENT.isLoaded()) {
+            return SHAMBLING_ANIMATION_PACK_TURNED_ON.get();
+        }
+        // the client config may not be loaded yet when the game selects its resource packs
+        return readShamblingAnimationPackTurnedOn(FMLPaths.CONFIGDIR.get().resolve(CLIENT_CONFIG_FILE));
+    }
+
+    /**
+     * Reads the marker from the client config file: false without the file or the key (first start, or a config
+     * from a version without the pack), true if the file can not be read (then better not touch the packs).
+     */
+    public static boolean readShamblingAnimationPackTurnedOn(Path file) {
+        if (!Files.isRegularFile(file)) {
+            return false;
+        }
+        try (CommentedFileConfig config = CommentedFileConfig.builder(file, TomlFormat.instance()).build()) {
+            config.load();
+            return Boolean.TRUE.equals(config.get(SHAMBLING_ANIMATION_PACK_TURNED_ON_KEY));
+        } catch (Exception e) {
+            ZombifiedPlayer.LOGGER.warn("Could not read {}: {}", file, e.toString());
+            return true;
+        }
+    }
+
+    public static void setShamblingAnimationPackTurnedOn() {
+        if (SPEC_CLIENT.isLoaded()) {
+            SHAMBLING_ANIMATION_PACK_TURNED_ON.set(true);
+            SHAMBLING_ANIMATION_PACK_TURNED_ON.save();
+        }
+    }
 
 
     private static boolean spawnZombifiedPlayerAfterDeath = true;
@@ -284,9 +330,6 @@ public class MainConfig
             useCustomEyeHeight = USE_CUSTOM_EYE_HEIGHT.get();
             customEyeHeight = CUSTOM_EYE_HEIGHT.get().floatValue();
             infectiousModCompatibility = INFECTIOUS_MOD_COMPATIBILITY.get();
-        }
-        if (SPEC_CLIENT.isLoaded()) {
-            // no client config
         }
 
     }

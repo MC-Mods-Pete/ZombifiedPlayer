@@ -9,6 +9,9 @@
 		"CorpseDeathEventsMixin",
 		"GravestoneDeathEventsMixin"
 	],
+	"client": [
+		"client.OptionsMixin"
+	],
 	"injectors": {
 		"defaultRequire": 1
 	}
