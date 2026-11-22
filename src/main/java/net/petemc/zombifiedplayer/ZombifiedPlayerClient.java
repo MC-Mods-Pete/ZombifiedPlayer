@@ -9,7 +9,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.petemc.zombifiedplayer.client.render.ModModelLayers;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 
@@ -36,5 +38,10 @@ public class ZombifiedPlayerClient {
     @SubscribeEvent
     static void onClientSetup(FMLClientSetupEvent event) {
         EntityRenderers.register(ModEntities.ZOMBIFIED_PLAYER.get(), ZombifiedPlayerRenderer::new);
+    }
+
+    @SubscribeEvent
+    static void onRegisterLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
+        ModModelLayers.register(event);
     }
 }
