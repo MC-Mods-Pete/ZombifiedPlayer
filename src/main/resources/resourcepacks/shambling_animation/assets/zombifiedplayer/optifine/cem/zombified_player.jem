@@ -1,0 +1,405 @@
+{
+  "models": [
+    {
+      "part": "right_arm",
+      "id": "right_arm",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        -5.0,
+        -22.0,
+        0.0
+      ],
+      "textureSize": [
+        64,
+        64
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            40,
+            16
+          ],
+          "coordinates": [
+            4.0,
+            12.0,
+            -2.0,
+            4.0,
+            12.0,
+            4.0
+          ]
+        }
+      ]
+    },
+    {
+      "part": "left_leg",
+      "id": "left_leg",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        1.9,
+        -12.0,
+        0.0
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            16,
+            48
+          ],
+          "coordinates": [
+            -3.9,
+            0.0,
+            -2.0,
+            4.0,
+            12.0,
+            4.0
+          ]
+        }
+      ]
+    },
+    {
+      "part": "jacket",
+      "id": "jacket",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        0.0,
+        -24.0,
+        0.0
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            16,
+            32
+          ],
+          "sizeAdd": 0.25,
+          "coordinates": [
+            -4.0,
+            12.0,
+            -2.0,
+            8.0,
+            12.0,
+            4.0
+          ]
+        }
+      ]
+    },
+    {
+      "part": "body",
+      "id": "body",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        0.0,
+        -24.0,
+        0.0
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            16,
+            16
+          ],
+          "coordinates": [
+            -4.0,
+            12.0,
+            -2.0,
+            8.0,
+            12.0,
+            4.0
+          ]
+        }
+      ]
+    },
+    {
+      "part": "head",
+      "id": "head",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        0.0,
+        -24.0,
+        0.0
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            0,
+            0
+          ],
+          "coordinates": [
+            -4.0,
+            24.0,
+            -4.0,
+            8.0,
+            8.0,
+            8.0
+          ]
+        }
+      ],
+      "animations": [
+        {
+          "var.seed": "random(id)",
+          "var.phase": "var.seed * 6.2832",
+          "var.breath": "sin(var.phase + age * 0.07)",
+          "var.step": "limb_swing * 0.6662",
+          "var.move": "min(1, limb_speed * 2)",
+          "varb.next_frame": "frame_counter != var.done_frame",
+          "var.grab": "if(varb.next_frame, clamp(var.grab + if(is_aggressive, 3, -2) * frame_time, 0, 1), var.grab)",
+          "var.done_frame": "frame_counter",
+          "var.reach": "min(1, var.move * 0.7 + var.grab)",
+          "var.hit": "hurt_time / 10",
+          "var.p": "swing_progress",
+          "var.lunge": "sin(pi * var.p)",
+          "var.atk_arm_r": "if(var.p <= 0, 0, if(var.p < 0.3, -0.9 * sin(var.p / 0.3 * pi / 2), if(var.p < 0.7, -0.9 + 1.7 * (0.5 - 0.5 * cos((var.p - 0.3) / 0.4 * pi)), 0.8 * (0.5 + 0.5 * cos((var.p - 0.7) / 0.3 * pi)))))",
+          "var.atk_arm_l": "var.atk_arm_r",
+          "var.atk_arm_ry": "0.35 * var.lunge",
+          "var.atk_arm_rz": "0.4 * var.lunge",
+          "var.atk_shoulder_tz": "-2.5 * var.lunge",
+          "var.atk_body": "0.28 * var.lunge",
+          "var.atk_head_rx": "0.45 * var.atk_arm_r",
+          "var.atk_head_ty": "1.2 * var.lunge",
+          "var.atk_head_tz": "-1.5 * var.lunge",
+          "var.atk_legs": "-0.12 * var.lunge",
+          "body.rx": "0.12 + 0.1 * var.reach + 0.02 * var.breath + var.atk_body - 0.2 * var.hit",
+          "body.ry": "0.06 * sin(var.step) * var.move",
+          "body.rz": "0.07 * sin(var.step) * var.move + 0.03 * (var.seed - 0.5)",
+          "body.tx": "0.4 * sin(var.step) * var.move",
+          "body.ty": "0.3 + 0.15 * var.breath + 0.6 * var.move * abs(sin(var.step))",
+          "body.tz": "-12 * sin(body.rx)",
+          "head.rx": "torad(head_pitch) * 0.6 + 0.1 - 0.04 * var.breath + var.atk_head_rx",
+          "head.ry": "torad(head_yaw) * 0.9 - 0.05 * sin(var.step - 0.6) * var.move",
+          "head.rz": "0.35 * (var.seed - 0.5) - 0.08 * sin(var.step - 0.6) * var.move",
+          "head.tx": "body.tx",
+          "head.ty": "body.ty + var.atk_head_ty",
+          "head.tz": "body.tz + var.atk_head_tz",
+          "right_arm.rx": "-0.2 - 1.3 * var.reach + 0.5 * torad(head_pitch) * var.grab + 0.15 * cos(var.step) * var.move + 0.03 * var.breath + var.atk_arm_r + 0.3 * var.hit",
+          "left_arm.rx": "-0.3 - 1.2 * var.reach + 0.5 * torad(head_pitch) * var.grab - 0.15 * cos(var.step) * var.move + 0.03 * var.breath + var.atk_arm_l + 0.3 * var.hit",
+          "right_arm.ry": "-0.15 * var.reach - var.atk_arm_ry",
+          "left_arm.ry": "0.15 * var.reach + var.atk_arm_ry",
+          "right_arm.rz": "0.12 * (1 - var.reach) + 0.02 * var.breath - var.atk_arm_rz",
+          "left_arm.rz": "-0.12 * (1 - var.reach) - 0.02 * var.breath + var.atk_arm_rz",
+          "right_arm.tx": "body.tx - 5",
+          "left_arm.tx": "body.tx + 5",
+          "right_arm.ty": "body.ty + 2.0 * cos(body.rx)",
+          "left_arm.ty": "body.ty + 2.0 * cos(body.rx)",
+          "right_arm.tz": "body.tz + 2.0 * sin(body.rx) + var.atk_shoulder_tz",
+          "left_arm.tz": "body.tz + 2.0 * sin(body.rx) + var.atk_shoulder_tz",
+          "right_leg.rx": "if(is_riding, right_leg.rx, 0.9 * cos(var.step) * limb_speed) + var.atk_legs",
+          "left_leg.rx": "if(is_riding, left_leg.rx, -0.9 * cos(var.step) * limb_speed) + var.atk_legs"
+        }
+      ]
+    },
+    {
+      "part": "left_sleeve",
+      "id": "left_sleeve",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        5.0,
+        -22.0,
+        0.0
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            48,
+            48
+          ],
+          "sizeAdd": 0.25,
+          "coordinates": [
+            -8.0,
+            12.0,
+            -2.0,
+            4.0,
+            12.0,
+            4.0
+          ]
+        }
+      ]
+    },
+    {
+      "part": "right_sleeve",
+      "id": "right_sleeve",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        -5.0,
+        -22.0,
+        0.0
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            40,
+            32
+          ],
+          "sizeAdd": 0.25,
+          "coordinates": [
+            4.0,
+            12.0,
+            -2.0,
+            4.0,
+            12.0,
+            4.0
+          ]
+        }
+      ]
+    },
+    {
+      "part": "left_arm",
+      "id": "left_arm",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        5.0,
+        -22.0,
+        0.0
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            32,
+            48
+          ],
+          "coordinates": [
+            -8.0,
+            12.0,
+            -2.0,
+            4.0,
+            12.0,
+            4.0
+          ]
+        }
+      ]
+    },
+    {
+      "part": "right_leg",
+      "id": "right_leg",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        -1.9,
+        -12.0,
+        0.0
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            0,
+            16
+          ],
+          "coordinates": [
+            -0.100000024,
+            0.0,
+            -2.0,
+            4.0,
+            12.0,
+            4.0
+          ]
+        }
+      ]
+    },
+    {
+      "part": "root",
+      "id": "root",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        0.0,
+        -24.0,
+        0.0
+      ]
+    },
+    {
+      "part": "right_pants",
+      "id": "right_pants",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        -1.9,
+        -12.0,
+        0.0
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            0,
+            32
+          ],
+          "sizeAdd": 0.25,
+          "coordinates": [
+            -0.100000024,
+            0.0,
+            -2.0,
+            4.0,
+            12.0,
+            4.0
+          ]
+        }
+      ]
+    },
+    {
+      "part": "hat",
+      "id": "hat",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        0.0,
+        -24.0,
+        0.0
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            32,
+            0
+          ],
+          "sizeAdd": 0.5,
+          "coordinates": [
+            -4.0,
+            24.0,
+            -4.0,
+            8.0,
+            8.0,
+            8.0
+          ]
+        }
+      ]
+    },
+    {
+      "part": "left_pants",
+      "id": "left_pants",
+      "attach": false,
+      "invertAxis": "xy",
+      "translate": [
+        1.9,
+        -12.0,
+        0.0
+      ],
+      "boxes": [
+        {
+          "textureOffset": [
+            0,
+            48
+          ],
+          "sizeAdd": 0.25,
+          "coordinates": [
+            -3.9,
+            0.0,
+            -2.0,
+            4.0,
+            12.0,
+            4.0
+          ]
+        }
+      ]
+    }
+  ],
+  "textureSize": [
+    64,
+    64
+  ]
+}
