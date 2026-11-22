@@ -97,7 +97,7 @@ public class ZombifiedPlayerRenderer
         this.addLayer(new HumanoidArmorLayer<>(this,
                 ArmorModelSet.<ZombieModel<ZombifiedPlayerEntityRenderState>>bake(ModModelLayers.ZOMBIFIED_PLAYER_ARMOR, ctx.getModelSet(), ZombieModel::new),
                 ctx.getEquipmentRenderer()));
-        this.addLayer(new ZombificationFeatureRenderer(this));
+        this.addLayer(new ZombificationFeatureRenderer(this, ctx.getModelSet()));
     }
 
     @Override
