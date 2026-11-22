@@ -52,11 +52,16 @@ public class ZombifiedPlayerRenderer
     private record Skin(Identifier texture, boolean slim) {
     }
 
-    // Fallback skin with the matching arm width
+    // Fallback skins with the matching arm width
     private static final Skin STEVE = new Skin(
             Identifier.fromNamespaceAndPath("minecraft", "textures/entity/player/wide/steve.png"), false);
+    private static final Skin ALEX = new Skin(
+            Identifier.fromNamespaceAndPath("minecraft", "textures/entity/player/slim/alex.png"), true);
 
-    /** Resolved skin per stored profile UUID. */
+    /** Marker for "no own skin": skinOf picks Steve or Alex, fixed per UUID (like vanilla does for players without a skin). */
+    private static final Skin FALLBACK = new Skin(STEVE.texture(), false);
+
+    /** Resolved skin per stored profile UUID (also the fallback once we know the account has no custom skin). */
     private static final Map<UUID, Skin> SKINS = new ConcurrentHashMap<>();
 
     /** Start time (ms) of the running fetch per UUID, prevents duplicate fetches. */
@@ -149,13 +154,14 @@ public class ZombifiedPlayerRenderer
     /** The loaded skin of the profile, otherwise the fallback skin (and a fetch is started, never blocking). */
     private static Skin skinOf(ZombifiedPlayerEntity entity) {
         GameProfile profile = entity.getGameProfile();
-        if (profile == null || profile.id() == null) {
-            return STEVE;
-        }
-        Skin skin = SKINS.get(profile.id());
+        UUID uuid = profile == null || profile.id() == null ? entity.getUUID() : profile.id();
+        Skin skin = profile == null || profile.id() == null ? null : SKINS.get(uuid);
         if (skin == null) {
-            triggerSkinFetch(profile);
-            return STEVE;
+            if (profile != null && profile.id() != null) triggerSkinFetch(profile);
+            skin = FALLBACK;
+        }
+        if (skin == FALLBACK) {
+            return Math.floorMod(uuid.hashCode(), 2) == 1 ? ALEX : STEVE;
         }
         return skin;
     }
@@ -173,7 +179,7 @@ public class ZombifiedPlayerRenderer
         UUID uuid = profile.id();
         String name = profile.name();
         if (name == null || name.isEmpty()) {
-            SKINS.put(uuid, STEVE);
+            SKINS.put(uuid, FALLBACK);
             return;
         }
 
