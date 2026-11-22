@@ -1,0 +1,7 @@
+{
+  "pack": {
+    "description": "Zombified players shamble, reach for you and swipe with both arms. Needs Entity Model Features",
+    "min_format": 84,
+    "max_format": 88
+  }
+}
