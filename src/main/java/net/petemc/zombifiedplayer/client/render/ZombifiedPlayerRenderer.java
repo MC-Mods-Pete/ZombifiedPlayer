@@ -1,16 +1,32 @@
 package net.petemc.zombifiedplayer.client.render;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.monster.zombie.ZombieModel;
-import net.minecraft.client.renderer.PlayerSkinRenderCache;
-import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.ArmorModelSet;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
+import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
+import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
+import net.minecraft.client.renderer.entity.layers.WingsLayer;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.item.component.ResolvableProfile;
+import net.minecraft.server.players.ProfileResolver;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.Util;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.player.PlayerModelType;
+import net.minecraft.world.entity.player.PlayerSkin;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SwingAnimationType;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
-import net.petemc.zombifiedplayer.ZombifiedPlayerClient;
 import net.petemc.zombifiedplayer.client.render.entity.feature.ZombificationFeatureRenderer;
 import net.petemc.zombifiedplayer.client.render.entity.state.ZombifiedPlayerEntityRenderState;
 import net.petemc.zombifiedplayer.config.MainConfig;
@@ -18,34 +34,62 @@ import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Renders the zombified player like vanilla's zombie renderer (AbstractZombieRenderer: same layers, arm poses,
+ * shaking while converting), but with the player mesh and the skin of the dead player.
+ * A MobRenderer and not an AbstractZombieRenderer: that one picks the adult or baby model on every frame,
+ * here the model follows the skin (wide or slim arms).
+ */
 public class ZombifiedPlayerRenderer
-        extends AbstractZombieRenderer<ZombifiedPlayerEntity, ZombifiedPlayerEntityRenderState, ZombieModel<ZombifiedPlayerEntityRenderState>> {
+        extends MobRenderer<ZombifiedPlayerEntity, ZombifiedPlayerEntityRenderState, ZombifiedPlayerModel> {
 
-    private static final Identifier TEXTURE_FALLBACK =
-            Identifier.fromNamespaceAndPath("minecraft", "textures/entity/player/wide/steve.png");
-
-    // Per-UUID async fetch tracking — never shared across entities incorrectly
-    private static final Set<UUID> fetchingInProgress = ConcurrentHashMap.newKeySet();
-    private static final Map<UUID, Long> retryAfter = new ConcurrentHashMap<>();
-    private static final Map<UUID, Integer> retryCount = new ConcurrentHashMap<>();
-
-    private static final long RETRY_DELAY_MS = 5_000L;
-    private static final int  MAX_RETRIES    = 5;
-
-    /** Own layers (zombified players are always adults, the baby model is the adult one). */
-    public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx) {
-        this(ctx, new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER)),
-                ArmorModelSet.bake(ModModelLayers.ZOMBIFIED_PLAYER_ARMOR, ctx.getModelSet(), ZombieModel::new));
-        this.addLayer(new ZombificationFeatureRenderer(this));
+    /** A skin texture and whether it is made for the slim model (3 pixel arms). */
+    private record Skin(Identifier texture, boolean slim) {
     }
 
-    private ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx, ZombieModel<ZombifiedPlayerEntityRenderState> model,
-                                    ArmorModelSet<ZombieModel<ZombifiedPlayerEntityRenderState>> armor) {
-        super(ctx, model, model, armor, armor);
+    // Fallback skin with the matching arm width
+    private static final Skin STEVE = new Skin(
+            Identifier.fromNamespaceAndPath("minecraft", "textures/entity/player/wide/steve.png"), false);
+
+    /** Resolved skin per stored profile UUID. */
+    private static final Map<UUID, Skin> SKINS = new ConcurrentHashMap<>();
+
+    /** Start time (ms) of the running fetch per UUID, prevents duplicate fetches. */
+    private static final Map<UUID, Long> FETCHING = new ConcurrentHashMap<>();
+
+    /** Timestamp (ms) after which a retry is allowed, per UUID. */
+    private static final Map<UUID, Long> RETRY_AFTER = new ConcurrentHashMap<>();
+
+    /** Number of failed fetch attempts per UUID. */
+    private static final Map<UUID, Integer> FAILED_TRIES = new ConcurrentHashMap<>();
+
+    private static final long RETRY_DELAY_MS = 5_000L;
+    private static final long MAX_RETRY_DELAY_MS = 300_000L;
+    /** A fetch whose result has not arrived after this time counts as failed. */
+    private static final long FETCH_TIMEOUT_MS = 30_000L;
+    private static final int MAX_TRIES = 5;
+
+    private final ZombifiedPlayerModel wideModel;
+    private final ZombifiedPlayerModel slimModel;
+
+    /** Own layers with the player mesh, wide or slim arms depending on the skin. */
+    public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx) {
+        super(ctx, new ZombifiedPlayerModel(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER), false), 0.5F);
+        this.wideModel = this.model;
+        this.slimModel = new ZombifiedPlayerModel(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_SLIM), true);
+        // the layers of HumanoidMobRenderer and AbstractZombieRenderer, in the same order
+        this.addLayer(new CustomHeadLayer<>(this, ctx.getModelSet(), ctx.getPlayerSkinRenderCache()));
+        this.addLayer(new WingsLayer<>(this, ctx.getModelSet(), ctx.getEquipmentRenderer()));
+        this.addLayer(new ItemInHandLayer<>(this));
+        this.addLayer(new HumanoidArmorLayer<>(this,
+                ArmorModelSet.<ZombieModel<ZombifiedPlayerEntityRenderState>>bake(ModModelLayers.ZOMBIFIED_PLAYER_ARMOR, ctx.getModelSet(), ZombieModel::new),
+                ctx.getEquipmentRenderer()));
+        this.addLayer(new ZombificationFeatureRenderer(this));
     }
 
     @Override
@@ -55,95 +99,138 @@ public class ZombifiedPlayerRenderer
 
     @Override
     public void extractRenderState(@NotNull ZombifiedPlayerEntity entity,
-                                   @NotNull ZombifiedPlayerEntityRenderState reusedState,
+                                   @NotNull ZombifiedPlayerEntityRenderState state,
                                    float partialTick) {
-        super.extractRenderState(entity, reusedState, partialTick);
-        reusedState.gameProfile = entity.getGameProfile();
+        super.extractRenderState(entity, state, partialTick);
+        // like HumanoidMobRenderer and AbstractZombieRenderer
+        HumanoidMobRenderer.extractHumanoidRenderState(entity, state, partialTick, this.itemModelResolver);
+        state.leftArmPose = getArmPose(entity, HumanoidArm.LEFT);
+        state.rightArmPose = getArmPose(entity, HumanoidArm.RIGHT);
+        state.isAggressive = entity.isAggressive();
+        state.isConverting = entity.isUnderWaterConverting();
+
+        Skin skin = skinOf(entity);
+        state.skinTexture = skin.texture();
+        state.slim = skin.slim();
     }
 
-    /** Never blocks the render thread — returns fallback texture until the async fetch completes. */
+    @Override
+    public void submit(@NotNull ZombifiedPlayerEntityRenderState state, @NotNull PoseStack poseStack,
+                       @NotNull SubmitNodeCollector submitNodeCollector, @NotNull CameraRenderState camera) {
+        // the layers (zombification, held items) use getModel(), so they follow the switch
+        this.model = state.slim ? this.slimModel : this.wideModel;
+        super.submit(state, poseStack, submitNodeCollector, camera);
+    }
+
     @Override
     public @NotNull Identifier getTextureLocation(@NotNull ZombifiedPlayerEntityRenderState state) {
-        if (state.gameProfile == null) return TEXTURE_FALLBACK;
-        UUID uuid = state.gameProfile.id();
-
-        // 1. Direct cache hit
-        Identifier skin = ZombifiedPlayerClient.cachedPlayerSkinsByUUID.get(uuid);
-        if (skin != null) {
-            state.skinTexture = skin;
-            return skin;
-        }
-
-        // 2. UUID mismatch (offline ↔ online UUID)
-        UUID remapped = ZombifiedPlayerClient.uuidMissmatches.get(uuid);
-        if (remapped != null) {
-            skin = ZombifiedPlayerClient.cachedPlayerSkinsByUUID.get(remapped);
-            if (skin != null) {
-                state.skinTexture = skin;
-                return skin;
-            }
-        }
-
-        // 3. Kick off async fetch — no-op if already running
-        triggerSkinFetch(state.gameProfile);
-        return TEXTURE_FALLBACK;
+        return state.skinTexture;
     }
 
-    // -------------------------------------------------------------------------
-    // Async fetch — NEVER calls .get() on the render thread
-    // -------------------------------------------------------------------------
+    @Override
+    protected boolean isShaking(@NotNull ZombifiedPlayerEntityRenderState state) {
+        return super.isShaking(state) || state.isConverting;
+    }
 
+    /** Arm pose like AbstractZombieRenderer and HumanoidMobRenderer (spears). */
+    private static HumanoidModel.ArmPose getArmPose(ZombifiedPlayerEntity entity, HumanoidArm arm) {
+        SwingAnimation otherAnim = entity.getItemHeldByArm(arm.getOpposite()).get(DataComponents.SWING_ANIMATION);
+        if (otherAnim != null && otherAnim.type() == SwingAnimationType.STAB) {
+            return HumanoidModel.ArmPose.SPEAR;
+        }
+        ItemStack held = entity.getItemHeldByArm(arm);
+        SwingAnimation anim = held.get(DataComponents.SWING_ANIMATION);
+        if (anim != null && anim.type() == SwingAnimationType.STAB && entity.swinging) {
+            return HumanoidModel.ArmPose.SPEAR;
+        }
+        return held.is(ItemTags.SPEARS) ? HumanoidModel.ArmPose.SPEAR : HumanoidModel.ArmPose.EMPTY;
+    }
+
+    /** The loaded skin of the profile, otherwise the fallback skin (and a fetch is started, never blocking). */
+    private static Skin skinOf(ZombifiedPlayerEntity entity) {
+        GameProfile profile = entity.getGameProfile();
+        if (profile == null || profile.id() == null) {
+            return STEVE;
+        }
+        Skin skin = SKINS.get(profile.id());
+        if (skin == null) {
+            triggerSkinFetch(profile);
+            return STEVE;
+        }
+        return skin;
+    }
+
+    /**
+     * Starts an async skin fetch for the given profile.
+     * Safe to call every frame: no-op if a fetch is already running for this UUID,
+     * the retry delay has not elapsed, or the attempt limit has been reached.
+     *
+     * The profile is looked up by name (like player heads do), so on offline-mode servers,
+     * where the stored UUID does not match the Mojang account, the skin of the account
+     * with that name is used.
+     */
     private static void triggerSkinFetch(GameProfile profile) {
         UUID uuid = profile.id();
+        String name = profile.name();
+        if (name == null || name.isEmpty()) {
+            SKINS.put(uuid, STEVE);
+            return;
+        }
 
-        if (fetchingInProgress.contains(uuid)) return;
+        long now = System.currentTimeMillis();
 
-        Long notBefore = retryAfter.get(uuid);
-        if (notBefore != null && System.currentTimeMillis() < notBefore) return;
+        Long startedAt = FETCHING.get(uuid);
+        if (startedAt != null) {
+            if (now - startedAt < FETCH_TIMEOUT_MS) return;
+            // The result never arrived (lookup hangs in the background)
+            if (FETCHING.remove(uuid, startedAt)) {
+                onFetchFailed(uuid, name, "no response");
+            }
+            return;
+        }
 
-        if (MainConfig.getLimitSkinFetchTries()
-                && retryCount.getOrDefault(uuid, 0) >= MAX_RETRIES) return;
+        Long notBefore = RETRY_AFTER.get(uuid);
+        if (notBefore != null && now < notBefore) return;
 
-        fetchingInProgress.add(uuid);
-        ZombifiedPlayer.LOGGER.info("Fetching skin for {} UUID: {}", profile.name(), uuid);
+        int failedTries = FAILED_TRIES.getOrDefault(uuid, 0);
+        if (MainConfig.getLimitSkinFetchTries() && failedTries >= MAX_TRIES) return;
 
-        Minecraft.getInstance()
-                .playerSkinRenderCache()
-                .lookup(ResolvableProfile.createUnresolved(profile.name()))
-                .thenCompose(opt -> {
-                    GameProfile resolved = opt
-                            .map(PlayerSkinRenderCache.RenderInfo::gameProfile)
-                            .orElse(profile);
-                    if (!resolved.id().equals(uuid)) {
-                        ZombifiedPlayerClient.uuidMissmatches.put(uuid, resolved.id());
+        if (FETCHING.putIfAbsent(uuid, now) != null) return;
+
+        ZombifiedPlayer.LOGGER.debug("Fetching skin for {} (UUID: {}, attempt {})", name, uuid, failedTries + 1);
+
+        // Results are handled on the client main thread; a fetch that timed out meanwhile is ignored
+        // (a newer attempt owns this UUID then).
+        Minecraft minecraft = Minecraft.getInstance();
+        ProfileResolver resolver = minecraft.services().profileResolver();
+        CompletableFuture.supplyAsync(() -> resolver.fetchByName(name), Util.nonCriticalIoPool())
+                // Account without custom skin: the skin manager returns the default skin of that account
+                .thenCompose(resolved -> resolved.isPresent()
+                        ? minecraft.getSkinManager().get(resolved.get())
+                        : CompletableFuture.completedFuture(Optional.<PlayerSkin>empty()))
+                .whenComplete((skin, error) -> minecraft.execute(() -> {
+                    if (!FETCHING.remove(uuid, now)) return;
+                    if (error != null || skin == null || skin.isEmpty()) {
+                        // No account found or Mojang not reachable, try again later
+                        onFetchFailed(uuid, name, error != null ? error.toString() : "no account or skin found");
+                        return;
                     }
-                    return Minecraft.getInstance().getSkinManager().get(resolved);
-                })
-                .thenAccept(opt -> {
-                    if (opt.isPresent()) {
-                        Identifier texture = opt.get().body().texturePath();
-                        UUID resolvedUUID = ZombifiedPlayerClient.uuidMissmatches.getOrDefault(uuid, uuid);
-                        ZombifiedPlayerClient.cachedPlayerSkinsByUUID.put(resolvedUUID, texture);
-                        ZombifiedPlayerClient.cachedPlayerSkinsByName.put(profile.name(), texture);
-                        ZombifiedPlayer.LOGGER.info("Skin fetched for {}: {}", profile.name(), texture);
-                        retryAfter.remove(uuid);
-                        retryCount.remove(uuid);
-                    } else {
-                        ZombifiedPlayer.LOGGER.warn("No skin received for {}, scheduling retry.", profile.name());
-                        scheduleRetry(uuid);
-                    }
-                    fetchingInProgress.remove(uuid);
-                })
-                .exceptionally(ex -> {
-                    ZombifiedPlayer.LOGGER.error("Skin fetch failed for {}: {}", profile.name(), ex.getMessage());
-                    fetchingInProgress.remove(uuid);
-                    scheduleRetry(uuid);
-                    return null;
-                });
+                    SKINS.put(uuid, new Skin(skin.get().body().texturePath(), skin.get().model() == PlayerModelType.SLIM));
+                    RETRY_AFTER.remove(uuid);
+                    FAILED_TRIES.remove(uuid);
+                    ZombifiedPlayer.LOGGER.debug("Skin cached for {} -> {}", name, skin.get().body().texturePath());
+                }));
     }
 
-    private static void scheduleRetry(UUID uuid) {
-        retryAfter.put(uuid, System.currentTimeMillis() + RETRY_DELAY_MS);
-        retryCount.merge(uuid, 1, Integer::sum);
+    private static void onFetchFailed(UUID uuid, String name, String reason) {
+        int failedTries = FAILED_TRIES.merge(uuid, 1, Integer::sum);
+        long delay = Math.min(RETRY_DELAY_MS << Math.min(failedTries - 1, 6), MAX_RETRY_DELAY_MS);
+        RETRY_AFTER.put(uuid, System.currentTimeMillis() + delay);
+
+        if (MainConfig.getLimitSkinFetchTries() && failedTries >= MAX_TRIES) {
+            ZombifiedPlayer.LOGGER.info("Giving up fetching the skin for {} after {} tries ({})", name, failedTries, reason);
+        } else {
+            ZombifiedPlayer.LOGGER.debug("Skin fetch for {} failed ({}), retrying in {} s", name, reason, delay / 1000);
+        }
     }
 }
