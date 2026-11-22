@@ -21,15 +21,38 @@ import org.jetbrains.annotations.NotNull;
 @Environment(EnvType.CLIENT)
 public class ZombifiedPlayerModel extends ZombieModel<ZombifiedPlayerEntityRenderState> {
     private final boolean slim;
+    private final boolean showSecondLayer;
+    private final ModelPart[] secondLayer;
 
     public ZombifiedPlayerModel(ModelPart root, boolean slim) {
+        this(root, slim, true);
+    }
+
+    /**
+     * @param showSecondLayer false for a model without the second skin layer (hat, jacket, sleeves, pants), e.g. for the
+     *                        zombification marks: models are drawn after all layers were submitted, so the layer cannot
+     *                        hide parts of the shared model for its own pass
+     */
+    public ZombifiedPlayerModel(ModelPart root, boolean slim, boolean showSecondLayer) {
         super(root);
         this.slim = slim;
+        this.showSecondLayer = showSecondLayer;
+        this.secondLayer = new ModelPart[]{this.hat, this.body.getChild("jacket"),
+                this.leftArm.getChild("left_sleeve"), this.rightArm.getChild("right_sleeve"),
+                this.leftLeg.getChild("left_pants"), this.rightLeg.getChild("right_pants")};
     }
 
     /** Same mesh as vanilla's player layers (ModelLayers.PLAYER / PLAYER_SLIM). */
     public static LayerDefinition createBodyLayer(boolean slim) {
         return LayerDefinition.create(PlayerModel.createMesh(CubeDeformation.NONE, slim), 64, 64);
+    }
+
+    @Override
+    public void setupAnim(@NotNull ZombifiedPlayerEntityRenderState state) {
+        super.setupAnim(state);
+        for (ModelPart part : this.secondLayer) {
+            part.visible = this.showSecondLayer;
+        }
     }
 
     /** Like PlayerModel: items in the hand of slim arms sit half a pixel further in. */
