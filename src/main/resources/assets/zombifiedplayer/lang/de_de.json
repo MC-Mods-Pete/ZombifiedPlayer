@@ -1,5 +1,6 @@
 {
   "entity.zombifiedplayer.zombified_player": "Zombifizierter Spieler",
+  "pack.zombifiedplayer.shambling_animation": "Zombified Player: Schlurf-Animation",
   "item.zombifiedplayer.zombified_player_spawn_egg": "Zombifizierter-Spieler-Spawn-Ei",
 
   "zombifiedplayer.spawn.message": "Eine zombifizierte Version von dir streift nun durch diese Welt...",
