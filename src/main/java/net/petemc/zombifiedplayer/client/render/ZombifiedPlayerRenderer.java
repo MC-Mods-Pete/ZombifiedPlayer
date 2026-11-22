@@ -2,8 +2,6 @@ package net.petemc.zombifiedplayer.client.render;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.geom.ModelLayerLocation;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.monster.zombie.ZombieModel;
 import net.minecraft.client.renderer.PlayerSkinRenderCache;
 import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
@@ -38,20 +36,16 @@ public class ZombifiedPlayerRenderer
     private static final long RETRY_DELAY_MS = 5_000L;
     private static final int  MAX_RETRIES    = 5;
 
+    /** Own layers (zombified players are always adults, the baby model is the adult one). */
     public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx) {
-        this(ctx, ModelLayers.ZOMBIE, ModelLayers.ZOMBIE_BABY, ModelLayers.ZOMBIE_ARMOR, ModelLayers.ZOMBIE_BABY_ARMOR);
+        this(ctx, new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER)),
+                ArmorModelSet.bake(ModModelLayers.ZOMBIFIED_PLAYER_ARMOR, ctx.getModelSet(), ZombieModel::new));
         this.addLayer(new ZombificationFeatureRenderer(this));
     }
 
-    public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx, ModelLayerLocation layer,
-                                   ModelLayerLocation legsArmorLayer,
-                                   ArmorModelSet<ModelLayerLocation> equipmentModelData,
-                                   ArmorModelSet<ModelLayerLocation> equipmentModelData2) {
-        super(ctx,
-              new ZombieModel<>(ctx.bakeLayer(layer)),
-              new ZombieModel<>(ctx.bakeLayer(legsArmorLayer)),
-              ArmorModelSet.bake(equipmentModelData, ctx.getModelSet(), ZombieModel::new),
-              ArmorModelSet.bake(equipmentModelData2, ctx.getModelSet(), ZombieModel::new));
+    private ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx, ZombieModel<ZombifiedPlayerEntityRenderState> model,
+                                    ArmorModelSet<ZombieModel<ZombifiedPlayerEntityRenderState>> armor) {
+        super(ctx, model, model, armor, armor);
     }
 
     @Override
