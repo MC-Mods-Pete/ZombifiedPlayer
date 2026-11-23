@@ -21,11 +21,11 @@ repositories {
     mavenLocal()
     maven { url "https://maven.shedaniel.me/"}
 
-    // curse maven
+    // Modrinth maven (dev dependencies, versions as Modrinth version IDs in gradle.properties)
     maven {
-        url "https://cursemaven.com"
+        url "https://api.modrinth.com/maven"
         content {
-            includeGroup "curse.maven"
+            includeGroup "maven.modrinth"
         }
     }
 }
@@ -141,20 +141,18 @@ dependencies {
     //implementation "curse.maven:comforts-276951:${comforts_version}"
 
     // other mod dependencies
-    runtimeOnly "curse.maven:jade-324717:${jade_version}"
-    implementation "curse.maven:contagion-1027702:${contagion_version}"
-    implementation "curse.maven:undeadnights-1166914:${undeadnights_version}"
+    runtimeOnly "maven.modrinth:jade:${jade_version}"
+    implementation "maven.modrinth:contagion:${contagion_version}"
+    implementation "maven.modrinth:undead-nights:${undeadnights_version}"
 
-    compileOnly "curse.maven:curios-309927:${curios_version}"
+    implementation "maven.modrinth:curios:${curios_version}"
 
-    //compileOnly "curse.maven:accessories-938917:${accessories_version}"
+    // there is no Accessories for 26.x (AccessoriesUtil is commented out)
 
-    implementation "curse.maven:corpse-316582:${corpse_version}"
-    implementation "curse.maven:gravestone-mod-238551:${gravestone_version}"
-    compileOnly "curse.maven:hardcore-revival-274036:${project.hardcore_revival_version}"
-
-    //runtimeOnly "curse.maven:sophisticated-backpacks-422301:${sophisticated_backpacks_version}"
-    //runtimeOnly "curse.maven:sophisticated-core-618298:${sophisticated_core_version}"
+    implementation "maven.modrinth:corpse:${corpse_version}"
+    implementation "maven.modrinth:gravestone-mod:${gravestone_version}"
+    compileOnly "maven.modrinth:hardcore-revival:${hardcore_revival_version}"
+    compileOnly "maven.modrinth:balm:${balm_version}"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
