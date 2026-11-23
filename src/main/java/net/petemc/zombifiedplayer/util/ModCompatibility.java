@@ -1,5 +1,7 @@
 package net.petemc.zombifiedplayer.util;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.fml.ModList;
@@ -18,6 +20,11 @@ public class ModCompatibility {
         }
         if (CuriosUtil.isCuriosLoaded()) {
             ZombifiedPlayer.LOGGER.info("Curios API detected. If enabled curios items will be transferred to the Zombified Player.");
+            try {
+                CuriosDeathDrops.register();
+            } catch (LinkageError e) {
+                CuriosUtil.disable(e);
+            }
         }
         if (isCorpseLoaded()) {
             ZombifiedPlayer.LOGGER.info("Corpse mod detected. No corpse will spawn when a Zombified Player is created.");
@@ -26,7 +33,7 @@ public class ModCompatibility {
             ZombifiedPlayer.LOGGER.info("Gravestone mod detected. No gravestone will spawn when a Zombified Player is created.");
         }
         if (HardcoreRevivalUtil.isHardcoreRevivalLoaded()) {
-            HardcoreRevivalUtil.registerEvents();
+            // event hooks are registered in common setup (ZombifiedPlayer#commonSetup)
             ZombifiedPlayer.LOGGER.info("Hardcore Revival detected. Timeout deaths inherit the original knockout death cause for Zombified Player checks.");
         }
     }
@@ -50,6 +57,18 @@ public class ModCompatibility {
             }
         }
         return false;
+    }
+
+    private static final Identifier CONTAGION_INFECTION = Identifier.fromNamespaceAndPath("contagion", "infection");
+
+    /** True if the player has Contagion's infection effect, e.g. at the moment of a death by fall damage. */
+    public static boolean isInfected(ServerPlayer serverPlayer) {
+        if (!isContagionLoaded()) {
+            return false;
+        }
+        return BuiltInRegistries.MOB_EFFECT.get(CONTAGION_INFECTION)
+                .map(serverPlayer::hasEffect)
+                .orElse(false);
     }
 
     public static boolean isUndeadNightsLoaded() {

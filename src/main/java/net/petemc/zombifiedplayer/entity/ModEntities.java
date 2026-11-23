@@ -17,7 +17,9 @@ public class ModEntities {
             DeferredRegister.create(Registries.ENTITY_TYPE, ZombifiedPlayer.MOD_ID);
 
     public static final Supplier<EntityType<ZombifiedPlayerEntity>> ZOMBIFIED_PLAYER =
-            ENTITY_TYPES.register("zombified_player", () -> net.minecraft.world.entity.EntityType.Builder.of(ZombifiedPlayerEntity::new, MobCategory.CREATURE)
+            ENTITY_TYPES.register("zombified_player", () -> net.minecraft.world.entity.EntityType.Builder.of(ZombifiedPlayerEntity::new, MobCategory.MONSTER)
+                    // like zombies: removed in peaceful (zombified players from a player death are kept, see checkDespawn)
+                    .notInPeaceful()
                     .sized(0.6f, 1.95f)
                     .eyeHeight(MainConfig.getUseCustomEyeHeight() ? MainConfig.getCustomEyeHeight() : 1.74f)
                     .build(ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(ZombifiedPlayer.MOD_ID, "zombified_player"))));

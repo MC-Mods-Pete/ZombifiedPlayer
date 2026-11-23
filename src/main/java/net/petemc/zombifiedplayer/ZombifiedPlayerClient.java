@@ -1,6 +1,7 @@
 package net.petemc.zombifiedplayer;
 
 import net.minecraft.client.renderer.entity.EntityRenderers;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -12,11 +13,18 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = ZombifiedPlayer.MOD_ID, dist = Dist.CLIENT)
 // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
 @EventBusSubscriber(modid = ZombifiedPlayer.MOD_ID, value = Dist.CLIENT)
 public class ZombifiedPlayerClient {
+
+    public static ConcurrentHashMap<UUID, Identifier> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String, Identifier> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<UUID, UUID> uuidMissmatches = new ConcurrentHashMap<>();
 
     public ZombifiedPlayerClient(ModContainer modContainer) {
         // Allows NeoForge to create a config screen for this mod's configs.

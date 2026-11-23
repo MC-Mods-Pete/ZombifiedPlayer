@@ -23,11 +23,15 @@ public class ServerPlayerEntityMixin
 {
     @Shadow @Final public MinecraftServer server;
 
-    @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V", shift = At.Shift.AFTER))
+    /**
+     * Injected before removeEntitiesOnShoulder(): runs after the vanilla death message part,
+     * also when there is no broadcast (game rule showDeathMessages off, team death message visibility).
+     */
+    @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;removeEntitiesOnShoulder()V"))
     public void die(DamageSource pCause, CallbackInfo ci)
     {
         ServerPlayer serverPlayer = (ServerPlayer) (Object) this;
-        if (ZombifiedPlayerSpawnLogic.shouldSpawn(serverPlayer, pCause)) {
+        if (ZombifiedPlayerSpawnLogic.takeSpawnedThisDeath(serverPlayer)) {
             if (MainConfig.getPrintSpawnMessageInChat()) {
                 serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"));
                 if (MainConfig.getPrintSpawnLocationInChat()) {

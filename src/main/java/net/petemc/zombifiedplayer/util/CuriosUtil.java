@@ -18,47 +18,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CuriosUtil {
 
+    /** Set when the installed Curios has an incompatible API (e.g. a Curios for another Minecraft version). */
+    private static volatile boolean incompatible = false;
+
     public static boolean isCuriosLoaded() {
-        return ModList.get().isLoaded("curios");
+        return !incompatible && ModList.get().isLoaded("curios");
     }
 
-    public static List<ItemStack> getCuriosItemsAndClear(Player player) {
-        List<ItemStack> curiosItems = new ArrayList<>();
-        
-        if (!isCuriosLoaded()) {
-            return curiosItems;
+    /** Incompatible Curios API: logged once, after that Curios handles its items alone (no crash on death). */
+    public static void disable(LinkageError error) {
+        if (!incompatible) {
+            incompatible = true;
+            ZombifiedPlayer.LOGGER.error("The installed Curios API is not compatible ({}), Curios compatibility is turned off", error.toString());
         }
-        try {
-            CuriosApi.getCuriosInventory(player).ifPresent(curiosInventory -> {
-                for (String identifier : curiosInventory.getCurios().keySet()) {
-                    ICurioStacksHandler stacksHandler = curiosInventory.getCurios().get(identifier);
-                    for (int i = 0; i < stacksHandler.getSlots(); i++) {
-                        ItemStack stack = stacksHandler.getStacks().getStackInSlot(i);
-                        if (!stack.isEmpty()) {
-                            curiosItems.add(stack.copy());
-                            stacksHandler.getStacks().setStackInSlot(i, ItemStack.EMPTY);
-                        }
-                    }
-                }
-            });
-        } catch (Exception e) {
-            ZombifiedPlayer.LOGGER.error("Error accessing Curios API during retrieval", e);
-        }
-
-        if (!curiosItems.isEmpty()) {
-            ZombifiedPlayer.LOGGER.info("Curious items list is not empty, returning list with " + curiosItems.size() + " items.");
-        }
-        
-        return curiosItems;
     }
 
-    /**
-     * Checks if a specific item (identified by its resource location string) is currently equipped in any trinket slot.
-     *
-     * @param player The player to check.
-     * @param itemId The resource location string of the item (e.g. "chargedcharms:charged_totem_charm").
-     * @return true if the item is found in a trinket slot, false otherwise.
-     */
     public static boolean checkForItemInCurios(Player player, String itemId) {
         return BuiltInRegistries.ITEM.getOptional(Identifier.parse(itemId))
                 .map(item -> checkForItemInCurios(player, item.getDefaultInstance()))
@@ -87,6 +61,8 @@ public class CuriosUtil {
                 }
             });
         } catch (Exception e) {
+        } catch (LinkageError e) {
+            disable(e);
         }
 
         return foundItem.get();
