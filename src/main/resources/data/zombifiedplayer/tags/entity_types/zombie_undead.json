@@ -1,0 +1,28 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:zombie",
+    "minecraft:husk",
+    "minecraft:drowned",
+    "minecraft:zombie_villager",
+    "minecraft:zombified_piglin",
+    "minecraft:zoglin",
+    "zombifiedplayer:zombified_player",
+    {
+      "id": "mutantszombies:blister_zombie",
+      "required": false
+    },
+    {
+      "id": "mutantszombies:zombie_brute",
+      "required": false
+    },
+    {
+      "id": "mutantszombies:split_head_zombie",
+      "required": false
+    },
+    {
+      "id": "mutantszombies:mutant_zombie",
+      "required": false
+    }
+  ]
+}

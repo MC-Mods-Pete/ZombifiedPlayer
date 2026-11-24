@@ -98,6 +98,10 @@ dependencies {
 	modCompileOnly "maven.modrinth:undead-nights:${project.undeadnights_version}"
 
 	modImplementation "maven.modrinth:trinkets:${project.trinkets_version}"
+
+	// Hardcore Revival API (Balm events), compile only: the mod stays optional
+	modCompileOnly "maven.modrinth:hardcore-revival:${project.hardcore_revival_version}"
+	modCompileOnly "maven.modrinth:balm:${project.balm_version}"
 	modImplementation "maven.modrinth:utility-belt:${project.utility_belt_version}"
 	modImplementation "maven.modrinth:gravestones:${project.gravestones_version}"
 

@@ -1,7 +1,10 @@
 package net.petemc.zombifiedplayer.util;
 
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.LivingEntity;
 import net.petemc.contagion.casts.InfectedEntity;
 import net.petemc.undeadnights.entity.EliteZombieEntity;
@@ -18,6 +21,10 @@ public class ModCompatibility {
         }
         if (TrinketsUtil.isTrinketsLoaded()) {
             ZombifiedPlayer.LOGGER.info("Trinkets API detected. If enabled trinket items will be transferred to the Zombified Player.");
+        }
+        if (HardcoreRevivalUtil.isHardcoreRevivalLoaded()) {
+            HardcoreRevivalUtil.registerEvents();
+            ZombifiedPlayer.LOGGER.info("Hardcore Revival detected. Timeout deaths inherit the original knockout death cause for Zombified Player checks.");
         }
         if (UniversalGravesUtil.isUniversalGravesLoaded()) {
             UniversalGravesUtil.registerEvent();
@@ -36,6 +43,17 @@ public class ModCompatibility {
             }
         }
         return false;
+    }
+
+    private static final ResourceLocation CONTAGION_INFECTION = new ResourceLocation("contagion", "infection");
+
+    /** True if the player has Contagion's infection effect, e.g. at the moment of a death by fall damage. */
+    public static boolean isInfected(ServerPlayer serverPlayer) {
+        if (!isContagionLoaded()) {
+            return false;
+        }
+        MobEffect infection = BuiltInRegistries.MOB_EFFECT.get(CONTAGION_INFECTION);
+        return infection != null && serverPlayer.hasEffect(infection);
     }
 
     public static boolean isUndeadNightsLoaded() {

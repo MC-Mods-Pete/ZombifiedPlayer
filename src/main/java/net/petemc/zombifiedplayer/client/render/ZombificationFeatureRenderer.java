@@ -14,7 +14,7 @@ import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 @Environment(value=EnvType.CLIENT)
 public class ZombificationFeatureRenderer
 extends RenderLayer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> {
-    private static final ResourceLocation TEXTURE = ResourceLocation.tryBuild(ZombifiedPlayer.MOD_ID,"textures/entity/zombify.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(ZombifiedPlayer.MOD_ID,"textures/entity/zombify.png");
 
     public ZombificationFeatureRenderer(RenderLayerParent<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> featureRendererContext) {
         super(featureRendererContext);

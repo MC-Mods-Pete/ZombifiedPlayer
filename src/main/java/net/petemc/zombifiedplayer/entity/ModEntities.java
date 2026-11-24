@@ -1,16 +1,26 @@
 package net.petemc.zombifiedplayer.entity;
 
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 public class ModEntities {
     public static final EntityType<ZombifiedPlayerEntity> ZOMBIFIED_PLAYER = Registry.register(BuiltInRegistries.ENTITY_TYPE,
-            ResourceLocation.tryBuild(ZombifiedPlayer.MOD_ID, "zombified_player"),
-            EntityType.Builder.of(ZombifiedPlayerEntity::new, MobCategory.MONSTER)
-                    .sized(0.6f, 1.95f)
-                    .build(ResourceLocation.tryBuild(ZombifiedPlayer.MOD_ID, "zombified_player").toString()));
+            new ResourceLocation(ZombifiedPlayer.MOD_ID, "zombified_player"),
+            // Same spawn rules as zombies: on the ground, in the dark (natural spawning, spawners)
+            FabricEntityTypeBuilder.createMob()
+                    .entityFactory(ZombifiedPlayerEntity::new)
+                    .spawnGroup(MobCategory.MONSTER)
+                    .spawnRestriction(SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                            Monster::checkMonsterSpawnRules)
+                    .dimensions(EntityDimensions.scalable(0.6f, 1.95f))
+                    .build());
 }

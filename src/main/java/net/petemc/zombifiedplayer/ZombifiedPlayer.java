@@ -2,16 +2,13 @@ package net.petemc.zombifiedplayer;
 
 import net.fabricmc.api.ModInitializer;
 
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
-import net.petemc.zombifiedplayer.event.PlayerDeathEvents;
-import net.petemc.zombifiedplayer.event.ServerZombifiedPlayerLoadEvent;
-import net.petemc.zombifiedplayer.network.NetworkHandlerServer;
-import net.petemc.zombifiedplayer.network.NetworkPayloads;
+import net.petemc.zombifiedplayer.item.ModItems;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
+import net.petemc.zombifiedplayer.world.NaturalSpawns;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,21 +22,10 @@ public class ZombifiedPlayer implements ModInitializer {
 	public void onInitialize() {
 		LOGGER.info("Initializing Zombified Player Mod");
 		MainConfig.init();
-		PlayerDeathEvents.registerEvent();
-		ServerZombifiedPlayerLoadEvent.registerEvent();
 		ModCompatibility.init();
+		ModItems.register();
+		NaturalSpawns.register();
 
 		FabricDefaultAttributeRegistry.register(ModEntities.ZOMBIFIED_PLAYER, ZombifiedPlayerEntity.createZombifiedPlayerAttributes());
-
-        assert NetworkPayloads.REQEST_GAMEPROFILE_PACKET_ID != null;
-        ServerPlayNetworking.registerGlobalReceiver(NetworkPayloads.REQEST_GAMEPROFILE_PACKET_ID, (server, serverPlayer, handler, buf, responseSender) -> {
-			UUID zombifiedPlayerUuid = buf.readUUID();
-			Integer zombifiedPlayerId = buf.readInt();
-
-			server.execute(() -> {
-				NetworkHandlerServer.processGameProfileRequest(serverPlayer, zombifiedPlayerUuid, zombifiedPlayerId);
-			});
-		});
-
 	}
 }
