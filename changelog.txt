@@ -1,6 +1,11 @@
 ZombifiedPlayer Changelog
 =========================
 
+2.0.1-Fabric-mc1.21.1
+---------------------
+Fixes
+ - Zombified players did not count as undead: Smite, potions of Healing and Harming and the Wither now treat them like zombies.
+
 2.0.0-Fabric-mc1.21.1
 ---------------------
 New
