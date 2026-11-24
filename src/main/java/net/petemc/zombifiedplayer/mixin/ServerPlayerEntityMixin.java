@@ -3,6 +3,7 @@ package net.petemc.zombifiedplayer.mixin;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.petemc.zombifiedplayer.event.PlayerDeathEvents;
+import net.petemc.zombifiedplayer.util.GravestonesUtil;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,5 +28,11 @@ public class ServerPlayerEntityMixin {
     @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;removeEntitiesOnShoulder()V"))
     private void zombifiedplayer$spawnMessage(DamageSource source, CallbackInfo ci) {
         PlayerDeathEvents.sendSpawnMessage((ServerPlayer) (Object) this);
+    }
+
+    /** The death is over: marks that only apply to this death are removed. */
+    @Inject(method = "die", at = @At("RETURN"))
+    private void zombifiedplayer$deathFinished(DamageSource source, CallbackInfo ci) {
+        GravestonesUtil.deathFinished((ServerPlayer) (Object) this);
     }
 }

@@ -7,6 +7,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Gravestones (by Guavy): no grave when a zombified player spawns (config option gravestoneCompatibility).
+ * Gravestones replaces Inventory.dropAll() on death: it places the grave, then clears all trinket slots.
+ * Skipping the grave therefore has to skip both and drop the inventory like vanilla (see GravestonesMixin).
+ */
 public class GravestonesUtil {
 
     private static final Set<UUID> skipGravestoneSet = Collections.synchronizedSet(new HashSet<>());
@@ -16,7 +21,7 @@ public class GravestonesUtil {
     }
 
     /**
-     * Marks this player to skip gravestone creation on next death.
+     * Marks this player to skip the gravestone of the current death.
      * Called before a ZombifiedPlayer is spawned.
      */
     public static void skipGravestone(Player player) {
@@ -25,12 +30,16 @@ public class GravestonesUtil {
         }
     }
 
-    /**
-     * Checks if this player's gravestone should be skipped, and removes them from the set.
-     * Called from the GravestonesMixin.
-     */
+    /** True while the current death of this player gets no gravestone. Called from GravestonesMixin. */
     public static boolean shouldSkipGravestone(UUID playerUuid) {
-        return skipGravestoneSet.remove(playerUuid);
+        return skipGravestoneSet.contains(playerUuid);
+    }
+
+    /**
+     * End of the death (ServerPlayer.die()): the mark only applies to this death, also when Gravestones placed
+     * no grave at all (graves turned off, keepInventory).
+     */
+    public static void deathFinished(Player player) {
+        skipGravestoneSet.remove(player.getUUID());
     }
 }
-
