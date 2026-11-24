@@ -1,11 +1,16 @@
 package net.petemc.zombifiedplayer.config;
 
+import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.toml.TomlFormat;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
+import net.minecraftforge.fml.loading.FMLPaths;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
@@ -35,7 +40,28 @@ public class MainConfig
 
     /** Whether the built-in shambling animation pack was already turned on once (read directly, used during startup). */
     public static boolean getShamblingAnimationPackTurnedOn() {
-        return !SPEC_CLIENT.isLoaded() || SHAMBLING_ANIMATION_PACK_TURNED_ON.get();
+        if (SPEC_CLIENT.isLoaded()) {
+            return SHAMBLING_ANIMATION_PACK_TURNED_ON.get();
+        }
+        // FML loads the client config (state CONFIG_LOAD) only after the game selected its resource packs
+        return readShamblingAnimationPackTurnedOn(FMLPaths.CONFIGDIR.get().resolve(CLIENT_CONFIG_FILE));
+    }
+
+    /**
+     * Reads the marker from the client config file: false without the file or the key (first start, or a config
+     * from a version without the pack), true if the file can not be read (then better not touch the packs).
+     */
+    public static boolean readShamblingAnimationPackTurnedOn(Path file) {
+        if (!Files.isRegularFile(file)) {
+            return false;
+        }
+        try (CommentedFileConfig config = CommentedFileConfig.builder(file, TomlFormat.instance()).build()) {
+            config.load();
+            return Boolean.TRUE.equals(config.get(SHAMBLING_ANIMATION_PACK_TURNED_ON_KEY));
+        } catch (Exception e) {
+            ZombifiedPlayer.LOGGER.warn("Could not read {}: {}", file, e.toString());
+            return true;
+        }
     }
 
     public static void setShamblingAnimationPackTurnedOn() {
@@ -236,9 +262,13 @@ public class MainConfig
     // Client Config
     private static final ForgeConfigSpec.Builder BUILDER_CLIENT = new ForgeConfigSpec.Builder();
 
+    /** Default file name of the client config (ModConfig of type CLIENT without an own name). */
+    public static final String CLIENT_CONFIG_FILE = ZombifiedPlayer.MOD_ID + "-client.toml";
+    public static final String SHAMBLING_ANIMATION_PACK_TURNED_ON_KEY = "shamblingAnimationPackTurnedOn";
+
     private static final ForgeConfigSpec.BooleanValue SHAMBLING_ANIMATION_PACK_TURNED_ON = BUILDER_CLIENT
             .comment("Set by the mod after it turned on the built-in resource pack 'Zombified Player: Shambling Animation' (needs Entity Model Features) at the first start. Turn the pack on or off under Options > Resource Packs. Set this to false to have the pack turned on again at the next start | default: false")
-            .define("shamblingAnimationPackTurnedOn", false);
+            .define(SHAMBLING_ANIMATION_PACK_TURNED_ON_KEY, false);
 
     public static final ForgeConfigSpec SPEC_CLIENT = BUILDER_CLIENT.build();
 
