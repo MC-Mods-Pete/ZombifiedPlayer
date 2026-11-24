@@ -4,7 +4,6 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ZombieModel;
-import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -48,9 +47,9 @@ public class ZombifiedPlayerRenderer
 
     public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx) {
         super(ctx,
-              new ZombieModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE)),
-              new ZombieModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE_INNER_ARMOR)),
-              new ZombieModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE_OUTER_ARMOR)));
+              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER)),
+              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_INNER_ARMOR)),
+              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_OUTER_ARMOR)));
         this.addLayer(new ZombificationFeatureRenderer(this));
     }
 
