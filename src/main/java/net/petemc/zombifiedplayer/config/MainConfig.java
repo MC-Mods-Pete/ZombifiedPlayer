@@ -37,6 +37,18 @@ public class MainConfig
         return useZombieModelFromResourcePacks;
     }
 
+    /** Whether the built-in shambling animation pack was already turned on once (read directly, used during startup). */
+    public static boolean getShamblingAnimationPackTurnedOn() {
+        return !SPEC_CLIENT.isLoaded() || SHAMBLING_ANIMATION_PACK_TURNED_ON.get();
+    }
+
+    public static void setShamblingAnimationPackTurnedOn() {
+        if (SPEC_CLIENT.isLoaded()) {
+            SHAMBLING_ANIMATION_PACK_TURNED_ON.set(true);
+            SHAMBLING_ANIMATION_PACK_TURNED_ON.save();
+        }
+    }
+
     public static boolean getIgnoreKeepInventory() {
         return ignoreKeepInventory;
     }
@@ -231,6 +243,10 @@ public class MainConfig
     private static final ForgeConfigSpec.BooleanValue USE_ZOMBIE_MODEL_FROM_RESOURCE_PACKS = BUILDER_CLIENT
             .comment("If true, zombified players use the zombie model, so zombie models from resource packs (Entity Model Features, e.g. Fresh Animations) also change zombified players. Packs with their own zombie models and textures (e.g. Bray's Zombie Overhaul) make the player skin look broken. Applied after reloading resource packs (F3+T) | default: false")
             .define("useZombieModelFromResourcePacks", false);
+
+    private static final ForgeConfigSpec.BooleanValue SHAMBLING_ANIMATION_PACK_TURNED_ON = BUILDER_CLIENT
+            .comment("Set by the mod after it turned on the built-in resource pack 'Zombified Player: Shambling Animation' (needs Entity Model Features) at the first start. Turn the pack on or off under Options > Resource Packs. Set this to false to have the pack turned on again at the next start | default: false")
+            .define("shamblingAnimationPackTurnedOn", false);
 
     public static final ForgeConfigSpec SPEC_CLIENT = BUILDER_CLIENT.build();
 

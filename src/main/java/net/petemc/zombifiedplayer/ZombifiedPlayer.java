@@ -8,6 +8,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -18,6 +19,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.petemc.zombifiedplayer.client.BuiltinPacks;
 import net.petemc.zombifiedplayer.client.render.ModModelLayers;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.config.MainConfig;
@@ -78,6 +80,7 @@ public class ZombifiedPlayer
         @SubscribeEvent
         public static void onClientSetup(FMLClientSetupEvent event)
         {
+            MinecraftForge.EVENT_BUS.addListener(BuiltinPacks::onClientTick);
             EntityRenderers.register(ModEntities.ZOMBIFIED_PLAYER.get(), ZombifiedPlayerRenderer::new);
         }
 
@@ -85,6 +88,12 @@ public class ZombifiedPlayer
         public static void onRegisterLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event)
         {
             ModModelLayers.register(event);
+        }
+
+        @SubscribeEvent
+        public static void onAddPackFinders(AddPackFindersEvent event)
+        {
+            BuiltinPacks.register(event);
         }
     }
 }

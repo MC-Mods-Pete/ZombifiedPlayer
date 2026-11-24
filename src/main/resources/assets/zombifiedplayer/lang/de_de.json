@@ -55,6 +55,8 @@
   "text.autoconfig.zombifiedplayer.option.infectiousModCompatibility.@Tooltip": "Wenn aktiviert, spawnt ein zombifizierter Spieler, wenn der Spieler von einem Infectious Zombie getötet wird | Standard: deaktiviert",
   "text.autoconfig.zombifiedplayer.option.useZombieModelFromResourcePacks": "Zombie-Modelle aus Resourcepacks verwenden",
   "text.autoconfig.zombifiedplayer.option.useZombieModelFromResourcePacks.@Tooltip": "Wenn aktiviert, verändern Zombie-Modelle aus Resourcepacks (Entity Model Features, z.B. Fresh Animations) auch zombifizierte Spieler. Bei Packs mit eigenen Zombie-Modellen und -Texturen (z.B. Bray's Zombie Overhaul) sieht der Spieler-Skin dann kaputt aus. Gilt nach dem Neuladen der Resourcepacks (F3+T) | Standard: deaktiviert",
+  "text.autoconfig.zombifiedplayer.option.shamblingAnimationPackTurnedOn": "Schlurf-Animation-Paket eingeschaltet",
+  "text.autoconfig.zombifiedplayer.option.shamblingAnimationPackTurnedOn.@Tooltip": "Setzt die Mod, nachdem sie das eingebaute Resourcepack \"Zombified Player: Schlurf-Animation\" beim ersten Start eingeschaltet hat. Ein- und ausschalten unter Optionen > Ressourcenpakete. Deaktivieren, damit das Paket beim nächsten Start wieder eingeschaltet wird | Standard: deaktiviert",
 
   "text.autoconfig.zombifiedplayer.option.corpseCompatibility.@PrefixText": "[Bitte beachten]\nFür die folgende Option muss die Corpse Mod installiert sein!",
   "text.autoconfig.zombifiedplayer.option.corpseCompatibility": "Keine Leiche erzeugen, wenn ein zombifizierter Spieler spawnt",
@@ -68,6 +70,7 @@
   "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight": "Benutzerdefinierte Augenhöhe verwenden",
   "text.autoconfig.zombifiedplayer.option.useCustomEyeHeight.@Tooltip": "Wenn aktiviert, verwendet der zombifizierte Spieler eine benutzerdefinierte Augenhöhe | Standard: deaktiviert",
   "text.autoconfig.zombifiedplayer.option.customEyeHeight": "Benutzerdefinierte Augenhöhe",
-  "text.autoconfig.zombifiedplayer.option.customEyeHeight.@Tooltip": "Die benutzerdefinierte Augenhöhe des zombifizierten Spielers (nur aktiv, wenn 'Benutzerdefinierte Augenhöhe verwenden' aktiviert ist) | Standard: 1.74"
+  "text.autoconfig.zombifiedplayer.option.customEyeHeight.@Tooltip": "Die benutzerdefinierte Augenhöhe des zombifizierten Spielers (nur aktiv, wenn 'Benutzerdefinierte Augenhöhe verwenden' aktiviert ist) | Standard: 1.74",
+  "pack.zombifiedplayer.shambling_animation": "Zombified Player: Schlurf-Animation"
 }
 
