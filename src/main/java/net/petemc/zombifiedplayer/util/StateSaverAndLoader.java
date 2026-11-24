@@ -1,10 +1,10 @@
 package net.petemc.zombifiedplayer.util;
 
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.PersistentState;
-import net.minecraft.world.PersistentStateManager;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 import java.util.HashMap;
@@ -13,17 +13,17 @@ import java.util.UUID;
 
 // Deprecated --> will be removed
 
-public class StateSaverAndLoader extends PersistentState {
+public class StateSaverAndLoader extends SavedData {
 
     public HashMap<UUID, GameProfileData> gameProfiles = new HashMap<>();
 
     @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
-        NbtCompound gameProfilesNbt = new NbtCompound();
+    public CompoundTag save(CompoundTag nbt) {
+        CompoundTag gameProfilesNbt = new CompoundTag();
         gameProfiles.forEach((uuid, gameProfileData) -> {
-            NbtCompound gameProfileNbt = new NbtCompound();
+            CompoundTag gameProfileNbt = new CompoundTag();
 
-            gameProfileNbt.putUuid("gameProfileUUID", gameProfileData.gameProfileUUID);
+            gameProfileNbt.putUUID("gameProfileUUID", gameProfileData.gameProfileUUID);
             gameProfileNbt.putString("gameProfileName", gameProfileData.gameProfileName);
 
             gameProfilesNbt.put(uuid.toString(), gameProfileNbt);
@@ -33,14 +33,14 @@ public class StateSaverAndLoader extends PersistentState {
         return nbt;
     }
 
-    public static StateSaverAndLoader createFromNbt(NbtCompound tag) {
+    public static StateSaverAndLoader createFromNbt(CompoundTag tag) {
         StateSaverAndLoader state = new StateSaverAndLoader();
 
-        NbtCompound gameProfilesNbt = tag.getCompound("gameProfiles");
-        gameProfilesNbt.getKeys().forEach(key -> {
+        CompoundTag gameProfilesNbt = tag.getCompound("gameProfiles");
+        gameProfilesNbt.getAllKeys().forEach(key -> {
             GameProfileData gameProfileData = new GameProfileData();
 
-            gameProfileData.gameProfileUUID = gameProfilesNbt.getCompound(key).getUuid("gameProfileUUID");
+            gameProfileData.gameProfileUUID = gameProfilesNbt.getCompound(key).getUUID("gameProfileUUID");
             gameProfileData.gameProfileName = gameProfilesNbt.getCompound(key).getString("gameProfileName");
 
             UUID uuid = UUID.fromString(key);
@@ -55,9 +55,9 @@ public class StateSaverAndLoader extends PersistentState {
      * It does this by calling 'StateSaveAndLoader::createFromNbt' passing it the previously saved 'NbtCompound' we wrote in 'writeNbt'.
      */
     public static StateSaverAndLoader getServerState(MinecraftServer server) {
-        PersistentStateManager persistentStateManager = server.getWorld(World.OVERWORLD).getPersistentStateManager();
+        DimensionDataStorage persistentStateManager = server.getLevel(Level.OVERWORLD).getDataStorage();
 
-        StateSaverAndLoader state = persistentStateManager.getOrCreate(
+        StateSaverAndLoader state = persistentStateManager.computeIfAbsent(
                 StateSaverAndLoader::createFromNbt,
                 StateSaverAndLoader::new,
                 ZombifiedPlayer.MOD_ID
@@ -68,12 +68,12 @@ public class StateSaverAndLoader extends PersistentState {
         // of mod writers are just going to be confused when their data isn't being saved, and so it's best just to 'markDirty' for them.
         // Besides, it's literally just setting a bool to true, and the only time there's a 'cost' is when the file is written to disk when
         // there were no actual change to any of the mods state (INCREDIBLY RARE).
-        state.markDirty();
+        state.setDirty();
 
         return state;
     }
 
-    public static GameProfileData getGameProfileState(UUID zombUuid, World world) {
+    public static GameProfileData getGameProfileState(UUID zombUuid, Level world) {
         StateSaverAndLoader serverState = getServerState(Objects.requireNonNull(world.getServer()));
 
         // Either get the player by the uuid, or we don't have data for him yet, make a new player state

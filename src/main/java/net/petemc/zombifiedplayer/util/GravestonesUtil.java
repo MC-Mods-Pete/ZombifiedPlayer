@@ -1,8 +1,7 @@
 package net.petemc.zombifiedplayer.util;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.player.PlayerEntity;
-
+import net.minecraft.world.entity.player.Player;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,9 +19,9 @@ public class GravestonesUtil {
      * Marks this player to skip gravestone creation on next death.
      * Called before a ZombifiedPlayer is spawned.
      */
-    public static void skipGravestone(PlayerEntity player) {
+    public static void skipGravestone(Player player) {
         if (isGravestonesLoaded()) {
-            skipGravestoneSet.add(player.getUuid());
+            skipGravestoneSet.add(player.getUUID());
         }
     }
 

@@ -3,7 +3,7 @@ package net.petemc.zombifiedplayer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.event.ClientZombifiedPlayerLoadEvent;
@@ -15,8 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class ZombifiedPlayerClient implements ClientModInitializer {
 
-	public static ConcurrentHashMap<UUID, Identifier> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
-	public static ConcurrentHashMap<String, Identifier> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<UUID, ResourceLocation> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
+	public static ConcurrentHashMap<String, ResourceLocation> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
 	public static ConcurrentHashMap<UUID, UUID> uuidMissmatches = new ConcurrentHashMap<>();
 
 	@Override
@@ -26,10 +26,10 @@ public class ZombifiedPlayerClient implements ClientModInitializer {
 
         assert NetworkPayloads.GAMEPROFILE_PACKET_ID != null;
         ClientPlayNetworking.registerGlobalReceiver(NetworkPayloads.GAMEPROFILE_PACKET_ID, (client, handler, buf, responseSender) -> {
-			UUID zombifiedPlayerUuid = buf.readUuid();
+			UUID zombifiedPlayerUuid = buf.readUUID();
 			Integer zombifiedPlayerId = buf.readInt();
-			UUID gameProfileUuid = buf.readUuid();
-			String gameProfileName = buf.readString();
+			UUID gameProfileUuid = buf.readUUID();
+			String gameProfileName = buf.readUtf();
 
 			client.execute(() -> {
                 assert client.player != null;

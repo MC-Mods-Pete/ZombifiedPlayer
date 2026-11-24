@@ -33,7 +33,7 @@ public class ZombifiedPlayer implements ModInitializer {
 
         assert NetworkPayloads.REQEST_GAMEPROFILE_PACKET_ID != null;
         ServerPlayNetworking.registerGlobalReceiver(NetworkPayloads.REQEST_GAMEPROFILE_PACKET_ID, (server, serverPlayer, handler, buf, responseSender) -> {
-			UUID zombifiedPlayerUuid = buf.readUuid();
+			UUID zombifiedPlayerUuid = buf.readUUID();
 			Integer zombifiedPlayerId = buf.readInt();
 
 			server.execute(() -> {

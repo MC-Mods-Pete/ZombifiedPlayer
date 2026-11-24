@@ -1,16 +1,16 @@
 package net.petemc.zombifiedplayer.entity;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnGroup;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 public class ModEntities {
-    public static final EntityType<ZombifiedPlayerEntity> ZOMBIFIED_PLAYER = Registry.register(Registries.ENTITY_TYPE,
-            Identifier.of(ZombifiedPlayer.MOD_ID, "zombified_player"),
-            EntityType.Builder.create(ZombifiedPlayerEntity::new, SpawnGroup.MONSTER)
-                    .setDimensions(0.6f, 1.95f)
-                    .build(Identifier.of(ZombifiedPlayer.MOD_ID, "zombified_player").toString()));
+    public static final EntityType<ZombifiedPlayerEntity> ZOMBIFIED_PLAYER = Registry.register(BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.tryBuild(ZombifiedPlayer.MOD_ID, "zombified_player"),
+            EntityType.Builder.of(ZombifiedPlayerEntity::new, MobCategory.MONSTER)
+                    .sized(0.6f, 1.95f)
+                    .build(ResourceLocation.tryBuild(ZombifiedPlayer.MOD_ID, "zombified_player").toString()));
 }

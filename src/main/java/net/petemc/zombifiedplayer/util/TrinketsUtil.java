@@ -2,13 +2,13 @@ package net.petemc.zombifiedplayer.util;
 
 import dev.emi.trinkets.api.*;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 import java.util.ArrayList;
@@ -21,7 +21,7 @@ public class TrinketsUtil {
         return FabricLoader.getInstance().isModLoaded("trinkets");
     }
 
-    public static List<ItemStack> getTrinketItemsAndClear(PlayerEntity player) {
+    public static List<ItemStack> getTrinketItemsAndClear(Player player) {
         List<ItemStack> trinketsItems = new ArrayList<>();
         
         if (!isTrinketsLoaded()) {
@@ -30,9 +30,9 @@ public class TrinketsUtil {
 
         try {
             TrinketsApi.getTrinketComponent(player).ifPresent(trinketComponent -> {
-                for (Pair<SlotReference, ItemStack> itemStackPair : trinketComponent.getAllEquipped()) {
-                        trinketsItems.add(itemStackPair.getRight().copy());
-                        itemStackPair.getRight().setCount(0);
+                for (Tuple<SlotReference, ItemStack> itemStackPair : trinketComponent.getAllEquipped()) {
+                        trinketsItems.add(itemStackPair.getB().copy());
+                        itemStackPair.getB().setCount(0);
                 }
             });
         } catch (Exception e) {
@@ -41,18 +41,18 @@ public class TrinketsUtil {
         return trinketsItems;
     }
 
-    public static boolean checkForItemInTrinkets(PlayerEntity player, String itemId) {
-        Identifier identifier = Identifier.tryParse(itemId);
+    public static boolean checkForItemInTrinkets(Player player, String itemId) {
+        ResourceLocation identifier = ResourceLocation.tryParse(itemId);
         if (identifier == null) {
             return false;
         }
 
-        return Registries.ITEM.getOrEmpty(identifier)
-                .map(item -> checkForItemInTrinkets(player, item.getDefaultStack()))
+        return BuiltInRegistries.ITEM.getOptional(identifier)
+                .map(item -> checkForItemInTrinkets(player, item.getDefaultInstance()))
                 .orElse(false);
     }
 
-    public static boolean checkForItemInTrinkets(PlayerEntity player, ItemStack itemToCheck) {
+    public static boolean checkForItemInTrinkets(Player player, ItemStack itemToCheck) {
         AtomicBoolean foundItem = new AtomicBoolean(false);
 
         if (!isTrinketsLoaded()) {
@@ -61,8 +61,8 @@ public class TrinketsUtil {
 
         try {
             TrinketsApi.getTrinketComponent(player).ifPresent(trinketComponent -> {
-                for (Pair<SlotReference, ItemStack> itemStackPair : trinketComponent.getAllEquipped()) {
-                    if (itemStackPair.getRight().isOf(itemToCheck.getItem())) {
+                for (Tuple<SlotReference, ItemStack> itemStackPair : trinketComponent.getAllEquipped()) {
+                    if (itemStackPair.getB().is(itemToCheck.getItem())) {
                         ZombifiedPlayer.LOGGER.info("Found " + itemToCheck + " in trinkets!");
                         foundItem.set(true);
                     }
@@ -75,15 +75,15 @@ public class TrinketsUtil {
     }
 
     
-    public static NbtList writeTrinketItemsToNbt(List<ItemStack> trinketsItems) {
-        NbtList nbtList = new NbtList();
+    public static ListTag writeTrinketItemsToNbt(List<ItemStack> trinketsItems) {
+        ListTag nbtList = new ListTag();
         
         for (int i = 0; i < trinketsItems.size(); i++) {
             ItemStack stack = trinketsItems.get(i);
             if (!stack.isEmpty()) {
-                NbtCompound itemNbt = new NbtCompound();
+                CompoundTag itemNbt = new CompoundTag();
                 itemNbt.putByte("Slot", (byte) i);
-                stack.writeNbt(itemNbt);
+                stack.save(itemNbt);
                 nbtList.add(itemNbt);
             }
         }
@@ -91,12 +91,12 @@ public class TrinketsUtil {
         return nbtList;
     }
 
-    public static List<ItemStack> readTrinketItemsFromNbt(NbtList nbtList) {
+    public static List<ItemStack> readTrinketItemsFromNbt(ListTag nbtList) {
         List<ItemStack> trinketsItems = new ArrayList<>();
         
         for (int i = 0; i < nbtList.size(); i++) {
-            NbtCompound itemNbt = nbtList.getCompound(i);
-            ItemStack stack = ItemStack.fromNbt(itemNbt);
+            CompoundTag itemNbt = nbtList.getCompound(i);
+            ItemStack stack = ItemStack.of(itemNbt);
             if (!stack.isEmpty()) {
                 trinketsItems.add(stack);
             }

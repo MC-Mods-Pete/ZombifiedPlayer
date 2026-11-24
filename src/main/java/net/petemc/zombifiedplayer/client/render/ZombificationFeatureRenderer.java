@@ -1,29 +1,29 @@
 package net.petemc.zombifiedplayer.client.render;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.feature.FeatureRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.ZombieEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.model.ZombieModel;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.resources.ResourceLocation;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 
 @Environment(value=EnvType.CLIENT)
 public class ZombificationFeatureRenderer
-extends FeatureRenderer<ZombifiedPlayerEntity, ZombieEntityModel<ZombifiedPlayerEntity>> {
-    private static final Identifier TEXTURE = Identifier.of(ZombifiedPlayer.MOD_ID,"textures/entity/zombify.png");
+extends RenderLayer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> {
+    private static final ResourceLocation TEXTURE = ResourceLocation.tryBuild(ZombifiedPlayer.MOD_ID,"textures/entity/zombify.png");
 
-    public ZombificationFeatureRenderer(FeatureRendererContext<ZombifiedPlayerEntity, ZombieEntityModel<ZombifiedPlayerEntity>> featureRendererContext) {
+    public ZombificationFeatureRenderer(RenderLayerParent<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> featureRendererContext) {
         super(featureRendererContext);
     }
 
     @Override
-    public void render(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, ZombifiedPlayerEntity zombifiedPlayerEntity, float f, float g, float h, float j, float k, float l) {
-        ZombificationFeatureRenderer.renderModel(this.getContextModel(), this.getTexture(zombifiedPlayerEntity), matrixStack, vertexConsumerProvider, i, zombifiedPlayerEntity, 0.6f, 1.0f, 0.6f);
-        ZombificationFeatureRenderer.renderModel(this.getContextModel(), TEXTURE, matrixStack, vertexConsumerProvider, i, zombifiedPlayerEntity, 1.0f, 1.0f, 1.0f);
+    public void render(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, ZombifiedPlayerEntity zombifiedPlayerEntity, float f, float g, float h, float j, float k, float l) {
+        ZombificationFeatureRenderer.renderColoredCutoutModel(this.getParentModel(), this.getTextureLocation(zombifiedPlayerEntity), matrixStack, vertexConsumerProvider, i, zombifiedPlayerEntity, 0.6f, 1.0f, 0.6f);
+        ZombificationFeatureRenderer.renderColoredCutoutModel(this.getParentModel(), TEXTURE, matrixStack, vertexConsumerProvider, i, zombifiedPlayerEntity, 1.0f, 1.0f, 1.0f);
     }
 }
 

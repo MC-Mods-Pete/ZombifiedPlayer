@@ -3,10 +3,10 @@ package net.petemc.zombifiedplayer.util;
 import io.wispforest.accessories.api.AccessoriesCapability;
 import io.wispforest.accessories.api.slot.SlotEntryReference;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ public class AccessoriesUtil {
         return FabricLoader.getInstance().isModLoaded("accessories");
     }
 
-    public static List<ItemStack> getAccessoriesItemsAndClear(PlayerEntity player) {
+    public static List<ItemStack> getAccessoriesItemsAndClear(Player player) {
         List<ItemStack> accessoriesItems = new ArrayList<>();
 
         if (!isAccessoriesLoaded()) {
@@ -40,7 +40,7 @@ public class AccessoriesUtil {
         return accessoriesItems;
     }
 
-    public static boolean checkForItemInAccessories(PlayerEntity player, ItemStack itemToCheck) {
+    public static boolean checkForItemInAccessories(Player player, ItemStack itemToCheck) {
         AtomicBoolean foundItem = new AtomicBoolean(false);
 
         if (!isAccessoriesLoaded()) {
@@ -50,7 +50,7 @@ public class AccessoriesUtil {
         try {
             AccessoriesCapability.getOptionally(player).ifPresent(capability -> {
                 for (SlotEntryReference entry : capability.getAllEquipped()) {
-                    if (entry.stack().isOf(itemToCheck.getItem())) {
+                    if (entry.stack().is(itemToCheck.getItem())) {
                         ZombifiedPlayer.LOGGER.info("Found " + itemToCheck + " in accessories!");
                         foundItem.set(true);
                     }
@@ -63,15 +63,15 @@ public class AccessoriesUtil {
         return foundItem.get();
     }
 
-    public static NbtList writeAccessoriesItemsToNbt(List<ItemStack> accessoryItems) {
-        NbtList nbtList = new NbtList();
+    public static ListTag writeAccessoriesItemsToNbt(List<ItemStack> accessoryItems) {
+        ListTag nbtList = new ListTag();
 
         for (int i = 0; i < accessoryItems.size(); i++) {
             ItemStack stack = accessoryItems.get(i);
             if (!stack.isEmpty()) {
-                NbtCompound itemNbt = new NbtCompound();
+                CompoundTag itemNbt = new CompoundTag();
                 itemNbt.putByte("Slot", (byte) i);
-                stack.writeNbt(itemNbt);
+                stack.save(itemNbt);
                 nbtList.add(itemNbt);
             }
         }
@@ -79,12 +79,12 @@ public class AccessoriesUtil {
         return nbtList;
     }
 
-    public static List<ItemStack> readAccessoriesItemsFromNbt(NbtList nbtList) {
+    public static List<ItemStack> readAccessoriesItemsFromNbt(ListTag nbtList) {
         List<ItemStack> accessoryItems = new ArrayList<>();
 
         for (int i = 0; i < nbtList.size(); i++) {
-            NbtCompound itemNbt = nbtList.getCompound(i);
-            ItemStack stack = ItemStack.fromNbt(itemNbt);
+            CompoundTag itemNbt = nbtList.getCompound(i);
+            ItemStack stack = ItemStack.of(itemNbt);
             if (!stack.isEmpty()) {
                 accessoryItems.add(stack);
             }

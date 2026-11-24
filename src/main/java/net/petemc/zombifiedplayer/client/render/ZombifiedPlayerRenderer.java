@@ -3,13 +3,13 @@ package net.petemc.zombifiedplayer.client.render;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.block.entity.SkullBlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.ZombieBaseEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModelLayers;
-import net.minecraft.client.render.entity.model.ZombieEntityModel;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.ZombieModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import net.petemc.zombifiedplayer.ZombifiedPlayerClient;
 import net.petemc.zombifiedplayer.config.MainConfig;
@@ -17,9 +17,9 @@ import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 
 @Environment(EnvType.CLIENT)
 public class ZombifiedPlayerRenderer
-        extends ZombieBaseEntityRenderer<ZombifiedPlayerEntity, ZombieEntityModel<ZombifiedPlayerEntity>> {
+        extends AbstractZombieRenderer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> {
 
-    private static Identifier TEXTURE_FALLBACK = Identifier.of("minecraft", "textures/entity/player/wide/steve.png");
+    private static ResourceLocation TEXTURE_FALLBACK = ResourceLocation.tryBuild("minecraft", "textures/entity/player/wide/steve.png");
     private static GameProfile receivedGameProfile;
     private static GameProfile inProgress = null;
     private boolean gameProfileReceived = false;
@@ -32,13 +32,13 @@ public class ZombifiedPlayerRenderer
     private int counter = counterMax;
     private int totalTries = 0;
 
-    public ZombifiedPlayerRenderer(EntityRendererFactory.Context ctx) {
-        super(ctx, new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE)), new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_INNER_ARMOR)), new ZombieEntityModel<>(ctx.getPart(EntityModelLayers.ZOMBIE_OUTER_ARMOR)));
-        this.addFeature(new ZombificationFeatureRenderer(this));
+    public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx) {
+        super(ctx, new ZombieModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE)), new ZombieModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE_INNER_ARMOR)), new ZombieModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE_OUTER_ARMOR)));
+        this.addLayer(new ZombificationFeatureRenderer(this));
     }
 
     @Override
-    public Identifier getTexture(ZombifiedPlayerEntity entity) {
+    public ResourceLocation getTextureLocation(ZombifiedPlayerEntity entity) {
         if (entity.getGameProfile() != null) {
             if (ZombifiedPlayerClient.cachedPlayerSkinsByUUID.containsKey(entity.getGameProfile().getId())) {
                 return ZombifiedPlayerClient.cachedPlayerSkinsByUUID.get(entity.getGameProfile().getId());
@@ -54,7 +54,7 @@ public class ZombifiedPlayerRenderer
         return TEXTURE_FALLBACK;
     }
 
-    public void setTexture(Identifier id) {
+    public void setTexture(ResourceLocation id) {
         TEXTURE_FALLBACK = id;
     }
 
@@ -74,7 +74,7 @@ public class ZombifiedPlayerRenderer
                         ZombifiedPlayer.LOGGER.info("Trying to get GameProfile for {} UUID: {}", profile.getName(), profile.getId());
                     }
 
-                    SkullBlockEntity.loadProperties(profile, owner -> {
+                    SkullBlockEntity.updateGameprofile(profile, owner -> {
                         receivedGameProfile = owner;
                     });
                 }
@@ -87,10 +87,10 @@ public class ZombifiedPlayerRenderer
                 }
 
                 if (receivedGameProfile != null) {
-                    MinecraftClient minecraft = MinecraftClient.getInstance();
+                    Minecraft minecraft = Minecraft.getInstance();
 
-                    Identifier skinTexture = null;
-                    skinTexture = minecraft.getSkinProvider().loadSkin(receivedGameProfile);
+                    ResourceLocation skinTexture = null;
+                    skinTexture = minecraft.getSkinManager().getInsecureSkinLocation(receivedGameProfile);
 
                     if (skinTexture != null) {
                         if (!receivedGameProfile.getId().equals(profile.getId())) {

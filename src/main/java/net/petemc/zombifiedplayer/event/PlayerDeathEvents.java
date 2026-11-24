@@ -1,16 +1,16 @@
 package net.petemc.zombifiedplayer.event;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.Items;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
-import net.minecraft.text.Texts;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Items;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
 import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
@@ -29,7 +29,7 @@ public class PlayerDeathEvents {
     public PlayerDeathEvents() {
         ServerLivingEntityEvents.ALLOW_DEATH.register((entity, damageSource, amount) -> {
             pPlayer = entity;
-            pAttacker = damageSource.getAttacker() instanceof LivingEntity ? ((LivingEntity) damageSource.getAttacker()) : null;
+            pAttacker = damageSource.getEntity() instanceof LivingEntity ? ((LivingEntity) damageSource.getEntity()) : null;
             pSource = damageSource;
             pAmount = amount;
             executeAllowDeath();
@@ -38,7 +38,7 @@ public class PlayerDeathEvents {
 
         ServerLivingEntityEvents.AFTER_DEATH.register((entity, damageSource) -> {
             pPlayer = entity;
-            pAttacker = damageSource.getAttacker() instanceof LivingEntity ? ((LivingEntity) damageSource.getAttacker()) : null;
+            pAttacker = damageSource.getEntity() instanceof LivingEntity ? ((LivingEntity) damageSource.getEntity()) : null;
             pSource = damageSource;
             executeAfterDeath();
         });
@@ -46,10 +46,10 @@ public class PlayerDeathEvents {
 
     public static void executeAllowDeath() {
         if (pPlayer != null) {
-            if (pPlayer instanceof ServerPlayerEntity serverPlayer) {
-                boolean flag = TrinketsUtil.checkForItemInTrinkets(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultStack());
+            if (pPlayer instanceof ServerPlayer serverPlayer) {
+                boolean flag = TrinketsUtil.checkForItemInTrinkets(serverPlayer, Items.TOTEM_OF_UNDYING.getDefaultInstance());
                 boolean flag2 = TrinketsUtil.checkForItemInTrinkets(serverPlayer, "chargedcharms:charged_totem_charm");
-                if (!(serverPlayer.getMainHandStack().isOf(Items.TOTEM_OF_UNDYING) || serverPlayer.getOffHandStack().isOf(Items.TOTEM_OF_UNDYING) || flag || flag2)) {
+                if (!(serverPlayer.getMainHandItem().is(Items.TOTEM_OF_UNDYING) || serverPlayer.getOffhandItem().is(Items.TOTEM_OF_UNDYING) || flag || flag2)) {
                     if ((MainConfig.getSpawnOnAnyDeath() ||
                             (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
                             (attackerIsUndead() && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
@@ -64,20 +64,20 @@ public class PlayerDeathEvents {
 
     public static void executeAfterDeath() {
         if (pPlayer != null) {
-            if (pPlayer instanceof ServerPlayerEntity serverPlayer) {
+            if (pPlayer instanceof ServerPlayer serverPlayer) {
                 if ((MainConfig.getSpawnOnAnyDeath() ||
                         (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
                         (attackerIsUndead() && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
                     if (MainConfig.getPrintSpawnMessageInChat()) {
-                        serverPlayer.sendMessageToClient(Text.translatable("zombifiedplayer.spawn.message"), false);
+                        serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"), false);
                         if (MainConfig.getPrintSpawnLocationInChat()) {
-                            Text textCoordinates = Texts.bracketed(Text.translatable("chat.coordinates", pPlayer.getBlockPos().getX(), pPlayer.getBlockPos().getY(), pPlayer.getBlockPos().getZ()))
-                                    .styled(
-                                            style -> style.withColor(Formatting.GREEN)
-                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + pPlayer.getBlockPos().getX() + " " + pPlayer.getBlockPos().getY() + " " + pPlayer.getBlockPos().getZ()))
-                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("chat.coordinates.tooltip")))
+                            Component textCoordinates = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", pPlayer.blockPosition().getX(), pPlayer.blockPosition().getY(), pPlayer.blockPosition().getZ()))
+                                    .withStyle(
+                                            style -> style.withColor(ChatFormatting.GREEN)
+                                                    .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + pPlayer.blockPosition().getX() + " " + pPlayer.blockPosition().getY() + " " + pPlayer.blockPosition().getZ()))
+                                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip")))
                                     );
-                            serverPlayer.sendMessageToClient(Text.translatable("zombifiedplayer.location.message", textCoordinates), false);
+                            serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.location.message", textCoordinates), false);
                         }
                     }
                 }

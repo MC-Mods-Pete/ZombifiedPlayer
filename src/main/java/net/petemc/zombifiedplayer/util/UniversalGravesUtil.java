@@ -2,7 +2,7 @@ package net.petemc.zombifiedplayer.util;
 
 import eu.pb4.graves.event.PlayerGraveCreationEvent;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.petemc.zombifiedplayer.config.MainConfig;
 
 import java.util.Collections;
@@ -24,7 +24,7 @@ public class UniversalGravesUtil {
      */
     public static void registerEvent() {
         PlayerGraveCreationEvent.EVENT.register(player -> {
-            if (MainConfig.getGravestoneCompatibility() && skipGraveSet.remove(player.getUuid())) {
+            if (MainConfig.getGravestoneCompatibility() && skipGraveSet.remove(player.getUUID())) {
                 return PlayerGraveCreationEvent.CreationResult.BLOCK_SILENT;
             }
             return PlayerGraveCreationEvent.CreationResult.ALLOW;
@@ -35,9 +35,9 @@ public class UniversalGravesUtil {
      * Marks this player to skip Universal Graves grave creation on next death.
      * Called before a ZombifiedPlayer is spawned.
      */
-    public static void skipGrave(PlayerEntity player) {
+    public static void skipGrave(Player player) {
         if (isUniversalGravesLoaded()) {
-            skipGraveSet.add(player.getUuid());
+            skipGraveSet.add(player.getUUID());
         }
     }
 }

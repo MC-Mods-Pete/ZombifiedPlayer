@@ -1,8 +1,8 @@
 package net.petemc.zombifiedplayer.util;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.petemc.contagion.casts.InfectedEntity;
 import net.petemc.undeadnights.entity.EliteZombieEntity;
 import net.petemc.undeadnights.entity.HordeZombieEntity;
@@ -29,7 +29,7 @@ public class ModCompatibility {
         return FabricLoader.getInstance().isModLoaded("contagion");
     }
 
-    public static boolean diedFromInfection(ServerPlayerEntity serverPlayer) {
+    public static boolean diedFromInfection(ServerPlayer serverPlayer) {
         if (isContagionLoaded()) {
             if (serverPlayer instanceof InfectedEntity infectedEntity) {
                 return infectedEntity.contagion_playerDiedFromInfection();
