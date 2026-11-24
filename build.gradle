@@ -161,16 +161,18 @@ repositories {
     //     dir 'libs'
     // }
 
-    // curse maven
     mavenLocal()
 
+    maven { url "https://maven.blamejared.com" }
+
+    // no exclusiveContent here: fg.deobf() serves the remapped jars from its own local repo with the same group
     maven {
-        url "https://cursemaven.com"
+        name = "Modrinth"
+        url "https://api.modrinth.com/maven"
         content {
-            includeGroup "curse.maven"
+            includeGroup "maven.modrinth"
         }
     }
-    maven { url "https://maven.blamejared.com" }
 }
 
 dependencies {
@@ -200,20 +202,20 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
 
     //other dependencies
-    implementation fg.deobf("curse.maven:contagion-1027702:${contagion_version}")
-    implementation fg.deobf("curse.maven:undeadnights-1166914:${undeadnights_version}")
+    implementation fg.deobf("maven.modrinth:contagion:${contagion_version}")
+    implementation fg.deobf("maven.modrinth:undead-nights:${undeadnights_version}")
 
-    runtimeOnly fg.deobf("curse.maven:jade--324717:${jade_version}")
-    runtimeOnly fg.deobf("curse.maven:contagion-1027702:${contagion_version}")
-    runtimeOnly fg.deobf("curse.maven:undeadnights-1166914:${undeadnights_version}")
+    runtimeOnly fg.deobf("maven.modrinth:jade:${jade_version}")
+    runtimeOnly fg.deobf("maven.modrinth:contagion:${contagion_version}")
+    runtimeOnly fg.deobf("maven.modrinth:undead-nights:${undeadnights_version}")
 
-    implementation fg.deobf("curse.maven:curios-309927:${curios_version}")
+    implementation fg.deobf("maven.modrinth:curios:${curios_version}")
 
-    implementation fg.deobf("curse.maven:corpse-316582:${corpse_version}")
-    implementation fg.deobf("curse.maven:gravestone-mod-238551:${gravestone_mod_version}")
+    implementation fg.deobf("maven.modrinth:corpse:${corpse_version}")
+    implementation fg.deobf("maven.modrinth:gravestone-mod:${gravestone_mod_version}")
 
-    implementation fg.deobf("curse.maven:sophisticated-backpacks-422301:${sophisticated_backpacks_version}")
-    implementation fg.deobf("curse.maven:sophisticated-core-618298:${sophisticated_core_version}")
+    implementation fg.deobf("maven.modrinth:sophisticated-backpacks:${sophisticated_backpacks_version}")
+    implementation fg.deobf("maven.modrinth:sophisticated-core:${sophisticated_core_version}")
 }
 
 mixin {
