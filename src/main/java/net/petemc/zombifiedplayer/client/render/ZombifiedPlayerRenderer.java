@@ -2,8 +2,11 @@ package net.petemc.zombifiedplayer.client.render;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ZombieModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.resources.DefaultPlayerSkin;
@@ -18,6 +21,7 @@ import net.petemc.zombifiedplayer.entity.ZombifiedPlayerEntity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -45,12 +49,48 @@ public class ZombifiedPlayerRenderer
     private static final long FETCH_TIMEOUT_MS = 30_000L;
     private static final int MAX_TRIES = 5;
 
+    /** UUIDs of profiles whose skin uses the slim model (3 pixel arms). */
+    private static final Set<UUID> SLIM_SKINS = ConcurrentHashMap.newKeySet();
+
+    private final ZombieModel<ZombifiedPlayerEntity> wideModel;
+    private final ZombieModel<ZombifiedPlayerEntity> slimModel;
+
     public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx) {
+        this(ctx, MainConfig.getUseZombieModelFromResourcePacks());
+    }
+
+    /**
+     * useZombieModel: vanilla zombie layers (zombie models from resource packs apply, no second skin layer, always wide arms).
+     * Otherwise own layers with the player mesh, wide or slim arms depending on the skin.
+     */
+    private ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx, boolean useZombieModel) {
         super(ctx,
-              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.body())),
-              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.innerArmor())),
-              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.outerArmor())));
+              useZombieModel
+                      ? new ZombieModel<>(ctx.bakeLayer(ModelLayers.ZOMBIE))
+                      : new ZombifiedPlayerModel(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER), false),
+              new ZombieModel<>(ctx.bakeLayer(useZombieModel ? ModelLayers.ZOMBIE_INNER_ARMOR : ModModelLayers.ZOMBIFIED_PLAYER_INNER_ARMOR)),
+              new ZombieModel<>(ctx.bakeLayer(useZombieModel ? ModelLayers.ZOMBIE_OUTER_ARMOR : ModModelLayers.ZOMBIFIED_PLAYER_OUTER_ARMOR)));
+        this.wideModel = this.model;
+        this.slimModel = useZombieModel
+                ? this.model
+                : new ZombifiedPlayerModel(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_SLIM), true);
         this.addLayer(new ZombificationFeatureRenderer(this));
+    }
+
+    @Override
+    public void render(@NotNull ZombifiedPlayerEntity entity, float entityYaw, float partialTicks, @NotNull PoseStack poseStack,
+                       @NotNull MultiBufferSource buffer, int packedLight) {
+        // the layers (zombification, held items) use getModel(), so they follow the switch
+        this.model = isSlim(entity) ? this.slimModel : this.wideModel;
+        super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
+    }
+
+    /** Slim only once the skin of the profile is loaded: the fallback skin (wide Steve) has wide arms. */
+    private static boolean isSlim(ZombifiedPlayerEntity entity) {
+        GameProfile profile = entity.getGameProfile();
+        if (profile == null || profile.getId() == null) return false;
+        UUID uuid = profile.getId();
+        return SLIM_SKINS.contains(uuid) && SKINS.containsKey(uuid);
     }
 
     @Override
@@ -129,6 +169,11 @@ public class ZombifiedPlayerRenderer
                     ? skinManager.registerTexture(skin, MinecraftProfileTexture.Type.SKIN)
                     : TEXTURE_FALLBACK;
 
+            if (skin != null && "slim".equals(skin.getMetadata("model"))) {
+                SLIM_SKINS.add(uuid);
+            } else {
+                SLIM_SKINS.remove(uuid);
+            }
             SKINS.put(uuid, location);
             RETRY_AFTER.remove(uuid);
             FAILED_TRIES.remove(uuid);
