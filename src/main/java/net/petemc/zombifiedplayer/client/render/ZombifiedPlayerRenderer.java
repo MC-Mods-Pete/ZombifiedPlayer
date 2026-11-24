@@ -4,6 +4,8 @@ import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ZombieModel;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.client.renderer.entity.AbstractZombieRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -24,11 +26,15 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ZombifiedPlayerRenderer
         extends AbstractZombieRenderer<ZombifiedPlayerEntity, ZombieModel<ZombifiedPlayerEntity>> {
 
-    private static final ResourceLocation TEXTURE_FALLBACK =
-            new ResourceLocation("minecraft", "textures/entity/player/wide/steve.png");
+    /** A skin texture and whether it is made for the slim model (3 pixel arms). */
+    private record Skin(ResourceLocation texture, boolean slim) {
+    }
+
+    private static final Skin FALLBACK = new Skin(
+            new ResourceLocation("minecraft", "textures/entity/player/wide/steve.png"), false);
 
     /** Resolved skin per stored profile UUID (also the fallback once we know the account has no custom skin). */
-    private static final Map<UUID, ResourceLocation> SKINS = new ConcurrentHashMap<>();
+    private static final Map<UUID, Skin> SKINS = new ConcurrentHashMap<>();
 
     /** Start time (ms) of the running fetch per UUID, prevents duplicate fetches. */
     private static final Map<UUID, Long> FETCHING = new ConcurrentHashMap<>();
@@ -45,26 +51,43 @@ public class ZombifiedPlayerRenderer
     private static final long FETCH_TIMEOUT_MS = 30_000L;
     private static final int MAX_TRIES = 5;
 
+    private final ZombieModel<ZombifiedPlayerEntity> wideModel;
+    private final ZombieModel<ZombifiedPlayerEntity> slimModel;
+
+    /** Own layers with the player mesh, wide or slim arms depending on the skin. */
     public ZombifiedPlayerRenderer(EntityRendererProvider.Context ctx) {
         super(ctx,
-              new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER)),
+              new ZombifiedPlayerModel(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER), false),
               new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_INNER_ARMOR)),
               new ZombieModel<>(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_OUTER_ARMOR)));
+        this.wideModel = this.model;
+        this.slimModel = new ZombifiedPlayerModel(ctx.bakeLayer(ModModelLayers.ZOMBIFIED_PLAYER_SLIM), true);
         this.addLayer(new ZombificationFeatureRenderer(this));
     }
 
     @Override
-    public @NotNull ResourceLocation getTextureLocation(@NotNull ZombifiedPlayerEntity entity) {
-        GameProfile profile = entity.getGameProfile();
-        if (profile == null || profile.getId() == null) return TEXTURE_FALLBACK;
+    public void render(@NotNull ZombifiedPlayerEntity entity, float entityYaw, float partialTicks, @NotNull PoseStack poseStack,
+                       @NotNull MultiBufferSource buffer, int packedLight) {
+        // the layers (zombification, held items) use getModel(), so they follow the switch
+        this.model = skinOf(entity).slim() ? this.slimModel : this.wideModel;
+        super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
+    }
 
-        ResourceLocation cached = SKINS.get(profile.getId());
+    @Override
+    public @NotNull ResourceLocation getTextureLocation(@NotNull ZombifiedPlayerEntity entity) {
+        return skinOf(entity).texture();
+    }
+
+    /** The loaded skin of the profile, otherwise the fallback skin (and a fetch is started, never blocking). */
+    private static Skin skinOf(ZombifiedPlayerEntity entity) {
+        GameProfile profile = entity.getGameProfile();
+        if (profile == null || profile.getId() == null) return FALLBACK;
+
+        Skin cached = SKINS.get(profile.getId());
         if (cached != null) return cached;
 
-        // Never blocks the render thread
         triggerSkinFetch(profile);
-
-        return TEXTURE_FALLBACK;
+        return FALLBACK;
     }
 
     /**
@@ -80,7 +103,7 @@ public class ZombifiedPlayerRenderer
         UUID uuid = profile.getId();
         String name = profile.getName();
         if (name == null || name.isEmpty()) {
-            SKINS.put(uuid, TEXTURE_FALLBACK);
+            SKINS.put(uuid, FALLBACK);
             return;
         }
 
@@ -125,14 +148,14 @@ public class ZombifiedPlayerRenderer
             SkinManager skinManager = Minecraft.getInstance().getSkinManager();
             MinecraftProfileTexture skin = skinManager.getInsecureSkinInformation(resolved).get(MinecraftProfileTexture.Type.SKIN);
             // Account without custom skin: keep the fallback skin and stop fetching
-            ResourceLocation location = skin != null
-                    ? skinManager.registerTexture(skin, MinecraftProfileTexture.Type.SKIN)
-                    : TEXTURE_FALLBACK;
+            Skin resolvedSkin = skin != null
+                    ? new Skin(skinManager.registerTexture(skin, MinecraftProfileTexture.Type.SKIN), "slim".equals(skin.getMetadata("model")))
+                    : FALLBACK;
 
-            SKINS.put(uuid, location);
+            SKINS.put(uuid, resolvedSkin);
             RETRY_AFTER.remove(uuid);
             FAILED_TRIES.remove(uuid);
-            ZombifiedPlayer.LOGGER.debug("Skin cached for {} -> {}", name, location);
+            ZombifiedPlayer.LOGGER.debug("Skin cached for {} -> {} (slim: {})", name, resolvedSkin.texture(), resolvedSkin.slim());
         } catch (RuntimeException e) {
             onFetchFailed(uuid, name, e.toString());
         }
