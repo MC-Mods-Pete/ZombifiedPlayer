@@ -216,6 +216,10 @@ dependencies {
 
     implementation fg.deobf("maven.modrinth:sophisticated-backpacks:${sophisticated_backpacks_version}")
     implementation fg.deobf("maven.modrinth:sophisticated-core:${sophisticated_core_version}")
+
+    // Hardcore Revival API (Balm events), compile only: the mod stays optional
+    compileOnly fg.deobf("maven.modrinth:hardcore-revival:${hardcore_revival_version}")
+    compileOnly fg.deobf("maven.modrinth:balm:${balm_version}")
 }
 
 mixin {

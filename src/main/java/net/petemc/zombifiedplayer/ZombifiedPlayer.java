@@ -2,9 +2,12 @@ package net.petemc.zombifiedplayer;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.renderer.entity.EntityRenderers;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -17,11 +20,11 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.petemc.zombifiedplayer.client.render.ZombifiedPlayerRenderer;
 import net.petemc.zombifiedplayer.config.MainConfig;
 import net.petemc.zombifiedplayer.entity.ModEntities;
+import net.petemc.zombifiedplayer.item.ModItems;
+import net.petemc.zombifiedplayer.util.HardcoreRevivalUtil;
 import net.petemc.zombifiedplayer.util.ModCompatibility;
+import net.petemc.zombifiedplayer.world.NaturalSpawnsBiomeModifier;
 import org.slf4j.Logger;
-
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(ZombifiedPlayer.MOD_ID)
@@ -30,18 +33,16 @@ public class ZombifiedPlayer
     public static final String MOD_ID = "zombifiedplayer";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public static ConcurrentHashMap<UUID, ResourceLocation> cachedPlayerSkinsByUUID = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<String, ResourceLocation> cachedPlayerSkinsByName = new ConcurrentHashMap<>();
-    public static ConcurrentHashMap<UUID, UUID> uuidMissmatches = new ConcurrentHashMap<>();
-
     public ZombifiedPlayer() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         ModEntities.register(modEventBus);
+        ModItems.register(modEventBus);
+        NaturalSpawnsBiomeModifier.register(modEventBus);
+        modEventBus.addListener(this::registerSpawnPlacements);
 
         modEventBus.addListener(this::commonSetup);
 
         MinecraftForge.EVENT_BUS.register(this);
-        //modEventBus.addListener(this::addCreative);
 
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, MainConfig.SPEC_SERVER);
         ModCompatibility.init();
@@ -49,7 +50,15 @@ public class ZombifiedPlayer
 
     private void commonSetup(final FMLCommonSetupEvent event)
     {
+        // main thread, all mods are constructed
+        event.enqueueWork(HardcoreRevivalUtil::registerEvents);
+    }
 
+    /** Same spawn rules as zombies: on the ground, in the dark (natural spawning, spawners). */
+    private void registerSpawnPlacements(SpawnPlacementRegisterEvent event)
+    {
+        event.register(ModEntities.ZOMBIFIED_PLAYER.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+                Monster::checkMonsterSpawnRules, SpawnPlacementRegisterEvent.Operation.REPLACE);
     }
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call

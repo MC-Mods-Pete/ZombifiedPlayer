@@ -10,8 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.petemc.zombifiedplayer.config.MainConfig;
-import net.petemc.zombifiedplayer.event.PlayerDeathEvents;
-import net.petemc.zombifiedplayer.util.ModCompatibility;
+import net.petemc.zombifiedplayer.util.ZombifiedPlayerSpawnLogic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -24,13 +23,15 @@ public class ServerPlayerEntityMixin
 {
     @Shadow @Final public MinecraftServer server;
 
-    @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastSystemMessage(Lnet/minecraft/network/chat/Component;Z)V", shift = At.Shift.AFTER))
+    /**
+     * Injected before removeEntitiesOnShoulder(): runs after the vanilla death message part,
+     * also when there is no broadcast (game rule showDeathMessages off, team death message visibility).
+     */
+    @Inject(method = "die", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;removeEntitiesOnShoulder()V"))
     public void die(DamageSource pCause, CallbackInfo ci)
     {
         ServerPlayer serverPlayer = (ServerPlayer) (Object) this;
-        if ((MainConfig.getSpawnOnAnyDeath() ||
-                (ModCompatibility.diedFromInfection(serverPlayer) && MainConfig.getSpawnWhenKilledByInfection()) ||
-                (PlayerDeathEvents.attackerIsUndead(pCause.getEntity()) && MainConfig.getSpawnZombifiedPlayerAfterDeath()))) {
+        if (ZombifiedPlayerSpawnLogic.takeSpawnedThisDeath(serverPlayer)) {
             if (MainConfig.getPrintSpawnMessageInChat()) {
                 serverPlayer.sendSystemMessage(Component.translatable("zombifiedplayer.spawn.message"));
                 if (MainConfig.getPrintSpawnLocationInChat()) {

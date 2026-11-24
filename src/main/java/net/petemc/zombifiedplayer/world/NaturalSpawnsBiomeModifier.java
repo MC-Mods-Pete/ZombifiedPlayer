@@ -1,0 +1,62 @@
+package net.petemc.zombifiedplayer.world;
+
+import com.mojang.serialization.Codec;
+import net.minecraft.core.Holder;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraftforge.common.world.BiomeModifier;
+import net.minecraftforge.common.world.MobSpawnSettingsBuilder;
+import net.minecraftforge.common.world.ModifiableBiomeInfo;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
+import net.petemc.zombifiedplayer.ZombifiedPlayer;
+import net.petemc.zombifiedplayer.config.MainConfig;
+import net.petemc.zombifiedplayer.entity.ModEntities;
+
+/**
+ * Adds natural zombified player spawns to every biome in which zombies spawn (also modded biomes,
+ * and none where a datapack or mod removed the zombies). Controlled by the server config options
+ * naturalSpawning and naturalSpawnWeight: Forge loads the server config before it applies biome modifiers,
+ * so changes take effect the next time the world is loaded.
+ * Used by data/zombifiedplayer/forge/biome_modifier/natural_spawns.json.
+ */
+public final class NaturalSpawnsBiomeModifier implements BiomeModifier {
+    public static final NaturalSpawnsBiomeModifier INSTANCE = new NaturalSpawnsBiomeModifier();
+
+    public static final DeferredRegister<Codec<? extends BiomeModifier>> SERIALIZERS =
+            DeferredRegister.create(ForgeRegistries.Keys.BIOME_MODIFIER_SERIALIZERS, ZombifiedPlayer.MOD_ID);
+
+    public static final RegistryObject<Codec<NaturalSpawnsBiomeModifier>> CODEC =
+            SERIALIZERS.register("natural_spawns", () -> Codec.unit(INSTANCE));
+
+    private NaturalSpawnsBiomeModifier() {
+    }
+
+    public static void register(IEventBus modEventBus) {
+        SERIALIZERS.register(modEventBus);
+    }
+
+    @Override
+    public void modify(Holder<Biome> biome, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder) {
+        // MODIFY runs after the other mods added and removed spawns, so the zombie entries are final
+        if (phase != Phase.MODIFY || !MainConfig.getNaturalSpawning()) {
+            return;
+        }
+        MobSpawnSettingsBuilder spawns = builder.getMobSpawnSettings();
+        boolean zombiesSpawnHere = spawns.getSpawner(MobCategory.MONSTER).stream()
+                .anyMatch(spawner -> spawner.type == EntityType.ZOMBIE);
+        if (zombiesSpawnHere) {
+            spawns.addSpawn(MobCategory.MONSTER,
+                    new MobSpawnSettings.SpawnerData(ModEntities.ZOMBIFIED_PLAYER.get(), MainConfig.getNaturalSpawnWeight(), 1, 1));
+        }
+    }
+
+    @Override
+    public Codec<? extends BiomeModifier> codec() {
+        return CODEC.get();
+    }
+}

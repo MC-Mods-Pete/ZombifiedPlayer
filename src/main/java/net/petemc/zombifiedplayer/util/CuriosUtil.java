@@ -2,9 +2,11 @@ package net.petemc.zombifiedplayer.util;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.petemc.zombifiedplayer.ZombifiedPlayer;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
@@ -19,30 +21,10 @@ public class CuriosUtil {
         return ModList.get().isLoaded("curios");
     }
 
-    public static List<ItemStack> getCuriosItemsAndClear(Player player) {
-        List<ItemStack> curiosItems = new ArrayList<>();
-
-        if (!isCuriosLoaded()) {
-            return curiosItems;
-        }
-
-        try {
-            CuriosApi.getCuriosHelper().getCuriosHandler(player).ifPresent(curiosInventory -> {
-                for (String identifier : curiosInventory.getCurios().keySet()) {
-                    ICurioStacksHandler stacksHandler = curiosInventory.getCurios().get(identifier);
-                    for (int i = 0; i < stacksHandler.getSlots(); i++) {
-                        ItemStack stack = stacksHandler.getStacks().getStackInSlot(i);
-                        if (!stack.isEmpty()) {
-                            curiosItems.add(stack.copy());
-                            stacksHandler.getStacks().setStackInSlot(i, ItemStack.EMPTY);
-                        }
-                    }
-                }
-            });
-        } catch (Exception e) {
-        }
-        
-        return curiosItems;
+    public static boolean checkForItemInCurios(Player player, String itemId) {
+        return ForgeRegistries.ITEMS.getDelegate(new ResourceLocation(itemId))
+                .map(item -> checkForItemInCurios(player, item.get().getDefaultInstance()))
+                .orElse(false);
     }
 
     public static boolean checkForItemInCurios(Player player, ItemStack itemToCheck) {

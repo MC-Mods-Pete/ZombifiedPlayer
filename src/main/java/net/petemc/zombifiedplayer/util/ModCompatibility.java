@@ -1,8 +1,11 @@
 package net.petemc.zombifiedplayer.util;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.registries.ForgeRegistries;
 import net.petemc.contagion.casts.InfectedPlayer;
 import net.petemc.undeadnights.entity.EliteZombieEntity;
 import net.petemc.undeadnights.entity.HordeZombieEntity;
@@ -18,12 +21,17 @@ public class ModCompatibility {
         }
         if (CuriosUtil.isCuriosLoaded()) {
             ZombifiedPlayer.LOGGER.info("Curios API detected. If enabled curios items will be transferred to the Zombified Player.");
+            CuriosDeathDrops.register();
         }
         if (isCorpseLoaded()) {
             ZombifiedPlayer.LOGGER.info("Corpse mod detected. No corpse will spawn when a Zombified Player is created.");
         }
         if (isGravestoneLoaded()) {
             ZombifiedPlayer.LOGGER.info("Gravestone mod detected. No gravestone will spawn when a Zombified Player is created.");
+        }
+        if (HardcoreRevivalUtil.isHardcoreRevivalLoaded()) {
+            // event hooks are registered in common setup (ZombifiedPlayer#commonSetup)
+            ZombifiedPlayer.LOGGER.info("Hardcore Revival detected. Timeout deaths inherit the original knockout death cause for Zombified Player checks.");
         }
     }
 
@@ -41,11 +49,22 @@ public class ModCompatibility {
 
     public static boolean diedFromInfection(ServerPlayer serverPlayer) {
         if (isContagionLoaded()) {
-            if (serverPlayer instanceof InfectedPlayer infectedPlayer) {
-                return infectedPlayer.contagion_playerDiedFromInfection();
+            if (serverPlayer instanceof InfectedPlayer infectedEntity) {
+                return infectedEntity.contagion_playerDiedFromInfection();
             }
         }
         return false;
+    }
+
+    private static final ResourceLocation CONTAGION_INFECTION = new ResourceLocation("contagion", "infection");
+
+    /** True if the player has Contagion's infection effect, e.g. at the moment of a death by fall damage. */
+    public static boolean isInfected(ServerPlayer serverPlayer) {
+        if (!isContagionLoaded()) {
+            return false;
+        }
+        MobEffect infection = ForgeRegistries.MOB_EFFECTS.getValue(CONTAGION_INFECTION);
+        return infection != null && serverPlayer.hasEffect(infection);
     }
 
     public static boolean isUndeadNightsLoaded() {
