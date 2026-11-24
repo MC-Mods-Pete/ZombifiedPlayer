@@ -68,6 +68,31 @@ public class ZombifiedPlayerModel extends ZombieModel<ZombifiedPlayerEntity> {
         this.jacket.visible = visible;
     }
 
+    /**
+     * Hides the second skin layer (hat, jacket, sleeves, pants). Returns the previous state of each part
+     * (for {@link #restoreSecondLayer}).
+     */
+    public boolean[] hideSecondLayer() {
+        ModelPart[] parts = this.secondLayer();
+        boolean[] previous = new boolean[parts.length];
+        for (int i = 0; i < parts.length; i++) {
+            previous[i] = parts[i].visible;
+            parts[i].visible = false;
+        }
+        return previous;
+    }
+
+    public void restoreSecondLayer(boolean[] previous) {
+        ModelPart[] parts = this.secondLayer();
+        for (int i = 0; i < parts.length; i++) {
+            parts[i].visible = previous[i];
+        }
+    }
+
+    private ModelPart[] secondLayer() {
+        return new ModelPart[]{this.hat, this.jacket, this.leftSleeve, this.rightSleeve, this.leftPants, this.rightPants};
+    }
+
     /** Like PlayerModel: items in the hand of slim arms sit half a pixel further in. */
     @Override
     public void translateToHand(@NotNull HumanoidArm side, @NotNull PoseStack poseStack) {
