@@ -1,0 +1,33 @@
+ZombifiedPlayer Changelog
+=========================
+
+2.0.0-Fabric-mc26.2
+-------------------
+New
+ - Zombified players now have the full player model: the second skin layer (jacket, sleeves, pants) is shown, and players with a slim skin (Alex model) get slim arms.
+ - With Entity Model Features installed, zombified players move like zombies: the built-in resource pack "Zombified Player: Shambling Animation" lets them shamble, reach for you and swipe with both arms. It is turned on at the first start and can be turned off under Options > Resource Packs.
+ - New option naturalSpawning (default off): zombified players also spawn naturally in the dark wherever zombies spawn, with the skin of a random player from randomSkinPlayerNames. They drop their equipment only by chance and despawn like zombies, and sometimes have loot in their pockets. Spawn weight with naturalSpawnWeight, name tag with displayNameTagForNaturalZombifiedPlayers.
+ - New spawn egg. Zombified players from the spawn egg, from spawners or from /summon without a player get the skin of a random player from the new list randomSkinPlayerNames.
+ - New option spawnWhenDiedWhileInfected (default off, Contagion): a zombified player also spawns when an infected player dies from any cause.
+ - New option ignoreKeepInventory (default off), see Changes.
+ - Mutants and Zombies: death by Blister Zombie, Zombie Brute, Split Head Zombie or Mutant Zombie spawns a zombified player.
+ - Infectious: new option infectiousModCompatibility (default off), death by an Infectious zombie spawns a zombified player.
+Changes
+ - The game rule keepInventory is now respected: the player keeps everything and the zombified player appears without items. With ignoreKeepInventory the zombified player takes the items anyway.
+ - Trinkets items now follow the rules of Trinkets: items that stay with the player or are destroyed (e.g. Curse of Vanishing) no longer go to the zombified player.
+ - The door option is renamed to zombifiedPlayersCanAlwaysBreakDoors: off = zombified players break doors only on Hard like zombies, on = on every difficulty. If you had changed the old option, set the new one again.
+ - Zombie models from other resource packs (e.g. Fresh Animations, Bray's Zombie Overhaul) no longer change zombified players, so the player skin always fits.
+ - Players without their own skin are shown as Steve or Alex (always the same for a player) with the matching arm width.
+ - The green zombification marks are only drawn on the body, the left arm and leg have their own marks.
+ - Zombified players are always adults.
+Fixes
+ - Items of the zombified player got lost or damaged (with doMobLoot off, in Peaceful, items in the hands, armor).
+ - The options makeTheZombifiedPlayersStronger and zombifiedPlayersCanBreakDoors had no effect.
+ - Zombified players from /summon with data or from spawners only had half health with makeTheZombifiedPlayersStronger.
+ - /summon zombifiedplayer:zombified_player without data failed.
+ - The player lost the items when another mod cancelled the death.
+ - The spawn message was missing when death messages are turned off.
+ - On offline servers zombified players did not get the skin of the player.
+ - Transparent arms with slim skins.
+ - Zombified players dropped rotten flesh twice.
+ - No crash on death when the installed Trinkets version does not fit. The items then stay with Trinkets instead of going to the zombified player.
