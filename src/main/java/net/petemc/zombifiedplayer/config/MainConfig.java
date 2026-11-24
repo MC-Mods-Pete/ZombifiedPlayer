@@ -33,10 +33,6 @@ public class MainConfig
         return transferCuriosOrTrinketItemsToZombifiedPlayer;
     }
 
-    public static boolean getUseZombieModelFromResourcePacks() {
-        return useZombieModelFromResourcePacks;
-    }
-
     /** Whether the built-in shambling animation pack was already turned on once (read directly, used during startup). */
     public static boolean getShamblingAnimationPackTurnedOn() {
         return !SPEC_CLIENT.isLoaded() || SHAMBLING_ANIMATION_PACK_TURNED_ON.get();
@@ -240,10 +236,6 @@ public class MainConfig
     // Client Config
     private static final ForgeConfigSpec.Builder BUILDER_CLIENT = new ForgeConfigSpec.Builder();
 
-    private static final ForgeConfigSpec.BooleanValue USE_ZOMBIE_MODEL_FROM_RESOURCE_PACKS = BUILDER_CLIENT
-            .comment("If true, zombified players use the zombie model, so zombie models from resource packs (Entity Model Features, e.g. Fresh Animations) also change zombified players. Packs with their own zombie models and textures (e.g. Bray's Zombie Overhaul) make the player skin look broken. Applied after reloading resource packs (F3+T) | default: false")
-            .define("useZombieModelFromResourcePacks", false);
-
     private static final ForgeConfigSpec.BooleanValue SHAMBLING_ANIMATION_PACK_TURNED_ON = BUILDER_CLIENT
             .comment("Set by the mod after it turned on the built-in resource pack 'Zombified Player: Shambling Animation' (needs Entity Model Features) at the first start. Turn the pack on or off under Options > Resource Packs. Set this to false to have the pack turned on again at the next start | default: false")
             .define("shamblingAnimationPackTurnedOn", false);
@@ -276,7 +268,6 @@ public class MainConfig
     private static boolean useCustomEyeHeight = false;
     private static float customEyeHeight = 1.74f;
     private static boolean infectiousModCompatibility = false;
-    private static boolean useZombieModelFromResourcePacks = false;
 
     private static boolean isValidPlayerName(Object value) {
         return value instanceof String name && name.matches("[A-Za-z0-9_]{1,16}");
@@ -311,9 +302,6 @@ public class MainConfig
             useCustomEyeHeight = USE_CUSTOM_EYE_HEIGHT.get();
             customEyeHeight = CUSTOM_EYE_HEIGHT.get().floatValue();
             infectiousModCompatibility = INFECTIOUS_MOD_COMPATIBILITY.get();
-        }
-        if (SPEC_CLIENT.isLoaded()) {
-            useZombieModelFromResourcePacks = USE_ZOMBIE_MODEL_FROM_RESOURCE_PACKS.get();
         }
 
     }
