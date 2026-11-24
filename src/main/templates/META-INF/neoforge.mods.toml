@@ -30,7 +30,10 @@ displayName="${mod_name}" #mandatory
 #displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
 
 # A file name (in the root of the mod JAR) containing a logo for display
-logoFile= "${mod_id}.png" #optional
+# Square icon and wide banner for the NeoForge mod list (26.2+), logoFile kept for older launchers (e.g. Prism)
+iconFile = "${mod_id}.png"
+bannerFile = "${mod_id}.png"
+logoFile = "${mod_id}.png"
 
 # A text field displayed in the mod UI
 #credits="" #optional
