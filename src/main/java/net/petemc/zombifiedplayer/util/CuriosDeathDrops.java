@@ -102,7 +102,7 @@ public final class CuriosDeathDrops {
         for (int i = 0; i < stacks.getSlots(); i++) {
             ItemStack stack = stacks.getStackInSlot(i);
             if (stack.isEmpty()) continue;
-            if (event.getOverrides().stream().anyMatch(o -> o.getA().test(stack))) continue;
+            if (event.getOverrides().stream().anyMatch(o -> o.getFirst().test(stack))) continue;
             boolean visible = i < handler.getRenders().size() && handler.getRenders().get(i);
             SlotContext context = new SlotContext(identifier, player, i, cosmetic, visible);
             DropRule rule = CuriosApi.getCurio(stack)
