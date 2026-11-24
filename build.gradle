@@ -33,13 +33,6 @@ repositories {
 	}
 	maven { url "https://maven.terraformersmc.com/releases/"}
 
-	// curse maven
-	maven {
-		url "https://cursemaven.com"
-		content {
-			includeGroup "curse.maven"
-		}
-	}
 
     maven {
         name 'Ladysnake Mods'
@@ -49,14 +42,6 @@ repositories {
         name 'Wispforest'
         url 'https://maven.wispforest.io/'
     }
-    maven {
-        name 'Architectury'
-        url 'https://maven.architectury.dev/'
-    }
-    maven {
-        name 'Jamalam'
-        url 'https://maven.jamalam.tech/releases/'
-    }
 	maven {
         name 'Modrinth'
         url 'https://api.modrinth.com/maven'
@@ -64,14 +49,27 @@ repositories {
             includeGroup 'maven.modrinth'
         }
     }
-    // Local libs for Polymer (bundled in Universal Graves but not auto-loaded in dev env)
-    flatDir {
-        dirs 'libs'
-    }
+	maven {
+		name 'Nucleoid'
+		url 'https://maven.nucleoid.xyz/'
+	}
 }
 
 fabricApi {
 	configureDataGeneration()
+}
+
+loom {
+	runs {
+		// headless GameTest server: runs the tests registered under the entrypoint "fabric-gametest", then exits
+		gametest {
+			inherit server
+			name "Game Test"
+			vmArg "-Dfabric-api.gametest"
+			vmArg "-Dfabric-api.gametest.report-file=${project.layout.buildDirectory.get()}/junit.xml"
+			runDir "run"
+		}
+	}
 }
 
 dependencies {
@@ -92,28 +90,45 @@ dependencies {
 	include "me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}"
 
 	//other dependencies
-	modImplementation "curse.maven:jade-324717:${project.jade_version}"
-	modImplementation "curse.maven:contagion-1027702:${project.contagion_version}"
-	modImplementation "curse.maven:undeadnights-1166914:${project.undeadnights_version}"
+	modImplementation "maven.modrinth:jade:${project.jade_version}"
+	modImplementation "maven.modrinth:contagion:${project.contagion_version}"
+	// compile only: Undead Nights 2.1.0 has an own method setDirty() that calls the vanilla one (method_80); under Mojang
+	// names both are setDirty, so in the dev environment it calls itself (StackOverflowError on the first server tick).
+	// The released jar (intermediary names) is not affected.
+	modCompileOnly "maven.modrinth:undead-nights:${project.undeadnights_version}"
 
-    modImplementation "curse.maven:trinkets-341284:${project.trinkets_version}"
-	modImplementation "curse.maven:utility-belt-664053:${project.utility_belt}"
+	modImplementation "maven.modrinth:trinkets:${project.trinkets_version}"
+	modImplementation "maven.modrinth:utility-belt:${project.utility_belt_version}"
 	modImplementation "maven.modrinth:gravestones:${project.gravestones_version}"
 
-	modImplementation "curse.maven:universal-graves-497175:5706124"
+	modImplementation "maven.modrinth:universal-graves:${project.universal_graves_version}"
 
-	modImplementation "dev.architectury:architectury-fabric:9.2.14"
-	modImplementation "io.github.jamalam360:jamlib-fabric:1.3.5+1.20.1"
-	modImplementation "curse.maven:accessories-938917:7164886"
+	// Utility Belt needs Architectury and JamLib
+	modImplementation "maven.modrinth:architectury-api:${project.architectury_version}"
+	modImplementation "maven.modrinth:jamlib:${project.jamlib_version}"
+	modImplementation "maven.modrinth:accessories:${project.accessories_version}"
+	// endec is jar-in-jar in Accessories, Loom does not load nested jars in the dev environment: the versions Accessories bundles
 	modImplementation "io.wispforest:endec:0.1.8"
 	modImplementation "io.wispforest.endec:gson:0.1.5"
 	modImplementation "io.wispforest.endec:netty:0.1.4"
 	// Sodium needed in dev env to satisfy accessories' optional Sodium mixin
 	modLocalRuntime "maven.modrinth:sodium:OihdIimA"
 
-	// Polymer is bundled as JiJ inside Universal Graves but not auto-extracted in dev env by Loom
-	// All JARs in libs/ are the flattened transitive dependencies of Universal Graves
-	modLocalRuntime fileTree(dir: 'libs', include: '*.jar')
+	// Universal Graves bundles Polymer and friends as jar-in-jar, Loom does not load nested jars in the dev environment:
+	// the same libraries from the Nucleoid maven (were local jars in libs/ before)
+	modLocalRuntime "eu.pb4:polymer-core:0.5.19+1.20.1"
+	modLocalRuntime "eu.pb4:polymer-common:0.5.19+1.20.1"
+	modLocalRuntime "eu.pb4:polymer-networking:0.5.19+1.20.1"
+	modLocalRuntime "eu.pb4:polymer-reg-sync-manipulator:0.5.19+1.20.1"
+	modLocalRuntime "eu.pb4:polymer-resource-pack:0.5.19+1.20.1"
+	modLocalRuntime "eu.pb4:polymer-virtual-entity:0.5.19+1.20.1"
+	modLocalRuntime "eu.pb4:placeholder-api:2.1.3+1.20.1"
+	modLocalRuntime "eu.pb4:sgui:1.2.2+1.20"
+	modLocalRuntime "eu.pb4:predicate-api:0.2.1+1.20.1"
+	modLocalRuntime "eu.pb4:common-protection-api:1.0.0"
+	modLocalRuntime "xyz.nucleoid:server-translations-api:2.0.0+1.20"
+	modLocalRuntime "xyz.nucleoid:packet-tweaker:0.4.0+1.19.4"
+	modLocalRuntime "maven.modrinth:fabric-permissions-api:62DUD085"
 
     // Adds a dependency on the base cardinal components module (required by every other module)
     // Replace modImplementation with modApi if you expose components in your own API
