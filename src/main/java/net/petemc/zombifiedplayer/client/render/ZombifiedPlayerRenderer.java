@@ -37,7 +37,10 @@ public class ZombifiedPlayerRenderer
     private static final Skin ALEX = new Skin(
             new ResourceLocation("minecraft", "textures/entity/alex.png"), true);
 
-    /** Resolved skin per stored profile UUID (also the fallback once we know the account has no custom skin). */
+    /** Marker for "no own skin": skinOf picks Steve or Alex, fixed per UUID (like vanilla does for players without a skin). */
+    private static final Skin FALLBACK = new Skin(STEVE.texture(), false);
+
+    /** Resolved skin per stored profile UUID (FALLBACK once we know the account has no custom skin). */
     private static final Map<UUID, Skin> SKINS = new ConcurrentHashMap<>();
 
     /** Start time (ms) of the running fetch per UUID, prevents duplicate fetches. */
@@ -84,30 +87,36 @@ public class ZombifiedPlayerRenderer
     public void render(@NotNull ZombifiedPlayerEntity entity, float entityYaw, float partialTicks, @NotNull PoseStack poseStack,
                        @NotNull MultiBufferSource buffer, int packedLight) {
         // the layers (zombification, held items) use getModel(), so they follow the switch
-        this.model = skinOf(entity).slim() ? this.slimModel : this.wideModel;
+        this.model = skinOf(entity, this.hasSlimModel()).slim() ? this.slimModel : this.wideModel;
         super.render(entity, entityYaw, partialTicks, poseStack, buffer, packedLight);
     }
 
     @Override
     public @NotNull ResourceLocation getTextureLocation(@NotNull ZombifiedPlayerEntity entity) {
-        return skinOf(entity).texture();
+        return skinOf(entity, this.hasSlimModel()).texture();
     }
 
-    /** The loaded skin of the profile, otherwise the fallback skin (and a fetch is started, never blocking). */
-    private static Skin skinOf(ZombifiedPlayerEntity entity) {
+    /** False with useZombieModelFromResourcePacks: the zombie model only has wide arms. */
+    private boolean hasSlimModel() {
+        return this.slimModel != this.wideModel;
+    }
+
+    /**
+     * The loaded skin of the profile, otherwise the fallback skin (and a fetch is started, never blocking).
+     * Without a slim model the fallback is always Steve, Alex would have transparent stripes on wide arms.
+     */
+    private static Skin skinOf(ZombifiedPlayerEntity entity, boolean slimModel) {
         GameProfile profile = entity.getGameProfile();
-        if (profile == null || profile.getId() == null) return fallbackSkin(entity.getUUID());
-
-        Skin cached = SKINS.get(profile.getId());
-        if (cached != null) return cached;
-
-        triggerSkinFetch(profile);
-        return fallbackSkin(profile.getId());
-    }
-
-    /** Steve or Alex, fixed per UUID (like vanilla picks the default skin of players without one). */
-    private static Skin fallbackSkin(UUID uuid) {
-        return Math.floorMod(uuid.hashCode(), 2) == 0 ? STEVE : ALEX;
+        UUID uuid = profile == null || profile.getId() == null ? entity.getUUID() : profile.getId();
+        Skin skin = profile == null || profile.getId() == null ? null : SKINS.get(uuid);
+        if (skin == null) {
+            if (profile != null && profile.getId() != null) triggerSkinFetch(profile);
+            skin = FALLBACK;
+        }
+        if (skin == FALLBACK) {
+            return slimModel && Math.floorMod(uuid.hashCode(), 2) == 1 ? ALEX : STEVE;
+        }
+        return skin;
     }
 
     /**
@@ -123,7 +132,7 @@ public class ZombifiedPlayerRenderer
         UUID uuid = profile.getId();
         String name = profile.getName();
         if (name == null || name.isEmpty()) {
-            SKINS.put(uuid, fallbackSkin(uuid));
+            SKINS.put(uuid, FALLBACK);
             return;
         }
 
@@ -170,7 +179,7 @@ public class ZombifiedPlayerRenderer
             // Account without custom skin: keep the fallback skin and stop fetching
             Skin resolvedSkin = skin != null
                     ? new Skin(skinManager.registerTexture(skin, MinecraftProfileTexture.Type.SKIN), "slim".equals(skin.getMetadata("model")))
-                    : fallbackSkin(uuid);
+                    : FALLBACK;
 
             SKINS.put(uuid, resolvedSkin);
             RETRY_AFTER.remove(uuid);
